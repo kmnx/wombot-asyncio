@@ -70,7 +70,16 @@ class MyBot(chatango.Client):
             station_query = "bollwerk"
 
             msg = ""
+            audio_source = 'https://doyouworld.out.airtime.pro/doyouworld_a'
+            async with api.session as session:
+                out = await api._get(audio_source)
+                print(out)
+            await message.channel.send('got an id')
 
+
+
+
+            '''
             print("on_message: try shazam")
             try:
                 shazam_result = await api.detect(
@@ -134,6 +143,7 @@ class MyBot(chatango.Client):
                 await message.channel.send(
                     "ID Radio Bollwerk: " + hoursmins + " | sorry, found nothing. "
                 )
+            '''
 
 
 if __name__ == "__main__":
