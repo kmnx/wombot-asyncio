@@ -5,10 +5,9 @@ from pydub import AudioSegment
 
 from aiohttp import ClientSession
 import base64
-
+import secrets
 import sys
-shazam_api_key = "41934f7a32msh48132dd2d353798p1a99d4jsn817d99d65fe3"
-
+shazam_api_key = secrets.shazam_api_key
 
 
 class ShazamApi:
@@ -22,10 +21,9 @@ class ShazamApi:
             "x-rapidapi-host": self.api_host,
             "x-rapidapi-key": shazam_api_key,
             }
-        
-        self.session = ClientSession(trust_env=True)
 
-    async def _get(self, streamsource):
+
+    async def _get(self, streamsource,session = None):
         """
         get from shazam api
         :param query
@@ -37,10 +35,14 @@ class ShazamApi:
         audio_source = streamsource
         sound = ''
         out = ''
-
-        async with self.session as session:
+        if session == None:
+            session = aiohttp.ClientSession()
+        #async with ClientSession(trust_env=True) as session:
+        async with session as session:
             try:
                 async with session.get(streamsource) as response:
+                    #response = await session.get(streamsource)
+                    print('started recording')
                     while (asyncio.get_event_loop().time() < (starttime + 4)):
                         chunk = await response.content.read(1024)
                         if not chunk:
@@ -52,20 +54,25 @@ class ShazamApi:
                     sound = sound.set_channels(1)
                     sound = sound.set_sample_width(2)
                     sound = sound.set_frame_rate(44100)
-            except aiohttp.ClientConnectorError as e:
+            except aiohttp.client_exceptions.ClientConnectorError as e:
                 print('there was a ClientConnectorError')
                 print(e)
             if sound:
                 payload = base64.b64encode(sound.raw_data)
-                #async with aiohttp.ClientSession() as session:
                 async with session.post("https://shazam.p.rapidapi.com/songs/v2/detect",data=payload,headers=self.headers) as response:
                     out = await response.json()
             else:
-                print('there was no sound')
+                out = ''
+                print('no audio')
             return out
 
 
-
+async def loopy(loop):
+    n = 1
+    while True:
+        print('woop',n)
+        n += 1
+        await asyncio.sleep(1)
 
 
 async def main(loop):
@@ -73,13 +80,9 @@ async def main(loop):
     #audio_source = 'https://stream-relay-geo.ntslive.net/stream'
     #audio_source = 'https://fm.chunt.org/stream'
     audio_source = 'https://doyouworld.out.airtime.pro/doyouworld_a'
-    
+    asyncio.ensure_future(loopy(loop))
     api = ShazamApi(loop,shazam_api_key)
-
-    async with api.session as session:
-        out = await api._get(audio_source)
-                
-
+    out = await api._get(audio_source)          
     print(out)
 
 if __name__ == "__main__":

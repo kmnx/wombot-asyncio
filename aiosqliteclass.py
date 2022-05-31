@@ -3,16 +3,33 @@ import aiosqlite
 import logging as LOGGER
 
 
-class sqlite3class:
-    async def __init__(self):
+async def create_conn():
+    db = Sqlite3Class()
+    await db._init()
+    
+    return db
+
+
+class Sqlite3Class():
+    #async def __init__(self, loop):
+        #pass
+        #self.conn = await aiosqlite.connect("pythonsqlite.db", loop=loop)
+        #self.cursor = await self.conn.cursor()
+        #self.cursor.row_factory = lambda cursor, row: row[0]
+
+    async def _init(self):
         self.conn = await aiosqlite.connect("pythonsqlite.db")
+        self.conn.row_factory = lambda cursor, row: row[0]
+        #self.conn.row_factory = aiosqlite.Row
         self.cursor = await self.conn.cursor()
-        self.cursor.row_factory = lambda cursor, row: row[0]
+
+    async def _close():
+        await self.conn.close()
 
     async def query_gif(self, inurl):
         # inurl: url
-        # returns url ID
-        await print("query_gif", inurl)
+        # returns url id
+        print("query_gif", inurl)
         await self.cursor.execute("SELECT * FROM object_table WHERE object_name=? ", [inurl])
         result = await self.cursor.fetchone()
         if result:
@@ -22,34 +39,44 @@ class sqlite3class:
             return None
 
     async def query_tag(self, intag):
+        # intag: gif tag to search
+        #  returns tag id
         query_tag = intag
         await self.cursor.execute("SELECT * FROM tag_table WHERE tag_name=? ", [query_tag])
         result = await self.cursor.fetchone()
         if result:
             result_tag = result
             result_tag_id = result_tag
-
             return result_tag_id
+
         else:
             return None
 
     async def create_tag(self, intag):
+        # intag: tag name to create
+        # returns id of created tag
         query_tag = intag
         await self.cursor.execute("INSERT INTO tag_table (tag_name) VALUES (?)", [intag])
         await self.conn.commit()
-        result_tag_id = await self.cursor.lastrowid
+        result_tag_id = self.cursor.lastrowid
         return result_tag_id
 
     async def map_tag_to_gif(self, tagid, gifid):
+        # tag id: tag id to map to gif
+        # gif id: gif id to map to tag
+
         try:
             await self.cursor.execute(
                 "INSERT INTO object_tag_mapping VALUES (?,?)", (gifid, tagid)
             )
             await self.conn.commit()
         except Exception as e:
+            print(e)
             pass
 
     async def fetch_gif(self, intag):
+        # intag: tag name to search
+        # returns gif url
         await self.cursor.execute(
             "SELECT object_name from object_tag_mapping JOIN object_table ON object_reference = object_table.id JOIN tag_table ON tag_reference = tag_table.id WHERE tag_name = ?",
             [intag],
@@ -62,7 +89,7 @@ class sqlite3class:
             "INSERT INTO object_table (object_name) VALUES (?)", [inurl]
         )
         await self.conn.commit()
-        result_tag_id = await self.cursor.lastrowid
+        result_tag_id = self.cursor.lastrowid
         return result_tag_id
 
     async def tag(self, inurl, intag):
@@ -75,7 +102,7 @@ class sqlite3class:
         print("tag tagid", tagid)
         if not tagid:
             tagid = await self.create_tag(intag)
-        self.map_tag_to_gif(tagid, urlid)
+        await self.map_tag_to_gif(tagid, urlid)
 
     async def untag(self, inurl, intag):
         urlid = await self.query_gif(inurl)
@@ -93,37 +120,42 @@ class sqlite3class:
             await self.cursor.execute("DELETE FROM tag_table WHERE tag_name = ?", (intag,))
             await self.conn.commit()
 
+    async def inspect(self, in_string):
+        # in_string could be either url or tag name
+        # returns corresponding tag names or urls
+        resulting_tags = []
+        resulting_urls = []
+        await self.cursor.execute(
+            "SELECT object_name from object_tag_mapping JOIN object_table ON object_reference = object_table.id JOIN tag_table ON tag_reference = tag_table.id WHERE tag_name = ?",
+            [in_string],
+        )
+        result = await self.cursor.fetchall()
+        resulting_urls.append(result)
+
+        await self.cursor.execute(
+            "SELECT tag_name from object_tag_mapping JOIN tag_table ON tag_reference = tag_table.id JOIN object_table ON object_reference = object_table.id WHERE object_name = ?",
+            [in_string],
+        )
+        result = await self.cursor.fetchall()
+        resulting_tags.append(result)
+
+        return resulting_urls,resulting_tags
+
+
+
+
 async def run(loop):
+    db = await create_conn()
+    r = await db.query_tag('woi')
+    print(r)
     '''
-    conn = await aiosqlite.connect("pythonsqlite.db")
-    cur = await conn.cursor()
-    await cur.execute("SELECT * FROM tag_table WHERE tag_name=? ", ['woi',])
-    row = await cur.fetchone()
-    if row:
-        print(row)
-    else:
-        print('nothing')
+    async with conn.cursor() as cur:
+        await cur.execute("SELECT * FROM tag_table WHERE tag_name=? ", ['woi',])
+        r = await cur.fetchall()
+        print(r)
     '''
+    await db.conn.close()
     
-
-    async with aiosqlite.connect("pythonsqlite.db", loop=loop) as conn:
-        async with conn.cursor() as cur:
-            await cur.execute("SELECT * FROM tag_table WHERE tag_name=? ", ['woi',])
-            r = await cur.fetchall()
-            print(r)
-
-    #await cur.close()
-    #await conn.close()
-
-    #result_tag_id = await db.fetch_gif(query_in)
-    #LOGGER.error("result_tag_id", row)
-    '''
-    if result_tag_id:
-        res = await db.fetch_gif(query_in)
-        await print(res)
-    else:
-        await print("no result")
-    '''
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()

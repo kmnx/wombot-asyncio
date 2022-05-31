@@ -211,6 +211,7 @@ async def _process_pm(room, args):
 
 def message_cut(msg: str, lenth, room, _html: False):
     # TODO ajustar envío de texto con tabulaciones
+    print('_html is: ',_html)
     if len(msg) + msg.count(' ') * 5 > lenth:
         if room._BigMessageCut:
             msg = msg[:lenth]
@@ -267,6 +268,7 @@ def message_cut(msg: str, lenth, room, _html: False):
 
     if type(msg) != list:
         msg = [msg]
+    print('final msg', msg)
     return [
         formt.format(nc, str(room.user.styles.font_size), fc, room.user.styles.font_face,
                         unimsg) for unimsg in msg]
@@ -316,7 +318,8 @@ class channel:
                 set(list(self.__dict__.keys()) + list(dir(type(self)))) if
                 x[0] != '_']
 
-    async def send(self, message, use_html=False):
+    async def send(self, message, use_html=True):
+        print(message)
         if self.is_pm:
             await self.room.client.pm.send_message(self.user.name, message, use_html=use_html)
         else:
