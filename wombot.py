@@ -232,10 +232,8 @@ async def bandcamp_search(artist,title):
 
 class config:
     rooms = []
-    #rooms.append(environ["wombotmainroom"])
-    #rooms.append(environ["wombottestroom"])
-    rooms.append('knmx')
-    rooms.append('bothome')
+    rooms.append(environ["wombotmainroom"])
+    rooms.append(environ["wombottestroom"])
 
     botuser = [secrets.chatango_user, secrets.chatango_pass] # password
 
