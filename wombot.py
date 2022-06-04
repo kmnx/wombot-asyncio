@@ -279,13 +279,14 @@ class MyBot(chatango.Client):
         if message.body[0] == "!":
 
             print(message.room.name)
+
             data = message.body[1:].split(" ", 1)
             if len(data) > 1:
                 orig_cmd, args = data[0], data[1]
             else:
                 orig_cmd, args = data[0], ""
             cmd = orig_cmd.lower()
-
+            print(cmd)
             #if message.body.startswith("!a"):
             if cmd == ("a"):
                 if message.room.name != "<PM>":
@@ -369,12 +370,14 @@ class MyBot(chatango.Client):
 
                 asyncio.ensure_future(shazam_station(message,'doyou'))
                 
-                
-            elif cmd.startswith("id" or "raid"):
+            
+            elif cmd.startswith('id') or cmd.startswith('raid'):
                 if cmd.startswith("raid"):
                     cmd = cmd[4:]
+                    print(cmd)
                 elif cmd.startswith("id"):
                     cmd = cmd[2:]
+                    print(cmd)
                 asyncio.ensure_future(raid(message,cmd))
 
 
@@ -585,6 +588,9 @@ class MyBot(chatango.Client):
                         )
 
             else:
+                print(cmd)
+                print(cmd.startswith('raid'))
+                print(cmd.startswith('id') or cmd.startswith('raid'))
                 try:
                     gifres = await self.db.fetch_gif(cmd)
                 except Exception as e:
