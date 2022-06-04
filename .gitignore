@@ -1,8 +1,13 @@
-# macOS folders
-.DS_Store/
+# macOS 
+.DS_Store
+
 
 # sqlite db
 pythonsqlite.db
+trackids.db
+
+allgif.txt
+secrets.py
 
 # Byte-compiled / optimized / DLL files
 

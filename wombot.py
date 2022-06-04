@@ -3,28 +3,31 @@
 import chatango
 import asyncio
 from aiohttp import ClientSession
-import search_google
-
-import typing
 from datetime import datetime
-import shazam
-from os import environ
-#import requests
-import aiosqliteclass
 import random
-import secrets
-from pathlib import Path
+import typing
+from os import environ
 import os.path
+from pathlib import Path
+import time
+import pytz
+import json
+import re
+
+import search_google
+import get_id_doyou
+import shazam
+import aiosqliteclass
 import data_pics_wombat
 import data_pics_capybara
 import data_pics_otter
 import data_pics_quokka
 import data_txt_fortunes as fortunes
-import raid
+#import raid
 import aiosqlite
+
+import secrets
 shazam_api_key = secrets.shazam_api_key
-import time
-import pytz
 
 
 print('start')
@@ -91,6 +94,141 @@ else:
 
 print("init variables done")
 
+def convert_utc_to_london(utctime):
+    tz = pytz.timezone("UTC")
+    naive_time = datetime.strptime(utctime, "%Y-%m-%d %H:%M:%S")
+    utc_time = naive_time.replace(tzinfo=pytz.UTC)
+    london_tz = pytz.timezone("Europe/London")
+    london_time = utc_time.astimezone(london_tz)
+    string_time = str(london_time)
+    lesstime = string_time.split(" ")[1].split(":")
+    hoursmins = str(lesstime[0]) + ":" + str(lesstime[1])
+
+    return hoursmins
+
+
+async def raid(message,station_query):
+    session = ClientSession(trust_env=True)
+    async with session as s:
+        async with s.get("https://radioactivity.directory/api/") as r:
+            html = await r.read()
+
+    decoded = html.decode("ISO-8859-1")
+    ra_stations = json.loads(re.split("<[/]{0,1}script.*?>", decoded)[1])
+
+    ra_station_names = list(ra_stations.keys())
+    print(ra_station_names)
+    # if the provided station name is in the list of stations
+    if station_query in ra_station_names:
+        station_name = station_query
+    # try to guess which station is meant
+    else:
+        station_name = [
+            station for station in ra_station_names if station_query in station
+        ]
+
+        # if two station have the same distance, choose the first one
+        if station_name:
+            if isinstance(station_name, list):
+                station_name = station_name[0]
+            
+    if station_name:
+        await message.room.delete_message(message)
+        id_station = ra_stations[station_name]
+        # for all stations urls for the given station, run the shazam api and append results to the message
+        for stream in id_station["stream_url"]:
+            stream_name = stream[0]
+            if stream_name == "station":
+                stream_name = ""
+            stream_url = stream[1]
+
+            # shazam it
+            msg = ''
+            artist = ''
+            track = ''
+            shazamapi = shazam.ShazamApi(loop,api_key=shazam_api_key)
+            tz = pytz.timezone('Europe/London')
+            london_now = datetime.now(tz)
+            hoursmins = london_now.strftime("%H:%M")
+            try:
+                result = await shazamapi._get(stream_url)
+                if "track" in result:
+                    artist = result["track"]["subtitle"]
+                    title = result["track"]["title"]
+                    bandcamp_result_msg = await bandcamp_search(artist,title)
+                    await message.channel.send(
+                        "ID " + station_name + " (from shazam): "
+                        + hoursmins
+                        + " - "
+                        + artist
+                        + " - "
+                        + title
+                        + bandcamp_result_msg)
+                else:
+                    await message.channel.send(
+                        "ID " + station_name + ": "
+                        + hoursmins
+                        + " - "
+                        + "shazam found nothing")
+            except Exception as e:
+                print(str(e))
+        #print(artist + " - " + track)
+        #return artist,track
+
+async def shazam_station(message,station):
+    if station == "nts1":
+        audio_source = 'https://stream-relay-geo.ntslive.net/stream'
+    elif station == "nts2":
+        audio_source = 'https://stream-relay-geo.ntslive.net/stream2'
+    elif station == "doyou":
+        audio_source = 'https://doyouworld.out.airtime.pro/doyouworld_a'
+    stationname = station.upper()
+    shazamapi = shazam.ShazamApi(loop,api_key=shazam_api_key)
+    #session = ClientSession(trust_env=True)
+    tz = pytz.timezone('Europe/London')
+    london_now = datetime.now(tz)
+    hoursmins = london_now.strftime("%H:%M")
+    out = ''
+    msg = ''
+    result = await shazamapi._get(audio_source)
+    print(result)
+    
+    if "track" in result:
+        artist = result["track"]["subtitle"]
+        title = result["track"]["title"]
+        bandcamp_result_msg = await bandcamp_search(artist,title)
+        
+        await message.channel.send(
+            "ID " + stationname + " (from shazam): "
+            + hoursmins
+            + " - "
+            + artist
+            + " - "
+            + title
+            + bandcamp_result_msg)
+    else:
+        await message.channel.send(
+            "ID " + stationname + ": "
+            + hoursmins
+            + " - "
+            + "shazam found nothing")
+
+async def bandcamp_search(artist,title):
+    googlequery = artist + " " + title
+    res = ''
+    res = await search_google.search(googlequery)
+    print(res)
+    if res is not None:
+        bc_link = res[0]["link"]
+        print(bc_link)
+        if ("track" or "album") in bc_link:
+            bandcamp_result_msg = " | maybe it's: " + bc_link  
+        else:
+            bandcamp_result_msg = " | no bandcamp found. " 
+    else:
+        bandcamp_result_msg = " | no bandcamp found. "
+
+    return bandcamp_result_msg
 
 class config:
     rooms = []
@@ -106,8 +244,6 @@ class MyBot(chatango.Client):
         print("Bot initialized")
         self.db = await aiosqliteclass.create_conn()
         
-
-
         
     async def on_start(self): # room join queue
         for room in config.rooms:
@@ -173,32 +309,11 @@ class MyBot(chatango.Client):
                     "SELECT * FROM nts_one ORDER BY id DESC LIMIT 1;")
                 result = await cur.fetchall()
                 sqlid,utctime,artist,title = result[0]
-
-                tz = pytz.timezone("UTC")
-                naive_time = datetime.strptime(utctime, "%Y-%m-%d %H:%M:%S")
-                utc_time = naive_time.replace(tzinfo=pytz.UTC)
-                london_tz = pytz.timezone("Europe/London")
-                london_time = utc_time.astimezone(london_tz)
-                string_time = str(london_time)
-                lesstime = string_time.split(" ")[1].split(":")
-                hoursmins = str(lesstime[0]) + ":" + str(lesstime[1])
-
-                googlequery = artist + " " + title
-                res = ''
-                res = await search_google.search(googlequery)
-                print(res)
-                if res is not None:
-                    bc_link = res[0]["link"]
-                    print(bc_link)
-                    if ("track" or "album") in bc_link:
-                        bandcamp_result_msg = " | maybe it's: " + bc_link  
-                    else:
-                        bandcamp_result_msg = " | no bandcamp found. " 
-                else:
-                    bandcamp_result_msg = " | no bandcamp found. "
-                    
+                hoursmins = convert_utc_to_london(utctime)
+                bandcamp_result_msg = await bandcamp_search(artist,title)
+                
                 await message.channel.send(
-                    "ID NTS1: "
+                    "ID NTS1 (from nts): "
                     + hoursmins
                     + " - "
                     + artist
@@ -206,92 +321,64 @@ class MyBot(chatango.Client):
                     + title
                     + bandcamp_result_msg)
 
-            
+                asyncio.ensure_future(shazam_station(message,'nts1'))
+
+            elif cmd in ["id2", "idch2", "idnts2"]:
+                await message.room.delete_message(message)
+                utctime = ''
+                cur = await get_db_cur()
+                await cur.execute(
+                    "SELECT * FROM nts_two ORDER BY id DESC LIMIT 1;")
+                result = await cur.fetchall()
+                sqlid,utctime,artist,title = result[0]
+                hoursmins = convert_utc_to_london(utctime)
+                bandcamp_result_msg = await bandcamp_search(artist,title)
                 
+                await message.channel.send(
+                    "ID NTS2 (from nts): "
+                    + hoursmins
+                    + " - "
+                    + artist
+                    + " - "
+                    + title
+                    + bandcamp_result_msg)
 
+                asyncio.ensure_future(shazam_station(message,'nts2'))
 
-            elif cmd.startswith("id"):
-                api = shazam.ShazamApi(loop,api_key=shazam_api_key)
-                session = ClientSession(trust_env=True)
-                now = datetime.now()
-                hoursmins = now.strftime("%H:%M")
-
-                msg = ""
-                audio_source = 'https://doyouworld.out.airtime.pro/doyouworld_a'
-                async with session as s:
-                    out = await api._get(audio_source,s)
-                    print(out)
+            elif cmd in ["iddy", "iddoyou"]:
+                await message.room.delete_message(message)
                 
-                await message.channel.send('got an id')
-
-
-
-
-                '''
-                print("on_message: try shazam")
-                try:
-                    shazam_result = await api.detect(
-                        "https://radiobollwerk.out.airtime.pro/radiobollwerk_a", rec_seconds=4
-                    )
-                    result_dict = json.loads(shazam_result.content)
-                    artists = result_dict["track"]["subtitle"]
-                    title = result_dict["track"]["title"]
-                except Exception as e:
-                    #LOGGER.error(e)
-                    artists = ""
-                    title = ""
-
-                #print(artists)
-                #print(title)
-                #print((artists and title) is not None)
-                if artists and title:
-                    LOGGER.error("artist and title exist")
-                    print("artist and title exist:" + artists + " " + title)
-
-                    #googlequery = artists + " " + title
-                    #res = search_google.search(googlequery)
-                    #print(res)
-                    if res is not None:
-                        bc_link = res[0]["link"]
-                        print(bc_link)
-                        if ("track" or "album") in bc_link:
-                            await message.channel.send.message(
-                                "ID Radio Bollwerk: "
-                                + hoursmins
-                                + " - "
-                                + artists
-                                + " - "
-                                + title
-                                + " | maybe it's: "
-                                + bc_link
-                            )
-                        else:
-                            await message.channel.send.message(
-                                "ID Radio Bollwerk: "
-                                + hoursmins
-                                + " - "
-                                + artists
-                                + " - "
-                                + title
-                                + " | no bandcamp found. "
-                            )
-                    else:
-                        await message.channel.send.message(
-                            "ID Radio Bollwerk: "
+                londontime, artist, title = await get_id_doyou.get()
+                hoursmins = londontime
+                
+                if title != None:
+                    bandcamp_result_msg = await bandcamp_search(artist,title)
+                    
+                    await message.channel.send(
+                        "ID DOYOU (from doyou): "
                             + hoursmins
                             + " - "
-                            + artists
+                            + artist
                             + " - "
                             + title
-                            + " | no bandcamp found. "
-                        )
+                            + bandcamp_result_msg)
+                        
                 else:
-                    #LOGGER.error("artist and title dont even exist")
-                    #print("artist and title not found")
-                    await message.channel.send(
-                        "ID Radio Bollwerk: " + hoursmins + " | sorry, found nothing. "
-                    )
-                '''
+                    print("no id from doyou")
+                    await message.channel.send("No ID on doyou website, trying shazam")
+                
+                
+
+                asyncio.ensure_future(shazam_station(message,'doyou'))
+                
+                
+            elif cmd.startswith("id" or "raid"):
+                if cmd.startswith("raid"):
+                    cmd = cmd[4:]
+                elif cmd.startswith("id"):
+                    cmd = cmd[2:]
+                asyncio.ensure_future(raid(message,cmd))
+
 
             elif cmd == "fortune":
                 await message.room.delete_message(message)
