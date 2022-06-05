@@ -2,3 +2,4 @@ aiohttp # http requests and websockets
 aiosqlite
 pydub
 lxml
+mopidy-asyncio-client

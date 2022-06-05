@@ -1,14 +1,14 @@
 import aiohttp
 import urllib.parse as urlparse
-import secrets
+import mysecrets
 import json
 
 
 async def search(query):
 
     params = {
-        "key": secrets.google_key,
-        "cx": secrets.google_cx,
+        "key": mysecrets.google_key,
+        "cx": mysecrets.google_cx,
         "q": query,
         "start": 0,
         "num": 1,

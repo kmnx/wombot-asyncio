@@ -13,6 +13,10 @@ import time
 import pytz
 import json
 import re
+import logging
+import html
+from urllib.parse import urlparse
+import bs4
 
 import search_google
 import get_id_doyou
@@ -26,9 +30,12 @@ import data_txt_fortunes as fortunes
 #import raid
 import aiosqlite
 
-import secrets
-shazam_api_key = secrets.shazam_api_key
+import mysecrets
+shazam_api_key = mysecrets.shazam_api_key
 
+from mopidy_asyncio_client import MopidyClient
+logging.basicConfig()
+logging.getLogger('mopidy_asyncio_client').setLevel(logging.DEBUG)
 
 print('start')
 commandlist = [
@@ -93,6 +100,39 @@ else:
         allgif_set = set(line.strip() for line in file)
 
 print("init variables done")
+
+# mopidy logic
+
+async def playback_started_handler(data):
+    """Callback function, called when the playback started."""
+    print(data)
+    print(bot.rooms) # ok
+    nowplaying = html.unescape(data['tl_track']['track']['name'])
+    myroom = bot.get_room('knmx')
+    #print(myroom) # ok
+    msg = "http://chunted.fr/stream2 jukebox now playing: " + nowplaying
+    await myroom.send_message(msg)
+
+
+
+async def all_events_handler(event, data):
+    """Callback function; catch-all function."""
+    print(event, data)
+
+
+async def mpd_context_manager(mpd):
+
+    async with mpd as mopidy:
+
+        mopidy.bind('track_playback_started', playback_started_handler)
+        mopidy.bind('*', all_events_handler)
+
+        # Your program's logic:
+        #await mopidy.playback.play()
+        while True:
+            await asyncio.sleep(1)
+
+
 
 def convert_utc_to_london(utctime):
     tz = pytz.timezone("UTC")
@@ -182,7 +222,9 @@ async def shazam_station(message,station):
         audio_source = 'https://stream-relay-geo.ntslive.net/stream2'
     elif station == "doyou":
         audio_source = 'https://doyouworld.out.airtime.pro/doyouworld_a'
-    stationname = station.upper()
+    elif station == "chunt2":
+        audio_source = "http://chunted.fr/stream2"
+    stationname = station
     shazamapi = shazam.ShazamApi(loop,api_key=shazam_api_key)
     #session = ClientSession(trust_env=True)
     tz = pytz.timezone('Europe/London')
@@ -235,7 +277,7 @@ class config:
     rooms.append(environ["wombotmainroom"])
     rooms.append(environ["wombottestroom"])
 
-    botuser = [secrets.chatango_user, secrets.chatango_pass] # password
+    botuser = [mysecrets.chatango_user, mysecrets.chatango_pass] # password
 
 class MyBot(chatango.Client):
     async def on_init(self):
@@ -365,14 +407,17 @@ class MyBot(chatango.Client):
                 else:
                     print("no id from doyou")
                     await message.channel.send("No ID on doyou website, trying shazam")
-                
-                
+                    asyncio.ensure_future(shazam_station(message,'doyou'))
 
-                asyncio.ensure_future(shazam_station(message,'doyou'))
+
+            elif cmd in ["idchunt", "idchunt2","idjukebox"]:
+                await message.room.delete_message(message)
+                asyncio.ensure_future(shazam_station(message,'chunt2'))
                 
             
             elif cmd.startswith('id') or cmd.startswith('raid'):
                 if cmd.startswith("raid"):
+
                     cmd = cmd[4:]
                     print(cmd)
                 elif cmd.startswith("id"):
@@ -380,6 +425,105 @@ class MyBot(chatango.Client):
                     print(cmd)
                 asyncio.ensure_future(raid(message,cmd))
 
+            # jukebox controls
+            elif cmd.startswith('np'):
+                await message.room.delete_message(message)
+                data = await mpd.playback.get_current_track()
+                print(data)
+                if data:
+                    title = data['name']
+                    print(title)
+                    await message.channel.send("http://chunted.fr/stream2 jukebox now playing: " + title)
+                else:
+                    await message.channel.send("http://chunted.fr/stream2 jukebox not playing anything.")
+            elif cmd.startswith('jukebox'):
+                await message.room.delete_message(message)
+                await message.channel.send("http://chunted.fr/stream2 jukebox commands: !add url !skip !np")
+
+            elif cmd in ['play','add']:
+                await message.room.delete_message(message)
+                #await mpd.tracklist.add(uris=['mixcloud:track:/NTSRadio/siren-w-dj-fart-in-the-club-14th-may-2020/'])
+                #await mpd.tracklist.add(uris=['sc:https://soundcloud.com/sirenldn/nts-dj-fart-in-the-club'])
+                playback_state = await mpd.playback.get_state()
+                schemes = await mpd.core.get_uri_schemes()
+                print(schemes)
+                if args:
+
+                    #print(args)
+                    splitargs = args.split(" ")
+                    #print(splitargs)
+                    url = splitargs[0]
+                    
+                    #print(mypath)
+                    uri = ''
+                    print(url)
+                    strippedurl = url.strip().lstrip().rstrip()
+                    url = strippedurl
+                    print(url)
+                    if url.startswith('https://www.nts.live'):
+                        async with ClientSession() as s:
+                            r = await s.get(url)
+                            html = await r.read()
+                            soup = bs4.BeautifulSoup(html, features="lxml")
+                            buttons = soup.find('button', {'data-src' : True})
+                            source = buttons.get('data-src')
+                            url = source
+
+                    parsed = urlparse(url)
+                    mypath = parsed.path
+
+                    if url.startswith('https://www.mixcloud.com'):
+                        uri = "mixcloud:track:" + mypath
+                    elif url.startswith('https://soundcloud.com/'):
+                        uri = "sc:" + url
+
+                    elif url.startswith('https://www.youtube.com/watch'):
+                        #uri = "yt:" + url
+                        # seems very broken, somehow yt causes "wrong stream type" somewhere in liquidsoap/icecast/mopidy chain
+                        await message.channel.send("jukebox can add links from mixcloud,soundcloud,nts")
+
+
+                    
+                    searchlist = []
+                    searchlist.append(uri)
+                    results = await mpd.tracklist.add(uris=searchlist)
+
+                    if playback_state != 'playing':
+                        print("it's not playing")
+                        await mpd.playback.play()
+                    else:
+                        print('should be playing')
+                
+
+
+            elif cmd in ['queue','tl']:
+                tracklist = ''
+                tracklist = await mpd.tracklist.get_tl_tracks()
+                print(tracklist)
+                i = 0
+                smalllist = []
+
+
+
+                for item in tracklist:
+                    i += 1
+                    trackname = item['track']['name']
+                    smalllist.append(trackname)
+                if len(smalllist) > 3:
+                    tinylist = smalllist[0:3]
+                else:
+                    tinylist = smalllist
+                if i == 0:
+                    msg = 'jukebox: 0 items in the playlist'
+                else:
+
+                    msg = "jukebox: " + str(i) + " items in the playlist, next up are: "
+                for item in tinylist:
+                    msg = msg + "\r " + item
+                await message.channel.send(msg)
+
+            elif cmd in ['skip','next']:
+                await mpd.playback.next()
 
             elif cmd == "fortune":
                 await message.room.delete_message(message)
@@ -614,12 +758,16 @@ if __name__ == "__main__":
     loop = asyncio.get_event_loop()
     bot = MyBot()
     bot.default_user(config.botuser[0], config.botuser[1]) # easy_start
+
 #     or_accounts = [["user1","passwd1"], ["user2","passwd2"]]
 #     bot.default_user(accounts=or_accounts, pm=False) #True if passwd was input.
     ListBots = [bot.start()] # Multiple instances 
     task = asyncio.gather(*ListBots, return_exceptions=True)
+    mpd = MopidyClient(host='139.177.181.183')
+    mpdtask = asyncio.gather(mpd_context_manager(mpd))
+    tasks = asyncio.gather(task,mpdtask)
     try:
-        loop.run_until_complete(task)
+        loop.run_until_complete(tasks)
         loop.run_forever()
     except KeyboardInterrupt:
         print("[KeyboardInterrupt] Killed bot.")

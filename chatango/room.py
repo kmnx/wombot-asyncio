@@ -506,7 +506,7 @@ class Room(Connection):
     async def logout(self):
         await self._send_command("blogout")
 
-    async def send_message(self, message, use_html=False, flags=None):
+    async def send_message(self, message, use_html=True, flags=None):
         if not self.silent:
             message_flags = flags if flags else str(
                 self.message_flags+self.badge) or str(0+self.badge)

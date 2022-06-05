@@ -5,9 +5,9 @@ from pydub import AudioSegment
 
 from aiohttp import ClientSession
 import base64
-import secrets
+import mysecrets
 import sys
-shazam_api_key = secrets.shazam_api_key
+shazam_api_key = mysecrets.shazam_api_key
 
 
 class ShazamApi:
@@ -37,11 +37,9 @@ class ShazamApi:
         out = ''
         if session == None:
             session = aiohttp.ClientSession()
-        #async with ClientSession(trust_env=True) as session:
         async with session as session:
             try:
                 async with session.get(streamsource) as response:
-                    #response = await session.get(streamsource)
                     print('started recording')
                     while (asyncio.get_event_loop().time() < (starttime + 4)):
                         chunk = await response.content.read(1024)

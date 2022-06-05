@@ -7,7 +7,7 @@ pythonsqlite.db
 trackids.db
 
 allgif.txt
-secrets.py
+mysecrets.py
 
 # Byte-compiled / optimized / DLL files
 
