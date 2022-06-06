@@ -129,7 +129,8 @@ async def playback_started_handler(data):
     print(data)
     print(bot.rooms) # ok
     source_name = html.unescape(data['tl_track']['track']['name'])
-    myroom = bot.get_room('knmx')
+    mainroom = environ["wombotmainroom"]
+    myroom = bot.get_room(mainroom)
     #print(myroom) # ok
     if data['tl_track']['track']['uri'].startswith('soundcloud'):
         url = data['tl_track']['track']['comment']
