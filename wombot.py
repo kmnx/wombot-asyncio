@@ -107,10 +107,17 @@ async def playback_started_handler(data):
     """Callback function, called when the playback started."""
     print(data)
     print(bot.rooms) # ok
-    nowplaying = html.unescape(data['tl_track']['track']['name'])
+    source_name = html.unescape(data['tl_track']['track']['name'])
     myroom = bot.get_room('knmx')
     #print(myroom) # ok
-    msg = "http://chunted.fr/stream2 jukebox now playing: " + nowplaying
+    if data['tl_track']['track']['uri'].startswith('soundcloud'):
+        url = data['tl_track']['track']['comment']
+    elif data['tl_track']['track']['uri'].startswith('mixcloud'):
+        uri = data['tl_track']['track']['uri']
+        url = uri.replace('mixcloud:track:','https://www.mixcloud.com')
+    else:
+        url = data['tl_track']['track']['name']
+    msg = "http://chunted.fr/stream2 jukebox now playing: " + url
     await myroom.send_message(msg)
 
 
@@ -118,6 +125,8 @@ async def playback_started_handler(data):
 async def all_events_handler(event, data):
     """Callback function; catch-all function."""
     print(event, data)
+    if event == 'tracklist_changed':
+        print(data)
 
 
 async def mpd_context_manager(mpd):
@@ -126,6 +135,7 @@ async def mpd_context_manager(mpd):
 
         mopidy.bind('track_playback_started', playback_started_handler)
         mopidy.bind('*', all_events_handler)
+        await mpd.tracklist.set_consume(True)
 
         # Your program's logic:
         #await mopidy.playback.play()
@@ -354,7 +364,7 @@ class MyBot(chatango.Client):
                 bandcamp_result_msg = await bandcamp_search(artist,title)
                 
                 await message.channel.send(
-                    "ID NTS1 (from nts): "
+                    "ID NTS1 (from acrcloud): "
                     + hoursmins
                     + " - "
                     + artist
@@ -376,7 +386,7 @@ class MyBot(chatango.Client):
                 bandcamp_result_msg = await bandcamp_search(artist,title)
                 
                 await message.channel.send(
-                    "ID NTS2 (from nts): "
+                    "ID NTS2 (from acrcloud): "
                     + hoursmins
                     + " - "
                     + artist
@@ -430,15 +440,24 @@ class MyBot(chatango.Client):
                 await message.room.delete_message(message)
                 data = await mpd.playback.get_current_track()
                 print(data)
-                if data:
-                    title = data['name']
-                    print(title)
-                    await message.channel.send("http://chunted.fr/stream2 jukebox now playing: " + title)
+                if data is not None:
+                    if '__model__' in data:
+                        if data['uri'].startswith('mixcloud'):
+                            uri = data['uri']
+                            url = uri.replace('mixcloud:track:','https://www.mixcloud.com')
+
+                        elif data['uri'].startswith('soundcloud'):
+                            url = data['comment']
+                        await message.channel.send("http://chunted.fr/stream2 jukebox now playing: " + url)
                 else:
-                    await message.channel.send("http://chunted.fr/stream2 jukebox not playing anything.")
+                    await message.channel.send("jukebox is not playing anything right now")
             elif cmd.startswith('jukebox'):
                 await message.room.delete_message(message)
-                await message.channel.send("http://chunted.fr/stream2 jukebox commands: !add url !skip !np")
+                await message.channel.send("http://chunted.fr/stream2 jukebox commands: !add url !skip !np \r accepts links from mixcloud,soundcloud,nts")
+
+            elif cmd == 'clear':
+                await message.room.delete_message(message)
+                await mpd.tracklist.clear()
 
             elif cmd in ['play','add']:
                 await message.room.delete_message(message)
@@ -460,6 +479,9 @@ class MyBot(chatango.Client):
                     strippedurl = url.strip().lstrip().rstrip()
                     url = strippedurl
                     print(url)
+                    results = ''
+                    added = ''
+
                     if url.startswith('https://www.nts.live'):
                         async with ClientSession() as s:
                             r = await s.get(url)
@@ -474,55 +496,77 @@ class MyBot(chatango.Client):
 
                     if url.startswith('https://www.mixcloud.com'):
                         uri = "mixcloud:track:" + mypath
+                        searchlist = []
+                        searchlist.append(uri)
+                        added = await mpd.tracklist.add(uris=searchlist)
                     elif url.startswith('https://soundcloud.com/'):
                         uri = "sc:" + url
+                        searchlist = []
+                        searchlist.append(uri)
+                        added = await mpd.tracklist.add(uris=searchlist)
 
-                    elif url.startswith('https://www.youtube.com/watch'):
+                    if url.startswith('https://www.youtube.com/watch'):
+                        added = ''
                         #uri = "yt:" + url
-                        # seems very broken, somehow yt causes "wrong stream type" somewhere in liquidsoap/icecast/mopidy chain
-                        await message.channel.send("jukebox can add links from mixcloud,soundcloud,nts")
-
+                        # yt seems very broken, causes "wrong stream type" somewhere in liquidsoap/icecast/mopidy chain
+                        await message.channel.send("jukebox can currently add links from mixcloud,soundcloud,nts")
+                    print('added:',added)
+                    if added:
+                        if '__model__' in added[0]:
+                            print('added okay')
+                            await message.channel.send('jukebox successfully added ' + url)
+                        elif 'ValidationError' in added:
+                            print('ValidationError')
+                            await message.channel.send('could not add link')
+                    else:
+                        await message.channel.send('could not add link to jukebox')
 
                     
-                    searchlist = []
-                    searchlist.append(uri)
-                    results = await mpd.tracklist.add(uris=searchlist)
+                    
 
                     if playback_state != 'playing':
                         print("it's not playing")
-                        await mpd.playback.play()
+                        topslice = await mpd.tracklist.slice(0,1)
+                        if topslice is not None:
+                            tlid = topslice[0]['tlid']
+                            await mpd.playback.play(tlid=tlid)
                     else:
                         print('should be playing')
+
+                    if results:
+                        print(results)
                 
 
 
             elif cmd in ['queue','tl']:
+                await message.room.delete_message(message)
                 tracklist = ''
                 tracklist = await mpd.tracklist.get_tl_tracks()
                 print(tracklist)
                 i = 0
                 smalllist = []
 
-
-
                 for item in tracklist:
                     i += 1
                     trackname = item['track']['name']
                     smalllist.append(trackname)
+                print('i',i)
                 if len(smalllist) > 3:
                     tinylist = smalllist[0:3]
                 else:
                     tinylist = smalllist
                 if i == 0:
-                    msg = 'jukebox: 0 items in the playlist'
+                    msg = 'jukebox is not playing anything. add a link!'
                 else:
 
-                    msg = "jukebox: " + str(i) + " items in the playlist, next up are: "
+                    msg = str(i) + " tracks in jukebox queue. "
                 for item in tinylist:
-                    msg = msg + "\r " + item
+                    msg = msg + " | " + item
                 await message.channel.send(msg)
-
+                
             elif cmd in ['skip','next']:
+                await message.room.delete_message(message)
+                print('consume mode ',await mpd.tracklist.get_consume())
                 await mpd.playback.next()
 
             elif cmd == "fortune":

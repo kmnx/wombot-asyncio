@@ -12,15 +12,12 @@ async def get():
         r = await s.get("https://www.nts.live/shows/secret-sundaze/episodes/secret-sundaze-10th-march-2022")
         html = await r.read()
         soup = bs4.BeautifulSoup(html, features="lxml")
-        
+        buttons = soup.find('button', {'data-src' : True})
+        source = buttons.get('data-src')
         
         #ultag = soup.find("ul")
         #firstli = ultag.find("li")
-        buttons = soup.find('button', {'data-src' : True})
-
-        print(buttons)
-        source = buttons.get('data-src')
-        print(source)
+        
         '''
         buttons = soup.find(("button", {"data-src"}))
         trackartist = firstli.find(("h2", {"class": re.compile(r"^Track_artist")}))

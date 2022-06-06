@@ -511,18 +511,18 @@ class Room(Connection):
             message_flags = flags if flags else str(
                 self.message_flags+self.badge) or str(0+self.badge)
             msg = str(message)
-            print(message)
+            #print(message)
             if not use_html:
                 msg = html.escape(msg, quote=False)
-                print('escaped:',msg)
+                #print('escaped:',msg)
             else:
                 msg = html.unescape(msg)
-                print('unescaped:',msg)
+                #print('unescaped:',msg)
             _msg = msg.replace('\n', '\r').replace('~', '&#126;')
-            print('_msg',_msg)
+            #print('_msg',_msg)
             for _message in message_cut(str(_msg), self._maxlen, self,
                                            use_html):
-                print('_message',_message)
+                #print('_message',_message)
                 await self._send_command("bm", _id_gen(), message_flags, _message)
 
 ##
