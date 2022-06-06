@@ -125,7 +125,6 @@ async def schedule_gif_of_the_hour():
         await asyncio.sleep(5)
 
 async def goth_storage(goth=None):
-    if goth 
     if goth is not None:
         stored_goth = goth
     return stored_goth
