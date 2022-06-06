@@ -112,7 +112,7 @@ async def post_gif_of_the_hour(param):
     bots.append(bot.get_room(testroom))
     #print(datetime.now().time(), param)
     goth = random.choice(await bot.db.fetch_gif("bbb"))
-    await goth_storage(goth)
+    bot.goth = goth
     #print(gifone)
     for roombot in bots:
         await roombot.send_message('the gif of the hour is: ' + goth)
@@ -123,13 +123,6 @@ async def schedule_gif_of_the_hour():
 
     while True:
         await asyncio.sleep(5)
-
-async def goth_storage(goth=None):
-    if goth is not None:
-        stored_goth = goth
-    return stored_goth
-    
-
 
 
 # mopidy logic
@@ -329,6 +322,8 @@ class MyBot(chatango.Client):
     async def on_init(self):
         print("Bot initialized")
         self.db = await aiosqliteclass.create_conn()
+        self.goth = random.choice(await bot.db.fetch_gif("bbb"))
+        
         
         
     async def on_start(self): # room join queue
@@ -471,7 +466,9 @@ class MyBot(chatango.Client):
                     print(cmd)
                 asyncio.ensure_future(raid(message,cmd))
 
+
             # jukebox controls
+
             elif cmd.startswith('np'):
                 await message.room.delete_message(message)
                 data = await mpd.playback.get_current_track()
@@ -660,17 +657,19 @@ class MyBot(chatango.Client):
                 await message.room.delete_message(message)
                 await message.channel.send(random.choice(data_pics_quokka.pics))
 
-            # gif management 
+            # gif management
 
             elif cmd == "tags":
                 await message.room.delete_message(message)
                 taglist_all = await self.db.cursor.execute(
                     "SELECT tag_name FROM tag_table"
                 )
-                taglist = await self.db.cursor.fetchall()
+                taglist_unsorted = await self.db.cursor.fetchall()
+
+                taglist = taglist_unsorted.sorted()
 
                 thelongeststring = (
-                    "to tag a gif: !tag link-to-the-gif tagname \r"
+                    "to tag a gif: !tag link-to-the-gif tagname \r\r tags that post gifs/links: \r"
                 )
                 for key in taglist:
                     thelongeststring += "!" + key + " "
@@ -734,6 +733,11 @@ class MyBot(chatango.Client):
                 giftwo = random.choice(await self.db.fetch_gif("bbb"))
                 gifthree = random.choice(await self.db.fetch_gif("bbb"))
                 await message.channel.send(gifone + " " + giftwo + " " + gifthree)
+
+            elif cmd == 'goth':
+                await message.room.delete_message(message)
+            
+                await message.channel.send('the gif of the hour is ' + self.goth)
 
             # text spam
 
