@@ -3,3 +3,4 @@ aiosqlite
 pydub
 lxml
 mopidy-asyncio-client
+aiocron

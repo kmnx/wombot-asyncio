@@ -4,6 +4,7 @@ import chatango
 import asyncio
 from aiohttp import ClientSession
 from datetime import datetime
+import aiocron
 import random
 import typing
 from os import environ
@@ -99,7 +100,27 @@ else:
     with open(allgif_file) as file:
         allgif_set = set(line.strip() for line in file)
 
+
 print("init variables done")
+
+async def post_gif_of_the_hour(param):
+    bots = []
+    mainroom = environ["wombotmainroom"]
+    testroom = environ["wombottestroom"]
+    bots.append(bot.get_room(mainroom))
+    bots.append(bot.get_room(testroom))
+    #print(datetime.now().time(), param)
+    gifone = random.choice(await bot.db.fetch_gif("bbb"))
+    #print(gifone)
+    for roombot in bots:
+        await roombot.send_message('the gif of the hour is: ' + gifone)
+
+async def schedule_gif_of_the_hour():
+    #cron_min = aiocron.crontab('*/1 * * * *', func=post_gif_of_the_hour, args=("At every minute",), start=True)
+    cron_hour = aiocron.crontab('0 */1 * * *', func=post_gif_of_the_hour, args=("At minute 0 past every hour.",), start=True)
+
+    while True:
+        await asyncio.sleep(5)
 
 # mopidy logic
 
@@ -143,6 +164,7 @@ async def mpd_context_manager(mpd):
             await asyncio.sleep(1)
 
 
+# different track id functions return different timezones, trying to get everything to London time
 
 def convert_utc_to_london(utctime):
     tz = pytz.timezone("UTC")
@@ -156,6 +178,7 @@ def convert_utc_to_london(utctime):
 
     return hoursmins
 
+# radioactivity id
 
 async def raid(message,station_query):
     session = ClientSession(trust_env=True)
@@ -809,7 +832,8 @@ if __name__ == "__main__":
     task = asyncio.gather(*ListBots, return_exceptions=True)
     mpd = MopidyClient(host='139.177.181.183')
     mpdtask = asyncio.gather(mpd_context_manager(mpd))
-    tasks = asyncio.gather(task,mpdtask)
+    giftask = schedule_gif_of_the_hour()
+    tasks = asyncio.gather(task,mpdtask,giftask)
     try:
         loop.run_until_complete(tasks)
         loop.run_forever()
