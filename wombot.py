@@ -450,8 +450,14 @@ class MyBot(chatango.Client):
                     await message.channel.send("No ID on doyou website, trying shazam")
                     asyncio.ensure_future(shazam_station(message,'doyou'))
 
-
-            elif cmd in ["idchunt", "idchunt2","idjukebox"]:
+            elif cmd in ["idchunt"]:
+                await message.room.delete_message(message)
+                asyncio.ensure_future(shazam_station(message,'chunt1'))
+                asyncio.ensure_future(shazam_station(message,'chunt2'))
+            elif cmd in ["idchunt1"]:
+                await message.room.delete_message(message)
+                asyncio.ensure_future(shazam_station(message,'chunt1'))
+            elif cmd in ["idchunt2","idjukebox"]:
                 await message.room.delete_message(message)
                 asyncio.ensure_future(shazam_station(message,'chunt2'))
                 
