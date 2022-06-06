@@ -103,6 +103,7 @@ else:
 
 print("init variables done")
 
+
 async def post_gif_of_the_hour(param):
     bots = []
     mainroom = environ["wombotmainroom"]
@@ -110,10 +111,11 @@ async def post_gif_of_the_hour(param):
     bots.append(bot.get_room(mainroom))
     bots.append(bot.get_room(testroom))
     #print(datetime.now().time(), param)
-    gifone = random.choice(await bot.db.fetch_gif("bbb"))
+    goth = random.choice(await bot.db.fetch_gif("bbb"))
+    await goth_storage(goth)
     #print(gifone)
     for roombot in bots:
-        await roombot.send_message('the gif of the hour is: ' + gifone)
+        await roombot.send_message('the gif of the hour is: ' + goth)
 
 async def schedule_gif_of_the_hour():
     #cron_min = aiocron.crontab('*/1 * * * *', func=post_gif_of_the_hour, args=("At every minute",), start=True)
@@ -121,6 +123,15 @@ async def schedule_gif_of_the_hour():
 
     while True:
         await asyncio.sleep(5)
+
+async def goth_storage(goth=None):
+    if goth 
+    if goth is not None:
+        stored_goth = goth
+    return stored_goth
+    
+
+
 
 # mopidy logic
 
@@ -139,7 +150,7 @@ async def playback_started_handler(data):
         url = uri.replace('mixcloud:track:','https://www.mixcloud.com')
     else:
         url = data['tl_track']['track']['name']
-    msg = "http://chunted.fr/stream2 jukebox now playing: " + url
+    msg = "https://fm.chunt.org/stream2 jukebox now playing: " + url
     await myroom.send_message(msg)
 
 
@@ -256,8 +267,10 @@ async def shazam_station(message,station):
         audio_source = 'https://stream-relay-geo.ntslive.net/stream2'
     elif station == "doyou":
         audio_source = 'https://doyouworld.out.airtime.pro/doyouworld_a'
+    elif station == "chunt1":
+        audio_source = "https://fm.chunt.org/stream"
     elif station == "chunt2":
-        audio_source = "http://chunted.fr/stream2"
+        audio_source = "https://fm.chunt.org/stream2"
     stationname = station
     shazamapi = shazam.ShazamApi(loop,api_key=shazam_api_key)
     #session = ClientSession(trust_env=True)
@@ -361,7 +374,7 @@ class MyBot(chatango.Client):
                 orig_cmd, args = data[0], data[1]
             else:
                 orig_cmd, args = data[0], ""
-            cmd = orig_cmd.lower()
+            cmd = orig_cmd.lower().strip().lstrip().rstrip()
             print(cmd)
             #if message.body.startswith("!a"):
             if cmd == ("a"):
@@ -472,12 +485,12 @@ class MyBot(chatango.Client):
 
                         elif data['uri'].startswith('soundcloud'):
                             url = data['comment']
-                        await message.channel.send("http://chunted.fr/stream2 jukebox now playing: " + url)
+                        await message.channel.send("https://fm.chunt.org/stream2 jukebox now playing: " + url)
                 else:
                     await message.channel.send("jukebox is not playing anything right now")
             elif cmd.startswith('jukebox'):
                 await message.room.delete_message(message)
-                await message.channel.send("http://chunted.fr/stream2 jukebox commands: !add url !skip !np \r accepts links from mixcloud,soundcloud,nts")
+                await message.channel.send("https://fm.chunt.org/stream2 jukebox commands: !add url !skip !np \r accepts links from mixcloud,soundcloud,nts")
 
             elif cmd == 'clear':
                 await message.room.delete_message(message)
@@ -603,6 +616,7 @@ class MyBot(chatango.Client):
                     .replace(".", "")
                     .lower()
                 )
+            # gif/image/snippets spam commands
 
             elif cmd in [
                 "legalize",
@@ -646,6 +660,8 @@ class MyBot(chatango.Client):
                 print("quokka")
                 await message.room.delete_message(message)
                 await message.channel.send(random.choice(data_pics_quokka.pics))
+
+            # gif management 
 
             elif cmd == "tags":
                 await message.room.delete_message(message)
