@@ -168,7 +168,7 @@ async def mpd_context_manager(mpd):
             await asyncio.sleep(1)
 
 
-# different track id functions return different timezones, trying to get everything to London time
+# convert utc to London time 
 
 def convert_utc_to_london(utctime):
     tz = pytz.timezone("UTC")
@@ -672,7 +672,7 @@ class MyBot(chatango.Client):
                 )
                 taglist_unsorted = await self.db.cursor.fetchall()
 
-                taglist = taglist_unsorted.sorted()
+                taglist = sorted(taglist_unsorted)
 
                 thelongeststring = (
                     "to tag a gif: !tag link-to-the-gif tagname \r\r tags that post gifs/links: \r"
