@@ -197,22 +197,40 @@ async def raid(message,station_query):
     ra_stations = json.loads(re.split("<[/]{0,1}script.*?>", decoded)[1])
 
     ra_station_names = list(ra_stations.keys())
-    print(ra_station_names)
+
+    # pm a list of station names to the user if the typed !raidlist
+    if station_query == 'list':
+        msg = "Radioactivity stations: "
+        for station in ra_station_names:
+            msg += station + ", "
+        await message.room.client.pm.send_message(message.user, msg)
+
+    station_name = None
+
+    match = False
+
     # if the provided station name is in the list of stations
     if station_query in ra_station_names:
         station_name = station_query
+        match=True
     # try to guess which station is meant
     else:
         station_name = [
             station for station in ra_station_names if station_query in station
         ]
 
-        # if two station have the same distance, choose the first one
-        if station_name:
-            if isinstance(station_name, list):
+        # if more than station has particular matches, return an error message
+        if station_name is not None:
+            if isinstance(station_name, list) and len(station_name) > 1:
+                await message.channel.send('Sorry, station name was ambiguous. Please specify the station name exactly (type !raidlist to get a list of possible options).')
+            elif isinstance(station_name, list) and len(station_name) == 0:
+                await message.channel.send('Sorry, no station name match found (type !raidlist to get a list of possible options).')
+            else:
+                match = True
                 station_name = station_name[0]
-            
-    if station_name:
+
+    # station could be identified, let's go
+    if match:
         await message.room.delete_message(message)
         id_station = ra_stations[station_name]
         # for all stations urls for the given station, run the shazam api and append results to the message
