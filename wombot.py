@@ -728,7 +728,7 @@ class MyBot(chatango.Client):
                 )
 
             elif cmd in ["sandwich"]:
-                wait message.room.delete_message(message)
+                await message.room.delete_message(message)
                 toast = "https://media.giphy.com/media/GhPxSf3KazSZsJ4XSo/giphy.gif"
                 await message.channel.send(
                     toast + " " +
