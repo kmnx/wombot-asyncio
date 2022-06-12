@@ -1,4 +1,4 @@
-import requests
+import aiohttp
 import datetime
 
 apis = {
@@ -19,7 +19,9 @@ async def get_schedule(api_url):
     """
 
     # open api url and pull data
-    response = await requests.get(api_url)
+    session = aiohttp.ClientSession()
+    async with session as s:
+        response = await s.get(api_url)
     data = response.json()
 
     if 'nts.live/api' in api_url:
