@@ -1,5 +1,6 @@
 import aiohttp
 import datetime
+import json
 
 apis = {
     'nts1': 'https://www.nts.live/api/v2/radio/schedule/1',
@@ -21,8 +22,11 @@ async def get_schedule(api_url):
     # open api url and pull data
     session = aiohttp.ClientSession()
     async with session as s:
-        response = await s.get(api_url)
-    data = response.json()
+        async with s.get(api_url) as resp:
+            data = await resp.json()
+        #response = await s.get(api_url)
+        
+    #data = json.loads(await response.read())
 
     if 'nts.live/api' in api_url:
         data = data['results']
