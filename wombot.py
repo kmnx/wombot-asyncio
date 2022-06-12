@@ -115,8 +115,8 @@ async def get_now(stream_url, session):
                 if title:
                     return title.decode("utf8", errors="replace")
                 else:
-                    return "No title found"
-    return "Nothing found"
+                    return "Unknown"
+    return "Unknown"
 
 
 async def get_track():
@@ -494,14 +494,16 @@ class MyBot(chatango.Client):
                 '''
                 trackinfo = await get_track()
                 print('idchunt get_track result', trackinfo)
-                await message.channel.send("ID chunt1 from stream: " + trackinfo)
+                if trackinfo is Not "Unknown":
+                    await message.channel.send("ID chunt1 from stream: " + trackinfo)
                 asyncio.ensure_future(shazam_station(message,'chunt1'))
                 asyncio.ensure_future(shazam_station(message,'chunt2'))
             elif cmd in ["idchunt1"]:
                 await message.room.delete_message(message)
                 trackinfo = await get_track()
                 print('idchunt get_track result', trackinfo)
-                await message.channel.send("ID chunt1 from stream: " + trackinfo)
+                if trackinfo is Not "Unknown":
+                    await message.channel.send("ID chunt1 from stream: " + trackinfo)
                 asyncio.ensure_future(shazam_station(message,'chunt1'))
             elif cmd in ["idchunt2","idjukebox"]:
                 await message.room.delete_message(message)
