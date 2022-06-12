@@ -687,8 +687,9 @@ class MyBot(chatango.Client):
                     for arg in splitargs:
                         if arg.lower() in schedule.apis.keys():
                             s_schedule = schedule.get_schedule(schedule.apis[arg.lower()])
+                            pretty_schedule = await schedule.pprint_schedule(s_schedule_subset)
                             s_schedule_subset = schedule.subset_schedule(s_schedule, datetime.now(timezone.utc), future_hours=12)
-                            await message.room.client.pm.send_message(message.user, arg.upper() + '\n' + schedule.pprint_schedule(s_schedule_subset))
+                            await message.room.client.pm.send_message(message.user, arg.upper() + '\n' + pretty_schedule)
                         else:
                             await message.room.client.pm.send_message(message.user, arg.upper() + ': Sorry, I don\'t know that radio station.')
 
