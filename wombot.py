@@ -727,6 +727,16 @@ class MyBot(chatango.Client):
                     + "https://media.giphy.com/media/VeGFReghsvt05wD341/giphy.gif"
                 )
 
+            elif cmd in ["sandwich"]:
+                wait message.room.delete_message(message)
+                toast = "https://media.giphy.com/media/GhPxSf3KazSZsJ4XSo/giphy.gif"
+                await message.channel.send(
+                    toast + " " +
+                    random.choice(await self.db.fetch_gif("bbb"))
+                    + " "
+                    + toast
+                )
+
 
             elif cmd in ["whatdoesthatmean", "benufo", "bufo"]:
                 await message.room.delete_message(message)
