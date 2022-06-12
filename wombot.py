@@ -18,6 +18,7 @@ import logging
 import html
 from urllib.parse import urlparse
 import bs4
+import struct
 
 import schedule
 import search_google
@@ -105,6 +106,30 @@ else:
 
 
 print("init variables done")
+
+async def get_now(stream_url, session):
+    headers={"Icy-MetaData": "1"}
+    async with session.get(stream_url, headers=headers) as resp:
+        for _ in range(10):
+            data = await resp.content.read(8192)
+            m = re.search(br"StreamTitle='([^']*)';", data.rstrip(b"\0"))
+            if m:
+                title = m.group(1)
+                if title:
+                    return title.decode("utf8", errors="replace")
+                else:
+                    return "No title found"
+    return "Nothing found"
+
+
+async def get_track():
+    session = ClientSession()
+    stream_url = "https://fm.chunt.org/stream"
+    result = await get_now(stream_url, session)
+    print(f"result: {result}")
+    await session.close()
+    print('get_track result: ',result)
+    return result
 
 
 async def post_gif_of_the_hour(param):
@@ -473,10 +498,31 @@ class MyBot(chatango.Client):
 
             elif cmd in ["idchunt"]:
                 await message.room.delete_message(message)
+                url = 'https://fm.chunt.org/stream'
+                headers={'Icy-MetaData': "1"}
+                '''
+                async with ClientSession() as s:
+                    r = await s.get(url, headers=headers)
+                    print(r.headers)
+                    metaint = int(r.headers['icy-metaint'])
+                    print(metaint)
+                    print(r)
+                    for _ in range(10): # # title may be empty initially, try several times
+                        r.read(metaint)  # skip to metadata
+                        metadata_length = struct.unpack('B', r.read(1))[0] * 16  # length byte
+                        metadata = r.read(metadata_length).rstrip(b'\0')
+                        print(metadata)
+                '''
+                trackinfo = await get_track()
+                print('idchunt get_track result', trackinfo)
+                await message.channel.send("ID chunt1 from stream: " + trackinfo)
                 asyncio.ensure_future(shazam_station(message,'chunt1'))
                 asyncio.ensure_future(shazam_station(message,'chunt2'))
             elif cmd in ["idchunt1"]:
                 await message.room.delete_message(message)
+                trackinfo = await get_track()
+                print('idchunt get_track result', trackinfo)
+                await message.channel.send("ID chunt1 from stream: " + trackinfo)
                 asyncio.ensure_future(shazam_station(message,'chunt1'))
             elif cmd in ["idchunt2","idjukebox"]:
                 await message.room.delete_message(message)
@@ -655,6 +701,7 @@ class MyBot(chatango.Client):
                     .replace(".", "")
                     .lower()
                 )
+
             # gif/image/snippets spam commands
 
             elif cmd in [
@@ -783,6 +830,24 @@ class MyBot(chatango.Client):
                 await message.channel.send('the gif of the hour is ' + self.goth)
 
             # text spam
+
+            elif cmd == "chuntfm":
+                await message.room.delete_message(message)
+                await message.channel.send(
+                    "live: https://fm.chunt.org/stream jukebox: https://fm.chunt.org/stream2"
+                    )
+                    
+
+            elif cmd == "fortune":
+                await message.room.delete_message(message)
+                await message.channel.send(
+                    "your fortune, "
+                    + message.user.showname
+                    + " : "
+                    + (random.choice(fortunes.fortunecookie))
+                    .replace(".", "")
+                    .lower()
+                )
 
             elif cmd == "say":
                 await message.room.delete_message(message)
