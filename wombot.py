@@ -613,6 +613,12 @@ class MyBot(chatango.Client):
                         searchlist.append(uri)
                         added = await mpd.tracklist.add(uris=searchlist)
 
+                    elif "bandcamp" in url:
+                        uri = "bandcamp:" + url
+                        searchlist = []
+                        searchlist.append(uri)
+                        added = await mpd.tracklist.add(uris=searchlist)
+
                     if url.startswith('https://www.youtube.com/watch'):
                         added = ''
                         #uri = "yt:" + url
@@ -627,7 +633,7 @@ class MyBot(chatango.Client):
                             print('ValidationError')
                             await message.channel.send('could not add link')
                     else:
-                        await message.channel.send('could not add link to jukebox')
+                        await message.channel.send('could not add link to jukebox. supported links: mixcloud,soundcloud,nts')
 
                     
                     
