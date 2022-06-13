@@ -623,7 +623,7 @@ class MyBot(chatango.Client):
                         added = ''
                         #uri = "yt:" + url
                         # yt seems very broken, causes "wrong stream type" somewhere in liquidsoap/icecast/mopidy chain
-                        await message.channel.send("jukebox can currently add links from mixcloud,soundcloud,nts")
+                        await message.channel.send("jukebox can currently add links from mixcloud,soundcloud,bandcamp,nts")
                     print('added:',added)
                     if added:
                         if '__model__' in added[0]:
@@ -631,9 +631,9 @@ class MyBot(chatango.Client):
                             await message.channel.send('jukebox successfully added ' + url)
                         elif 'ValidationError' in added:
                             print('ValidationError')
-                            await message.channel.send('could not add link')
+                            await message.channel.send('could not add ' + url + ' to jukebox. supported links: mixcloud,soundcloud,bandcamp,nts')
                     else:
-                        await message.channel.send('could not add link to jukebox. supported links: mixcloud,soundcloud,nts')
+                        await message.channel.send('could not add ' + url + ' to jukebox. supported links: mixcloud,soundcloud,bandcamp,nts')
 
                     
                     
@@ -670,7 +670,7 @@ class MyBot(chatango.Client):
                 else:
                     tinylist = smalllist
                 if i == 0:
-                    msg = 'jukebox is not playing anything. add a link!'
+                    msg = 'jukebox is not playing anything. add a link from sc,mc,bc or nts!'
                 else:
 
                     msg = str(i) + " tracks in jukebox queue. "
