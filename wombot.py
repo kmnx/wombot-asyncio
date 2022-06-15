@@ -20,6 +20,7 @@ from urllib.parse import urlparse
 import bs4
 import struct
 
+import radioactivity
 import schedule
 import search_google
 import get_id_doyou
@@ -213,13 +214,8 @@ def convert_utc_to_london(utctime):
 # radioactivity id
 
 async def raid(message,station_query):
-    session = ClientSession(trust_env=True)
-    async with session as s:
-        async with s.get("https://radioactivity.directory/api/") as r:
-            html = await r.read()
 
-    decoded = html.decode("ISO-8859-1")
-    ra_stations = json.loads(re.split("<[/]{0,1}script.*?>", decoded)[1])
+    ra_stations = radioactivity.get_station_list()
 
     ra_station_names = list(ra_stations.keys())
 
@@ -541,6 +537,25 @@ class MyBot(chatango.Client):
                     cmd = cmd[2:]
                     print(cmd)
                 asyncio.ensure_future(raid(message,cmd))
+
+            elif cmd == "randomstation":
+                await message.room.delete_message(message)
+                ra_stations = radioactivity.get_station_list()
+
+                online_stations = []
+
+                for station in ra_stations.values():
+                    if station.get('stream_url'):
+                        if any([stream[2] == 'online' for stream in station.get('stream_url')]):
+                            online_stations.append(station)
+
+                # choose a random online station
+                if len(online_stations) > 0:
+                    station = random.choice(online_stations)
+
+                    await message.channel.send("Oi, here's a random station: " + station['name'] + " (" + station.get('url') + ")" + " from " + station['location'])
+                else:
+                    await message.channel.send("No online stations found :(")
 
 
             # jukebox controls
