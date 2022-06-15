@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+# /usr/bin/env python
 # -*- coding: utf-8 -*-
 import chatango
 import asyncio
@@ -490,6 +490,7 @@ class MyBot(chatango.Client):
                             + " - "
                             + title
                             + bandcamp_result_msg)
+                    asyncio.ensure_future(shazam_station(message,'doyou'))
                         
                 else:
                     print("no id from doyou")
@@ -603,6 +604,11 @@ class MyBot(chatango.Client):
                     mypath = parsed.path
 
                     if url.startswith('https://www.mixcloud.com'):
+                        uri = "mixcloud:track:" + mypath
+                        searchlist = []
+                        searchlist.append(uri)
+                        added = await mpd.tracklist.add(uris=searchlist)
+                    elif url.startswith('https://m.mixcloud.com'):
                         uri = "mixcloud:track:" + mypath
                         searchlist = []
                         searchlist.append(uri)
@@ -789,18 +795,18 @@ class MyBot(chatango.Client):
 
             elif cmd == "tag":
                 await message.room.delete_message(message)
-                if message.room.get_level(message.user) > 0:
-                    if args:
-                        args = args.replace(",", " ")
-                        splitargs = args.split(" ")
-                        inurl = splitargs[0]
-                        intags = splitargs[1:]
-                        if not inurl.startswith("http"):
-                            await message.channel.send("!tag url-to-gif tag1 tag2 tag3")
-                        else:
-                            for intag in intags:
-                                intag = intag.strip()
-                                await self.db.tag(inurl, intag)
+                
+                if args:
+                    args = args.replace(",", " ")
+                    splitargs = args.split(" ")
+                    inurl = splitargs[0]
+                    intags = splitargs[1:]
+                    if not inurl.startswith("http"):
+                        await message.channel.send("!tag url-to-gif tag1 tag2 tag3")
+                    else:
+                        for intag in intags:
+                            intag = intag.strip()
+                            await self.db.tag(inurl, intag)
 
             elif cmd == "untag":
                 await message.room.delete_message(message)
