@@ -224,7 +224,13 @@ async def raid(message,station_query):
         msg = "Radioactivity stations: "
         for station in ra_station_names:
             msg += station + ", "
+
+        # delete user message from room
+        await message.room.delete_message(message)
+        # send raid list to user via pm
         await message.room.client.pm.send_message(message.user, msg)
+
+        return None
 
     station_name = None
 
