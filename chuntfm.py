@@ -31,16 +31,12 @@ async def chuntfm_live():
 
     silence_check = detect_silence(sound, min_silence_len=900, silence_thresh=-30)
 
+    silence_list = [len(range(silence[0], silence[1]))>900 for silence in silence_check]
 
     # if all detected silences ar elonger than 900 miliseconds
-    if all([len(range(silence[0], silence[1]))>900 for silence in silence_check]):
+    if len(silence_list) > 0 and all(silence_list):
         return False
     else:
         return True
 
 
-tasks = [chuntfm_live() for x in range(1)]
-loop = asyncio.get_event_loop()
-loop.set_debug(True)
-loop.run_until_complete(asyncio.wait(tasks))
-loop.close()
