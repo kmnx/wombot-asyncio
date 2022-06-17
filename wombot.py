@@ -20,6 +20,7 @@ from urllib.parse import urlparse
 import bs4
 import struct
 
+import chuntfm
 import radioactivity
 import schedule
 import search_google
@@ -562,8 +563,21 @@ class MyBot(chatango.Client):
 
             elif cmd.startswith('np'):
                 await message.room.delete_message(message)
+
+                # check jukebox
                 data = await mpd.playback.get_current_track()
                 print(data)
+
+                msg = ""
+                # check livestream
+                try:
+                    if (await chuntfm.chuntfm_live()):
+                        msg += "chttps://fm.chunt.org/stream is live, get in!\n"
+                    else:
+                        msg += "chuntfm stream does not appear to be live rn\n"
+                except:
+                    msg += "could not asses whether chuntfm is live rn ¯\_(ツ)_/¯\n"
+
                 if data is not None:
                     if '__model__' in data:
                         if data['uri'].startswith('mixcloud'):
@@ -572,9 +586,12 @@ class MyBot(chatango.Client):
 
                         elif data['uri'].startswith('soundcloud'):
                             url = data['comment']
-                        await message.channel.send("https://fm.chunt.org/stream2 jukebox now playing: " + url)
+                        msg += "https://fm.chunt.org/stream2 jukebox now playing: " + url
                 else:
-                    await message.channel.send("jukebox is not playing anything right now")
+                    msg += "jukebox is not playing anything right now"
+
+                await message.channel.send(msg)
+
             elif cmd.startswith('jukebox'):
                 await message.room.delete_message(message)
                 await message.channel.send("https://fm.chunt.org/stream2 jukebox commands: !add url !skip !np \r accepts links from mixcloud,soundcloud,nts")
