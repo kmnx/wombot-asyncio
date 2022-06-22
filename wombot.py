@@ -198,7 +198,7 @@ async def post_gif_of_the_hour(param):
 
 async def schedule_gif_of_the_hour():
     #cron_min = aiocron.crontab('*/1 * * * *', func=post_gif_of_the_hour, args=("At every minute",), start=True)
-    cron_hour = aiocron.crontab('0 */1 * * *', func=post_gif_of_the_hour, args=("At minute 0 past every hour.",), start=True)
+    cron_jub = aiocron.crontab('*/1 */1 * * *', func=post_gif_of_the_hour, args=("At minute 0 past every hour.",), start=True)
     cron_hour = aiocron.crontab('0 */1 * * *', func=chubilee_announce, args=("At minute 0 past every hour.",), start=True)
 
     while True:
