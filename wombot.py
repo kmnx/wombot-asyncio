@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 import aiocron
 import random
 import typing
+from urllib.parse import urlparse
 from os import environ
 import os.path
 from pathlib import Path
@@ -108,6 +109,44 @@ else:
 
 print("init variables done")
 
+
+def get_chubilee_np():
+    chubilee = {"2022-06-23-00":"welcome st0nerz w kiki and call ins",
+        "2022-06-23-01":"sorting w/ tiger2 not live from prague",
+        "2022-06-23-02":"Trombones w/ Andehhhh",
+        "2022-06-23-03":"Jaanipäev w/meh",
+        "2022-06-23-04":"Nonstop Fit - Trous first appearance",
+        "2022-06-23-05":"faleme loop w/ cinnaron",
+        "2022-06-23-06":"chunting with mavros",
+        "2022-06-23-07":"Ok, I am Awake w/okiamevans",
+        "2022-06-23-08":"Oscar Maldonados morning shift",
+        "2022-06-23-09":"Early Dealer W/ Rival Dealer",
+        "2022-06-23-10":"Early Dealer W/ Rival Dealer",
+        "2022-06-23-11":"Yung Chunny Munny w Chunny Sunny ft. Peanuts MC",
+        "2022-06-23-12":"bubbasee on the high seas",
+        "2022-06-23-14":"DJ Dale - Jap Hip-Hop Special",
+        "2022-06-23-15":"Relaxed Fit w large trou",
+        "2022-06-23-16":"simple features w/ dj pauly c",
+        "2022-06-23-17":"Turbobabe's Turbohour w/ Ginny",
+        "2022-06-23-18":"HUGE DONKS w/ pixel",
+        "2022-06-23-19":"Woi Workout with oscmal",
+        "2022-06-23-20":"sort ur life out NOW w kiki",
+        "2022-06-23-21":"NRG with P-Air",
+        "2022-06-23-22":"Digital Rimming w/WoiKev",
+        "2022-06-23-23":"Bowel Cleansers w/ number2",
+        "2022-06-24-00":"🍍youanas sonic ananas🍍",
+        "2022-06-24-01":"big al's wee drums",
+        "2022-06-24-02":"GO AFTER",
+        "2022-06-24-03":"LATE????????? PARTY"}
+    now = datetime.now()
+    key = str(now.strftime("%Y-%m-%d-%H"))
+    print(key)
+    if key in chubilee:
+        np = chubilee[key]
+        return np
+    else:
+        return None
+
 async def get_now(stream_url, session):
     headers={"Icy-MetaData": "1"}
     async with session.get(stream_url, headers=headers) as resp:
@@ -132,6 +171,17 @@ async def get_track():
     print('get_track result: ',result)
     return result
 
+async def chubilee_announce():
+    bots = []
+    mainroom = environ["wombotmainroom"]
+    testroom = environ["wombottestroom"]
+    bots.append(bot.get_room(mainroom))
+    bots.append(bot.get_room(testroom))
+    np = get_chubilee_np()
+    
+    for roombot in bots:
+        if np is not None:
+            await roombot.send_message('now live on https://fm.chunt.org/stream: ' + np + " ")
 
 async def post_gif_of_the_hour(param):
     bots = []
@@ -149,6 +199,7 @@ async def post_gif_of_the_hour(param):
 async def schedule_gif_of_the_hour():
     #cron_min = aiocron.crontab('*/1 * * * *', func=post_gif_of_the_hour, args=("At every minute",), start=True)
     cron_hour = aiocron.crontab('0 */1 * * *', func=post_gif_of_the_hour, args=("At minute 0 past every hour.",), start=True)
+    cron_hour = aiocron.crontab('0 */1 * * *', func=chubilee_announce, args=("At minute 0 past every hour.",), start=True)
 
     while True:
         await asyncio.sleep(5)
@@ -350,10 +401,15 @@ async def bandcamp_search(artist,title):
     if res is not None:
         bc_link = res[0]["link"]
         print(bc_link)
-        if ("track" or "album") in bc_link:
-            bandcamp_result_msg = " | maybe it's: " + bc_link  
+        filters = ['track','album']
+        parsed = urlparse(bc_link)
+        splitpath = parsed.path.split('/')
+        bc_pagetype = splitpath[1]
+        if any(word in bc_pagetype for word in filters):
+            bandcamp_result_msg = " | maybe it's: " + bc_link 
         else:
-            bandcamp_result_msg = " | no bandcamp found. " 
+            bandcamp_result_msg = " | no bandcamp found. "
+        
     else:
         bandcamp_result_msg = " | no bandcamp found. "
 
@@ -516,18 +572,20 @@ class MyBot(chatango.Client):
                         metadata = r.read(metadata_length).rstrip(b'\0')
                         print(metadata)
                 '''
-                trackinfo = await get_track()
-                print('idchunt get_track result', trackinfo)
-                if trackinfo != "Unknown":
-                    await message.channel.send("ID chunt1 from stream: " + trackinfo)
+                #trackinfo = await get_track()
+                #print('idchunt get_track result', trackinfo)
+                #if trackinfo != "Unknown":
+                    #await message.channel.send("ID chunt1 from stream: " + trackinfo)
+                
                 asyncio.ensure_future(shazam_station(message,'chunt1'))
                 asyncio.ensure_future(shazam_station(message,'chunt2'))
             elif cmd in ["idchunt1"]:
                 await message.room.delete_message(message)
-                trackinfo = await get_track()
-                print('idchunt get_track result', trackinfo)
-                if trackinfo != "Unknown":
-                    await message.channel.send("ID chunt1 from stream: " + trackinfo)
+                #trackinfo = await get_track()
+                #print('idchunt get_track result', trackinfo)
+                #if trackinfo != "Unknown":
+                    #await message.channel.send("ID chunt1 from stream: " + trackinfo)
+                
                 asyncio.ensure_future(shazam_station(message,'chunt1'))
             elif cmd in ["idchunt2","idjukebox"]:
                 await message.room.delete_message(message)
@@ -567,7 +625,13 @@ class MyBot(chatango.Client):
             # jukebox controls
 
             elif cmd.startswith('np'):
+                
+
                 await message.room.delete_message(message)
+                np = get_chubilee_np()
+                if np is not None:
+                    await message.channel.send("Now live on https://fm.chunt.org/stream: " + np)
+                
                 data = await mpd.playback.get_current_track()
                 print(data)
                 if data is not None:
@@ -578,7 +642,7 @@ class MyBot(chatango.Client):
 
                         elif data['uri'].startswith('soundcloud'):
                             url = data['comment']
-                        await message.channel.send("https://fm.chunt.org/stream2 jukebox now playing: " + url)
+                        await message.channel.send(" https://fm.chunt.org/stream2 jukebox now playing: " + url)
                 else:
                     await message.channel.send("jukebox is not playing anything right now")
             elif cmd.startswith('jukebox'):
