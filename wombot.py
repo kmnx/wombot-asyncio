@@ -944,9 +944,13 @@ class MyBot(chatango.Client):
 
             elif cmd == "chuntfm":
                 await message.room.delete_message(message)
-                await message.channel.send(
-                    "live: https://fm.chunt.org/stream jukebox: https://fm.chunt.org/stream2"
-                    )
+                np = get_chubilee_np()
+                if np is not None:
+                    await message.channel.send("live on https://fm.chunt.org/stream: "+ np)
+                else:
+                    await message.channel.send(
+                        "live: https://fm.chunt.org/stream jukebox: https://fm.chunt.org/stream2"
+                        )
                     
 
             elif cmd == "fortune":
