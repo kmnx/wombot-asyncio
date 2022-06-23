@@ -182,7 +182,7 @@ async def chubilee_announce():
     
     for roombot in bots:
         if np is not None:
-            await roombot.send_message('now live on https://fm.chunt.org/stream: ' + np + " ")
+            await roombot.send_message('now live on https://fm.chunt.org/stream : ' + np + " ")
 
 async def post_gif_of_the_hour(param):
     bots = []
@@ -631,7 +631,7 @@ class MyBot(chatango.Client):
                 await message.room.delete_message(message)
                 np = get_chubilee_np()
                 if np is not None:
-                    await message.channel.send("Now live on https://fm.chunt.org/stream: " + np)
+                    await message.channel.send("Now live on https://fm.chunt.org/stream : " + np)
                 
                 data = await mpd.playback.get_current_track()
                 print(data)
@@ -947,7 +947,7 @@ class MyBot(chatango.Client):
                 await message.room.delete_message(message)
                 np = get_chubilee_np()
                 if np is not None:
-                    await message.channel.send("live on https://fm.chunt.org/stream: "+ np)
+                    await message.channel.send("live on https://fm.chunt.org/stream : "+ np)
                 else:
                     await message.channel.send(
                         "live: https://fm.chunt.org/stream jukebox: https://fm.chunt.org/stream2"
