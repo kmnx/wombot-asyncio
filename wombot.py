@@ -124,6 +124,7 @@ def get_chubilee_np():
         "2022-06-23-10":"Early Dealer W/ Rival Dealer",
         "2022-06-23-11":"Yung Chunny Munny w Chunny Sunny ft. Peanuts MC",
         "2022-06-23-12":"bubbasee on the high seas",
+        "2022-06-23-13":"Mamma mia it's a balearia ft sayanne",
         "2022-06-23-14":"DJ Dale - Jap Hip-Hop Special",
         "2022-06-23-15":"Relaxed Fit w large trou",
         "2022-06-23-16":"simple features w/ dj pauly c",
