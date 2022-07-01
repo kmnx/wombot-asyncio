@@ -267,7 +267,7 @@ def convert_utc_to_london(utctime):
 
 async def raid(message,station_query):
 
-    ra_stations = radioactivity.get_station_list()
+    ra_stations = await radioactivity.get_station_list()
 
     ra_station_names = list(ra_stations.keys())
 
