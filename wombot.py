@@ -88,7 +88,7 @@ shoutstart = [
     "out to the absolute legend ",
     "much love out to ",
     "out to the amazing ",
-    "out to the unimitable",
+    "out to the inimitable",
 ]
 
 shoutend = ["😘", "❤️", "💙", "*h*", "<3"]
@@ -172,18 +172,6 @@ async def get_track():
     print('get_track result: ',result)
     return result
 
-async def chubilee_announce():
-    bots = []
-    mainroom = environ["wombotmainroom"]
-    testroom = environ["wombottestroom"]
-    bots.append(bot.get_room(mainroom))
-    bots.append(bot.get_room(testroom))
-    np = get_chubilee_np()
-    
-    for roombot in bots:
-        if np is not None:
-            await roombot.send_message('now live on https://fm.chunt.org/stream : ' + np + " ")
-
 async def post_gif_of_the_hour(param):
     bots = []
     mainroom = environ["wombotmainroom"]
@@ -200,7 +188,6 @@ async def post_gif_of_the_hour(param):
 async def schedule_gif_of_the_hour():
     #cron_min = aiocron.crontab('*/1 * * * *', func=post_gif_of_the_hour, args=("At every minute",), start=True)
     cron_jub = aiocron.crontab('0 */1 * * *', func=post_gif_of_the_hour, args=("At minute 0 past every hour.",), start=True)
-    cron_hour = aiocron.crontab('0 */1 * * *', func=chubilee_announce, args=("At minute 0 past every hour.",), start=True)
 
     while True:
         await asyncio.sleep(5)
