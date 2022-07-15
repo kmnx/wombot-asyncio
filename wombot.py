@@ -923,7 +923,7 @@ class MyBot(chatango.Client):
                     inurl = splitargs[0]
                     intags = splitargs[1:]
                     if not inurl.startswith("http"):
-                        await message.channel.send("!tag url-to-gif tag1 tag2 tag3")
+                        await message.channel.send("to tag a gif: !tag url-to-gif tag1 tag2 tag3")
                     else:
                         for intag in intags:
                             intag = intag.strip()
