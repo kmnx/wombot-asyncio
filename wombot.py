@@ -205,7 +205,7 @@ async def post_chuntfm_status():
     if not hasattr(bot, "chuntfm"):
         bot.chuntfm = dict()
 
-    cfm_status = chuntfm.get_chuntfm_status()
+    cfm_status = await chuntfm.get_chuntfm_status()
 
     if cfm_status is not None:
         bot.chuntfm.update(cfm_status)
@@ -229,7 +229,7 @@ async def post_chuntfm_status():
 
 
 async def schedule_chuntfm_livecheck():
-    cron_jub = aiocron.crontab('1-59 * * * *', func=post_chuntfm_status(), start=True)
+    livecheck = aiocron.crontab('*/1 * * * *', func=post_chuntfm_status, start=True)
 
     while True:
         await asyncio.sleep(5)
@@ -976,24 +976,24 @@ class MyBot(chatango.Client):
 
             elif cmd == "chuntfm":
                 await message.room.delete_message(message)
-                np = get_chubilee_np()
-                if np is not None:
-                    await message.channel.send("live on https://fm.chunt.org/stream : "+ np)
-                else:
+                #np = get_chubilee_np()
+                #if np is not None:
+                    #await message.channel.send("live on https://fm.chunt.org/stream : "+ np)
+                
 
-                    # check cfm status
-                    try:
-                        cfm_status = bot.chuntfm.get('status')
-                    except:
-                        cfm_status = None
+                # check cfm status
+                try:
+                    cfm_status = bot.chuntfm.get('status')
+                except:
+                    cfm_status = None
 
-                    msg_status = ''
-                    if cfm_status is not None:
-                        msg_status = '(' + cfm_status + ')'
+                msg_status = ''
+                if cfm_status is not None:
+                    msg_status = '(' + cfm_status + ')'
 
-                    await message.channel.send(
-                        "live: https://fm.chunt.org/stream " + msg_status + " jukebox: https://fm.chunt.org/stream2"
-                        )
+                await message.channel.send(
+                    "live: https://fm.chunt.org/stream " + msg_status + " jukebox: https://fm.chunt.org/stream2"
+                    )
                     
 
             elif cmd == "fortune":
