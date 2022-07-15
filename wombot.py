@@ -222,7 +222,8 @@ async def post_chuntfm_status():
             return None
 
     for roombot in bots:
-        await roombot.send_message(msg)
+        #await roombot.send_message(msg)
+        pass
 
     bot.chuntfm['last_posted_status'] = bot.chuntfm.get('status')
     bot.chuntfm['last_posted_time'] = time.time()
