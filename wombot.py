@@ -213,16 +213,21 @@ async def post_chuntfm_status():
         return None
 
     # if theres a new status
-    if bot.chuntfm.get('last_posted_status') is None or bot.chuntfm.get('status') != bot.chuntfm.get('last_posted_status'):
+    if (bot.chuntfm.get('last_posted_status') is None) or (bot.chuntfm.get('status') != bot.chuntfm.get('last_posted_status')):
         msg = "ChuntFM status: " + bot.chuntfm.get('status') + '!'
+        print('the msg is:',msg)
     elif bot.chuntfm.get('status') == 'online':
         msg = "ChuntFM is online!"
         # if the last online status post was less than 15 mins agp, dont post again
-        if time.time() - bot.chuntfm.get('last_posted_time') < 15/60:
+        print(bot.chuntfm.get('last_posted_time'))
+        print(time.time() - bot.chuntfm.get('last_posted_time'))
+        print(time.time() - bot.chuntfm.get('last_posted_time') < 15*60)
+        if time.time() - bot.chuntfm.get('last_posted_time') < 15*60:
             return None
 
     for roombot in bots:
-        #await roombot.send_message(msg)
+        await roombot.send_message(msg)
+        #print('sending status message to room')
         pass
 
     bot.chuntfm['last_posted_status'] = bot.chuntfm.get('status')
