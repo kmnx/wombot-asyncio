@@ -36,6 +36,7 @@ import data_txt_fortunes as fortunes
 import aiosqlite
 
 import schedule
+import chuntfm
 
 import mysecrets
 shazam_api_key = mysecrets.shazam_api_key
@@ -185,9 +186,50 @@ async def post_gif_of_the_hour(param):
     for roombot in bots:
         await roombot.send_message('the gif of the hour is: ' + goth)
 
+
 async def schedule_gif_of_the_hour():
     #cron_min = aiocron.crontab('*/1 * * * *', func=post_gif_of_the_hour, args=("At every minute",), start=True)
     cron_jub = aiocron.crontab('0 */1 * * *', func=post_gif_of_the_hour, args=("At minute 0 past every hour.",), start=True)
+
+    while True:
+        await asyncio.sleep(5)
+
+async def post_chuntfm_status():
+
+    bots = []
+    mainroom = environ["wombotmainroom"]
+    testroom = environ["wombottestroom"]
+    bots.append(bot.get_room(mainroom))
+    bots.append(bot.get_room(testroom))
+
+    if not hasattr(bot, "chuntfm"):
+        bot.chuntfm = dict()
+
+    cfm_status = chuntfm.get_chuntfm_status()
+
+    if cfm_status is not None:
+        bot.chuntfm.update(cfm_status)
+    else:
+        return None
+
+    # if theres a new status
+    if bot.chuntfm.get('last_posted_status') is None or bot.chuntfm.get('status') != bot.chuntfm.get('last_posted_status'):
+        msg = "ChuntFM status: " + bot.chuntfm.get('status') + '!'
+    elif bot.chuntfm.get('status') == 'online':
+        msg = "ChuntFM is online!"
+        # if the last online status post was less than 15 mins agp, dont post again
+        if time.time() - bot.chuntfm.get('last_posted_time') < 15/60:
+            return None
+
+    for roombot in bots:
+        await roombot.send_message(msg)
+
+    bot.chuntfm['last_posted_status'] = bot.chuntfm.get('status')
+    bot.chuntfm['last_posted_time'] = time.time()
+
+
+async def schedule_chuntfm_livecheck():
+    cron_jub = aiocron.crontab('1-59 * * * *', func=post_chuntfm_status(), start=True)
 
     while True:
         await asyncio.sleep(5)
@@ -930,14 +972,27 @@ class MyBot(chatango.Client):
 
             # text spam
 
+            # chuntfm command
+
             elif cmd == "chuntfm":
                 await message.room.delete_message(message)
                 np = get_chubilee_np()
                 if np is not None:
                     await message.channel.send("live on https://fm.chunt.org/stream : "+ np)
                 else:
+
+                    # check cfm status
+                    try:
+                        cfm_status = bot.chuntfm.get('status')
+                    except:
+                        cfm_status = None
+
+                    msg_status = ''
+                    if cfm_status is not None:
+                        msg_status = '(' + cfm_status + ')'
+
                     await message.channel.send(
-                        "live: https://fm.chunt.org/stream jukebox: https://fm.chunt.org/stream2"
+                        "live: https://fm.chunt.org/stream " + msg_status + " jukebox: https://fm.chunt.org/stream2"
                         )
                     
 
@@ -1064,7 +1119,9 @@ if __name__ == "__main__":
     mpd = MopidyClient(host='139.177.181.183')
     mpdtask = asyncio.gather(mpd_context_manager(mpd))
     giftask = schedule_gif_of_the_hour()
-    tasks = asyncio.gather(task,mpdtask,giftask)
+    cfm_task = schedule_chuntfm_livecheck()
+
+    tasks = asyncio.gather(task,mpdtask,giftask,cfm_task)
     try:
         loop.run_until_complete(tasks)
         loop.run_forever()
