@@ -1110,6 +1110,23 @@ class MyBot(chatango.Client):
                 else:
                     print("no result for gif search")
 
+        else:
+            # very crude way to catch posted gifs and add them to allgif_set and allgif_file
+            splitmsg = message.body.split(" ")
+            for word in splitmsg:
+                if (word.endswith(".gif") or word.endswith(".gifv")) and (
+                    len(word) < 75
+                ):
+                    print("might be gif")
+                    if word in allgif_set:
+                        pass
+
+                    else:
+                        print("not in set")
+                        allgif_set.add(word)
+                        with open(allgif_file, "a") as file:
+                            file.write(word + "\n")
+
 async def get_db_cur():
     conn = await aiosqlite.connect("/db/trackids.db")
     #conn.row_factory = lambda cursor, row: row[0]
@@ -1133,6 +1150,15 @@ if __name__ == "__main__":
     cfm_task = schedule_chuntfm_livecheck()
 
     tasks = asyncio.gather(task,mpdtask,giftask,cfm_task)
+
+    allgif_file = os.path.join(basepath, "allgif.txt")
+    if not os.path.exists(allgif_file):
+        with open(allgif_file, "a") as file:
+            pass
+        allgif_set = set()
+    else:
+        with open(allgif_file) as file:
+            allgif_set = set(line.strip() for line in file)
     try:
         loop.run_until_complete(tasks)
         loop.run_forever()
