@@ -683,6 +683,11 @@ class MyBot(chatango.Client):
 
                         elif data['uri'].startswith('soundcloud'):
                             url = data['comment']
+                        elif data['uri'].startswith('bandcamp'):
+                            comment = data['comment']
+                            url = comment.replace('URL: ','')
+                        else:
+                            url = ''
                         await message.channel.send(" https://fm.chunt.org/stream2 jukebox now playing: " + url)
                 else:
                     await message.channel.send("jukebox is not playing anything right now")
@@ -1119,6 +1124,7 @@ class MyBot(chatango.Client):
                 ):
                     print("might be gif")
                     if word in allgif_set:
+                        print("already in allgif_set")
                         pass
 
                     else:
