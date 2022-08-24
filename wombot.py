@@ -367,6 +367,10 @@ async def raid(message,station_query):
             tz = pytz.timezone('Europe/London')
             london_now = datetime.now(tz)
             hoursmins = london_now.strftime("%H:%M")
+
+            stream_sep = "" if stream_name == "" else " "
+
+
             try:
                 result = await shazamapi._get(stream_url)
                 if "track" in result:
@@ -374,7 +378,7 @@ async def raid(message,station_query):
                     title = result["track"]["title"]
                     bandcamp_result_msg = await bandcamp_search(artist,title)
                     await message.channel.send(
-                        "ID " + station_name + " (from shazam): "
+                        "ID " + station_name + stream_sep + stream_name + " (from shazam): "
                         + hoursmins
                         + " - "
                         + artist
@@ -383,7 +387,7 @@ async def raid(message,station_query):
                         + bandcamp_result_msg)
                 else:
                     await message.channel.send(
-                        "ID " + station_name + ": "
+                        "ID " + station_name + stream_sep + stream_name + ": "
                         + hoursmins
                         + " - "
                         + "shazam found nothing")
