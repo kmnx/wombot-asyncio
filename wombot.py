@@ -596,30 +596,31 @@ class MyBot(chatango.Client):
                     await message.channel.send("No ID on doyou website, trying shazam")
                     asyncio.ensure_future(shazam_station(message,'doyou'))
 
-            elif cmd in ["idchunt"]:
-                await message.room.delete_message(message)
-                url = 'https://fm.chunt.org/stream'
-                headers={'Icy-MetaData': "1"}
-                '''
-                async with ClientSession() as s:
-                    r = await s.get(url, headers=headers)
-                    print(r.headers)
-                    metaint = int(r.headers['icy-metaint'])
-                    print(metaint)
-                    print(r)
-                    for _ in range(10): # # title may be empty initially, try several times
-                        r.read(metaint)  # skip to metadata
-                        metadata_length = struct.unpack('B', r.read(1))[0] * 16  # length byte
-                        metadata = r.read(metadata_length).rstrip(b'\0')
-                        print(metadata)
-                '''
-                #trackinfo = await get_track()
-                #print('idchunt get_track result', trackinfo)
-                #if trackinfo != "Unknown":
-                    #await message.channel.send("ID chunt1 from stream: " + trackinfo)
-                
-                asyncio.ensure_future(shazam_station(message,'chunt1'))
-                asyncio.ensure_future(shazam_station(message,'chunt2'))
+            #
+            # elif cmd in ["idchunt"]:
+            #     await message.room.delete_message(message)
+            #     url = 'https://fm.chunt.org/stream'
+            #     headers={'Icy-MetaData': "1"}
+            #     '''
+            #     async with ClientSession() as s:
+            #         r = await s.get(url, headers=headers)
+            #         print(r.headers)
+            #         metaint = int(r.headers['icy-metaint'])
+            #         print(metaint)
+            #         print(r)
+            #         for _ in range(10): # # title may be empty initially, try several times
+            #             r.read(metaint)  # skip to metadata
+            #             metadata_length = struct.unpack('B', r.read(1))[0] * 16  # length byte
+            #             metadata = r.read(metadata_length).rstrip(b'\0')
+            #             print(metadata)
+            #     '''
+            #     #trackinfo = await get_track()
+            #     #print('idchunt get_track result', trackinfo)
+            #     #if trackinfo != "Unknown":
+            #         #await message.channel.send("ID chunt1 from stream: " + trackinfo)
+            #
+            #     asyncio.ensure_future(shazam_station(message,'chunt1'))
+            #     asyncio.ensure_future(shazam_station(message,'chunt2'))
             elif cmd in ["idchunt1"]:
                 await message.room.delete_message(message)
                 #trackinfo = await get_track()
