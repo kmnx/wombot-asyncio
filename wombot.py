@@ -984,6 +984,9 @@ class MyBot(chatango.Client):
                     if tagstring != '':
                         #await message.channel.send("'" + arg + "'" + "  has these tags:" + tagstring)
                         await message.room.client.pm.send_message(message.user,"'" + arg + "'" + " tags these urls: " + tagstring )
+                else:
+                    await message.room.client.pm.send_message(message.user,"use like '!info woi' to get info about tags and urls")
+
 
                     
                     
