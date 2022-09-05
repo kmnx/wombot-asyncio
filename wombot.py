@@ -967,7 +967,7 @@ class MyBot(chatango.Client):
                     for url in urllist:
                         print(url)
                         if urlstring == '':
-                            urlstring = "'" + url "'"
+                            urlstring = "'" + url + "'"
                         else:
                             urlstring = urlstring + ', ' + "'" + url +"'"
                     for tag in taglist:
