@@ -120,7 +120,7 @@ class Sqlite3Class():
             await self.cursor.execute("DELETE FROM tag_table WHERE tag_name = ?", (intag,))
             await self.conn.commit()
 
-    async def inspect(self, in_string):
+    async def info(self, in_string):
         # in_string could be either url or tag name
         # returns corresponding tag names or urls
         resulting_tags = []
@@ -138,15 +138,15 @@ class Sqlite3Class():
         )
         result = await self.cursor.fetchall()
         resulting_tags.append(result)
-
+        print(resulting_tags,resulting_urls)
         return resulting_urls,resulting_tags
 
 
 
 
-async def run(loop):
+async def run(loop,query_in):
     db = await create_conn()
-    r = await db.query_tag('woi')
+    r = await db.info(query_in)
     print(r)
     '''
     async with conn.cursor() as cur:
@@ -161,11 +161,11 @@ if __name__ == "__main__":
     loop = asyncio.get_event_loop()
     
     query_in = input("enter search term: ")
-    url_in = input("enter url: ")
+    #url_in = input("enter url: ")
     
     #task = asyncio.gather(run())
     try:
-        loop.run_until_complete(run(loop))
+        loop.run_until_complete(run(loop,query_in))
         #loop.run_forever()
     except KeyboardInterrupt:
         print("[KeyboardInterrupt] Killed bot.")

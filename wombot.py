@@ -953,11 +953,37 @@ class MyBot(chatango.Client):
                         intag = splitargs[1]
                         await self.db.untag(inurl, intag)
 
-            elif cmd == "inspect":
+            elif cmd == "info":
                 await message.room.delete_message(message)
                 if args:
                     splitargs = args.split(" ")
                     arg = splitargs[0]
+                    urls,tags = await self.db.info(arg)
+                    print(urls,tags)
+                    urlstring = ''
+                    tagstring = ''
+                    urllist = urls[0]
+                    taglist = tags[0]
+                    for url in urllist:
+                        print(url)
+                        if urlstring == '':
+                            urlstring = url
+                        else:
+                            urlstring = urlstring + ', ' + "'" + url +"'"
+                    for tag in taglist:
+                        print(tag)
+                        if tagstring == '':
+                            tagstring = tag
+                        else:
+                            tagstring = tagstring + ', ' + tag
+                    if urlstring != '':
+                        #await message.channel.send("'" + arg + "'" + " tags these urls: " + urlstring )
+                        await message.room.client.pm.send_message(message.user,"'" + arg + "'" + " tags these urls: " + urlstring )
+                    if tagstring != '':
+                        #await message.channel.send("'" + arg + "'" + "  has these tags:" + tagstring)
+                        await message.room.client.pm.send_message(message.user,"'" + arg + "'" + " tags these urls: " + tagstring )
+
+                    
                     
 
 
