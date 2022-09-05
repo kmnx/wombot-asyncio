@@ -1045,6 +1045,8 @@ class MyBot(chatango.Client):
                                 "https://ust.chatango.com/",
                                 "https://ust.chatango.com/ ",
                             )
+                        else:
+                            nurl = url
                         if urlstring == "":
                             urlstring = "'" + nurl + "'"
                         else:
