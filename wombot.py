@@ -508,6 +508,7 @@ class MyBot(chatango.Client):
         print("Bot initialized")
         self.db = await aiosqliteclass.create_conn()
         self.goth = random.choice(await bot.db.fetch_gif("bbb"))
+        print("seriously")
 
     async def on_start(self):  # room join queue
         for room in config.rooms:
@@ -660,7 +661,7 @@ class MyBot(chatango.Client):
             #
             #     asyncio.ensure_future(shazam_station(message,'chunt1'))
             #     asyncio.ensure_future(shazam_station(message,'chunt2'))
-            elif cmd in ["idchunt1", "idchu2"]:
+            elif cmd in ["idchunt1", "idchu1"]:
                 await message.room.delete_message(message)
                 # trackinfo = await get_track()
                 # print('idchunt get_track result', trackinfo)
@@ -1270,7 +1271,7 @@ if __name__ == "__main__":
     giftask = schedule_gif_of_the_hour()
     cfm_task = schedule_chuntfm_livecheck()
 
-    tasks = asyncio.gather(task, mpdtask, giftask, cfm_task)
+    tasks = asyncio.gather(task, giftask, mpdtask, cfm_task)
 
     allgif_file = os.path.join(basepath, "allgif.txt")
     if not os.path.exists(allgif_file):
