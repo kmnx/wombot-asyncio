@@ -966,10 +966,12 @@ class MyBot(chatango.Client):
                     taglist = tags[0]
                     for url in urllist:
                         print(url)
+                        if url.startswith('https://ust.chatango.com/'):
+                            nurl = url.replace('https://ust.chatango.com/', 'https://ust.chatango.com/ ')
                         if urlstring == '':
-                            urlstring = "'" + url + "'"
+                            urlstring = "'" + nurl + "'"
                         else:
-                            urlstring = urlstring + ', ' + "'" + url +"'"
+                            urlstring = urlstring + ', ' + "'" + nurl +"'"
                     for tag in taglist:
                         print(tag)
                         if tagstring == '':
