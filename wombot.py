@@ -625,7 +625,7 @@ class MyBot(chatango.Client):
             #
             #     asyncio.ensure_future(shazam_station(message,'chunt1'))
             #     asyncio.ensure_future(shazam_station(message,'chunt2'))
-            elif cmd in ["idchunt1"]:
+            elif cmd in ["idchunt1","idchu2"]:
                 await message.room.delete_message(message)
                 #trackinfo = await get_track()
                 #print('idchunt get_track result', trackinfo)
@@ -633,7 +633,7 @@ class MyBot(chatango.Client):
                     #await message.channel.send("ID chunt1 from stream: " + trackinfo)
                 
                 asyncio.ensure_future(shazam_station(message,'chunt1'))
-            elif cmd in ["idchunt2","idjukebox"]:
+            elif cmd in ["idchunt2","idjukebox","idchu2"]:
                 await message.room.delete_message(message)
                 asyncio.ensure_future(shazam_station(message,'chunt2'))
                 
