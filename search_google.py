@@ -22,7 +22,7 @@ async def search(query):
         async with session.get(gcse_url) as resp:
             data = await resp.json()
             print(data)
-        
+
     if "items" in data.keys():
         items = data["items"]
     else:
@@ -33,6 +33,7 @@ async def search(query):
 
 if __name__ == "__main__":
     import asyncio
+
     loop = asyncio.get_event_loop()
     # check what happens when there is no result on bandcamp
     # search("öfdsouhpvuhpoiuhsdfpouvh")

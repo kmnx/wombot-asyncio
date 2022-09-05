@@ -13,7 +13,9 @@ from .message import Fonts
 
 
 class Client:
-    def __init__(self, aiohttp_session: typing.Optional[aiohttp.ClientSession] = None, debug=0):
+    def __init__(
+        self, aiohttp_session: typing.Optional[aiohttp.ClientSession] = None, debug=0
+    ):
         if aiohttp_session is None:
             aiohttp_session = aiohttp.ClientSession(trace_configs=[trace()])
 
@@ -21,7 +23,7 @@ class Client:
         self.loop = self.aiohttp_session.loop
         self.pm = None
         self.user = None
-        self.debug = 0 # debug
+        self.debug = 0  # debug
 
         self._running = False
         self.silent = 2
@@ -33,15 +35,19 @@ class Client:
         self._default_password = None
 
     def __dir__(self):
-        return [x for x in
-                set(list(self.__dict__.keys()) + list(dir(type(self)))) if
-                x[0] != '_']
+        return [
+            x
+            for x in set(list(self.__dict__.keys()) + list(dir(type(self))))
+            if x[0] != "_"
+        ]
 
     @property
     def accounts(self):
         if self._using_accounts:
-            return [(x, self._using_accounts[x][0]) for x in range(
-                len(self._using_accounts))]
+            return [
+                (x, self._using_accounts[x][0])
+                for x in range(len(self._using_accounts))
+            ]
         return None
 
     async def join(self, room_name: str, anon=False) -> Room:
@@ -56,13 +62,16 @@ class Client:
             return None
         if room_name in self._rooms:
             roomname, isconnected, canreconnect = AlreadyConnectedError(
-                room_name, self._rooms[room_name]).check()
+                room_name, self._rooms[room_name]
+            ).check()
             if not isconnected and canreconnect:
                 await self.leave(roomname)
                 self.check_rooms(roomname)
         room = Room(self, room_name)
-        _accs = [self._default_user_name if not anon else "",
-                 self._default_password if not anon else ""]
+        _accs = [
+            self._default_user_name if not anon else "",
+            self._default_password if not anon else "",
+        ]
         await room.connect(*_accs)
         await asyncio.sleep(0.2)
 
@@ -88,8 +97,9 @@ class Client:
 
     async def pm_start(self, user=None, passwd=None):
         self.pm = PM(self)
-        await self.pm.sock_connect(user or self._default_user_name,
-            passwd or self._default_password)
+        await self.pm.sock_connect(
+            user or self._default_user_name, passwd or self._default_password
+        )
 
     @property
     def rooms(self):
@@ -111,7 +121,13 @@ class Client:
         self.__rcopy.clear()
         return True
 
-    def default_user(self, user_name: str, password: typing.Optional[str] = None, pm=True, accounts=None):
+    def default_user(
+        self,
+        user_name: str,
+        password: typing.Optional[str] = None,
+        pm=True,
+        accounts=None,
+    ):
         self._using_accounts = accounts  # [[user, pass]]
         self._default_user_name = user_name
         self._default_password = password
@@ -135,7 +151,9 @@ class Client:
     def running(self):
         return self._running
 
-    async def on_event(self, event: str, *args: typing.Any, **kwargs: typing.Dict[str, typing.Any]):
+    async def on_event(
+        self, event: str, *args: typing.Any, **kwargs: typing.Dict[str, typing.Any]
+    ):
         if int(self.debug) == 3:
             print(event, repr(args), repr(kwargs))
 
@@ -180,7 +198,7 @@ class Client:
         print([(x.name, x._connections.closed) for x in self.rooms])
         try:
             for room in self.rooms:
-                if hasattr(room, '_connection') and room._connection.closed == True:
+                if hasattr(room, "_connection") and room._connection.closed == True:
                     if room.name in self._rooms:
                         self.set_timeout(1, self.leave, room.name)
                         self.set_timeout(3, self.join, room.name)

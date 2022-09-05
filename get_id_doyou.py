@@ -12,8 +12,7 @@ async def get():
         r = await s.get("https://doyoutrackid.com/tracks/today")
         html = await r.read()
         soup = bs4.BeautifulSoup(html, features="lxml")
-        
-        
+
         ultag = soup.find("ul")
         firstli = ultag.find("li")
 
@@ -41,7 +40,6 @@ async def get():
         else:
             print("no result")
             return None, None, None
-            
 
 
 if __name__ == "__main__":

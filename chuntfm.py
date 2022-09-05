@@ -3,8 +3,7 @@ import asyncio
 import json
 
 
-
-async def get_chuntfm_status(status_url = "https://chunt.org/chuntfm.json"):
+async def get_chuntfm_status(status_url="https://chunt.org/chuntfm.json"):
 
     # read in json from url
     try:
@@ -19,9 +18,11 @@ async def get_chuntfm_status(status_url = "https://chunt.org/chuntfm.json"):
         print(e)
         return None
 
+
 async def main(loop):
     status = await get_chuntfm_status()
     print(status)
+
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()

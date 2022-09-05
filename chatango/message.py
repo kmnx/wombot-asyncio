@@ -4,7 +4,15 @@ import string
 import time
 import enum
 
-from .utils import gen_uid, get_anon_name, _clean_message, _parseFont, _fontFormat, _videoImagePMFormat, Styles
+from .utils import (
+    gen_uid,
+    get_anon_name,
+    _clean_message,
+    _parseFont,
+    _fontFormat,
+    _videoImagePMFormat,
+    Styles,
+)
 from .user import User
 
 
@@ -25,11 +33,20 @@ class MessageFlags(enum.IntFlag):
     CHANNEL_PINK = 1 << 14
     CHANNEL_MOD = 1 << 15
 
+
 Fonts = {
-    '0': 'arial', '1': 'comic', '2': 'georgia', '3': 'handwriting', '4': 'impact',
-    '5': 'palatino', '6': 'papirus', '7': 'times', '8': 'typewriter'
-    }
-    
+    "0": "arial",
+    "1": "comic",
+    "2": "georgia",
+    "3": "handwriting",
+    "4": "impact",
+    "5": "palatino",
+    "6": "papirus",
+    "7": "times",
+    "8": "typewriter",
+}
+
+
 class Message(object):  # base
     def __init__(self):
         self._user = None
@@ -41,9 +58,11 @@ class Message(object):  # base
         self._raw = str()
 
     def __dir__(self):
-        return [x for x in
-                set(list(self.__dict__.keys()) + list(dir(type(self)))) if
-                x[0] != '_']
+        return [
+            x
+            for x in set(list(self.__dict__.keys()) + list(dir(type(self))))
+            if x[0] != "_"
+        ]
 
     def __repr__(self):
         return "<Message>"
@@ -76,18 +95,21 @@ class Message(object):  # base
     def styles(self):
         return self._styles
 
+
 class PMBase(Message):
     def __init__(self):
         self._msgoff = False
         self._flags = str(0)
-        
+
     @property
     def msgoff(self):
         return self._msgoff
 
 
 class RoomBase(Message):
-    def __init__(self, ):
+    def __init__(
+        self,
+    ):
         self._id = None
         self._puid = int()
         self._ip = str()
@@ -153,7 +175,8 @@ async def _process(room, args):
     if name == "":
         isanon = True
         if not tname:
-            if n in ['None']: n = None
+            if n in ["None"]:
+                n = None
             if not isinstance(n, type(None)):
                 name = get_anon_name(n, puid)
             else:
@@ -168,8 +191,13 @@ async def _process(room, args):
     msg._user = User(name, ip=ip, isanon=isanon)
     msg._user._styles._name_color = name_color
     msg._styles = msg._user._styles
-    msg._styles._font_size, msg._styles._font_color, msg._styles._font_face = _parseFont(f)
-    if msg._styles._font_size == None: msg._styles._font_size=11
+    (
+        msg._styles._font_size,
+        msg._styles._font_color,
+        msg._styles._font_face,
+    ) = _parseFont(f)
+    if msg._styles._font_size == None:
+        msg._styles._font_size = 11
     msg._flags = MessageFlags(int(flags))
     if MessageFlags.BG_ON in msg.flags:
         if MessageFlags.PREMIUM in msg.flags:
@@ -178,7 +206,11 @@ async def _process(room, args):
     msg._channel = channel(msg._room, msg._user)
     ispremium = MessageFlags.PREMIUM in msg._flags
     if msg._user.ispremium != ispremium:
-        evt = msg._user._ispremium != None and ispremium != None and _time > time.time() - 5
+        evt = (
+            msg._user._ispremium != None
+            and ispremium != None
+            and _time > time.time() - 5
+        )
         msg._user._ispremium = ispremium
         if evt:
             await room.client._call_event("premium_change", msg._user, ispremium)
@@ -191,7 +223,7 @@ async def _process_pm(room, args):
         name = args[2]
     user = User(name)
     mtime = float(args[3]) - room._correctiontime
-    rawmsg = ':'.join(args[5:])
+    rawmsg = ":".join(args[5:])
     body, n, f = _clean_message(rawmsg, pm=True)
     name_color = n or None
     font_size, font_color, font_face = _parseFont(f, pm=True)
@@ -209,42 +241,43 @@ async def _process_pm(room, args):
     msg._channel = channel(msg._room, msg._user)
     return msg
 
+
 def message_cut(msg: str, lenth, room, _html: False):
     # TODO ajustar envío de texto con tabulaciones
-    #print('_html is: ',_html)
-    if len(msg) + msg.count(' ') * 5 > lenth:
+    # print('_html is: ',_html)
+    if len(msg) + msg.count(" ") * 5 > lenth:
         if room._BigMessageCut:
             msg = msg[:lenth]
         else:
             # partir el mensaje en pedacitos y formatearlos por separado
-            espacios = msg.count(' ') + msg.count('\t')
+            espacios = msg.count(" ") + msg.count("\t")
             particion = lenth
             conteo = 0
             while espacios * 6 + particion > lenth:
-                particion = len(
-                    msg[:particion - espacios])  # Recorrido máximo 5
-                espacios = msg[:particion].count(' ') + msg[
-                                                        :particion].count(
-                    '\t')
+                particion = len(msg[: particion - espacios])  # Recorrido máximo 5
+                espacios = msg[:particion].count(" ") + msg[:particion].count("\t")
                 conteo += 1
-            return message_cut(msg[:particion], lenth, room,
-                                        _html) + message_cut(
-                msg[particion:], lenth, room,
-                                        _html)
+            return message_cut(msg[:particion], lenth, room, _html) + message_cut(
+                msg[particion:], lenth, room, _html
+            )
     fc = room.user.styles.font_color.lower()
     nc = room.user.styles.name_color
     if not _html:
         msg = html.escape(msg, quote=False)
 
-    msg = msg.replace('\n', '\r').replace('~', '&#126;')
-    for x in set(re.findall('<[biu]>|</[biu]>', msg)):
+    msg = msg.replace("\n", "\r").replace("~", "&#126;")
+    for x in set(re.findall("<[biu]>|</[biu]>", msg)):
         msg = msg.replace(x, x.upper()).replace(x, x.upper())
-    if room.name == '<PM>':
+    if room.name == "<PM>":
         formt = '<n{}/><m v="1"><g x{:0>2.2}s{}="{}">{}</g></m>'
-        fc = '{:X}{:X}{:X}'.format(*tuple(
-            round(int(fc[i:i + 2], 16) / 17) for i in
-            (0, 2, 4))).lower() if len(fc) == 6 else fc[:3].lower()
-        msg = msg.replace('&nbsp;', ' ')  # fix
+        fc = (
+            "{:X}{:X}{:X}".format(
+                *tuple(round(int(fc[i : i + 2], 16) / 17) for i in (0, 2, 4))
+            ).lower()
+            if len(fc) == 6
+            else fc[:3].lower()
+        )
+        msg = msg.replace("&nbsp;", " ")  # fix
         msg = _videoImagePMFormat(msg)
         if not _html:
             msg = _fontFormat(msg)
@@ -253,25 +286,29 @@ def message_cut(msg: str, lenth, room, _html: False):
         if not _html:
             # Reemplazar espacios múltiples
             # TODO mejorar sin alterar enlaces
-            msg = msg.replace('\t', ' %s ' % ('&nbsp;' * 2))
-            msg = msg.replace('   ', ' %s ''' % ('&nbsp;'))
-            msg = msg.replace('&nbsp;  ', '&nbsp;&nbsp; ')
-            msg = msg.replace('&nbsp;  ', '&nbsp;&nbsp; ')
-            msg = msg.replace('  ', ' &#8203; ')
+            msg = msg.replace("\t", " %s " % ("&nbsp;" * 2))
+            msg = msg.replace("   ", " %s " "" % ("&nbsp;"))
+            msg = msg.replace("&nbsp;  ", "&nbsp;&nbsp; ")
+            msg = msg.replace("&nbsp;  ", "&nbsp;&nbsp; ")
+            msg = msg.replace("  ", " &#8203; ")
         formt = '<n{}/><f x{:0>2.2}{}="{}">{}'
         if not _html:
             msg = _fontFormat(msg)
         if room.user.isanon:
             # El color del nombre es el tiempo de conexión y no hay fuente
-            nc = str(room._connectiontime).split('.')[0][-4:]
-            formt = '<n{0}/>{4}'
+            nc = str(room._connectiontime).split(".")[0][-4:]
+            formt = "<n{0}/>{4}"
 
     if type(msg) != list:
         msg = [msg]
-    #print('final msg', msg)
+    # print('final msg', msg)
     return [
-        formt.format(nc, str(room.user.styles.font_size), fc, room.user.styles.font_face,
-                        unimsg) for unimsg in msg]
+        formt.format(
+            nc, str(room.user.styles.font_size), fc, room.user.styles.font_face, unimsg
+        )
+        for unimsg in msg
+    ]
+
 
 def convertPM(msg: str) -> str:
     """
@@ -280,7 +317,7 @@ def convertPM(msg: str) -> str:
     @param msg: Mensaje con fuentes incrustadas
     @return: Mensaje con etiquetas f convertidas a g
     """
-    pattern = re.compile(r'<f x(\d{1,2})?([a-fA-F0-9]{6}|[a-fA-F0-9]{3})=(.*?)>')
+    pattern = re.compile(r"<f x(\d{1,2})?([a-fA-F0-9]{6}|[a-fA-F0-9]{3})=(.*?)>")
 
     def repl(match):
         s, c, f = match.groups()
@@ -289,14 +326,15 @@ def convertPM(msg: str) -> str:
         else:
             s = int(s)
         if len(c) == 6:
-            c = '{:X}{:X}{:X}'.format(
+            c = "{:X}{:X}{:X}".format(
                 round(int(c[0:2], 16) / 17),  # r
                 round(int(c[2:4], 16) / 17),  # g
-                round(int(c[4:6], 16) / 17)  # b
+                round(int(c[4:6], 16) / 17),  # b
             )
         return '</g><g x{:02}s{}="{}">'.format(s, c, f[1:-1])
 
     return pattern.sub(repl, msg)
+
 
 def mentions(body, room):
     t = []
@@ -307,6 +345,7 @@ def mentions(body, room):
                     t.append(participant)
     return t
 
+
 class channel:
     def __init__(self, room, user):
         self.is_pm = True if room.name == "<PM>" else False
@@ -314,14 +353,18 @@ class channel:
         self.room = room
 
     def __dir__(self):
-        return [x for x in
-                set(list(self.__dict__.keys()) + list(dir(type(self)))) if
-                x[0] != '_']
+        return [
+            x
+            for x in set(list(self.__dict__.keys()) + list(dir(type(self))))
+            if x[0] != "_"
+        ]
 
     async def send(self, message, use_html=True):
-        #print(message)
+        # print(message)
         if self.is_pm:
-            await self.room.client.pm.send_message(self.user.name, message, use_html=use_html)
+            await self.room.client.pm.send_message(
+                self.user.name, message, use_html=use_html
+            )
         else:
             await self.room.send_message(message, use_html=use_html)
 

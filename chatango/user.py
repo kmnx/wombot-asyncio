@@ -37,8 +37,12 @@ class ModeratorFlags(enum.IntFlag):
     STAFF_ICON_VISIBLE = 1 << 19
 
 
-AdminFlags = (ModeratorFlags.EDIT_MODS | ModeratorFlags.EDIT_RESTRICTIONS |
-              ModeratorFlags.EDIT_GROUP | ModeratorFlags.EDIT_GP_ANNC)
+AdminFlags = (
+    ModeratorFlags.EDIT_MODS
+    | ModeratorFlags.EDIT_RESTRICTIONS
+    | ModeratorFlags.EDIT_GROUP
+    | ModeratorFlags.EDIT_GP_ANNC
+)
 
 
 class User:  # TODO a new format for users
@@ -48,9 +52,9 @@ class User:  # TODO a new format for users
         key = name.lower()
         if key in cls._users:
             for attr, val in kwargs.items():
-                if attr == 'ip' and not val:
+                if attr == "ip" and not val:
                     continue  # only valid ips
-                setattr(cls._users[key], '_' + attr, val)
+                setattr(cls._users[key], "_" + attr, val)
             return cls._users[key]
         self = super().__new__(cls)
         self._styles = Styles()
@@ -67,40 +71,42 @@ class User:  # TODO a new format for users
         self._client = None
         self._last_time = None
         for attr, val in kwargs.items():
-            setattr(self, '_' + attr, val)
+            setattr(self, "_" + attr, val)
         return self
 
     def get(name):
         return User._users.get(name) or User(name)
 
     def __dir__(self):
-        return [x for x in
-                set(list(self.__dict__.keys()) + list(dir(type(self)))) if
-                x[0] != '_']
+        return [
+            x
+            for x in set(list(self.__dict__.keys()) + list(dir(type(self))))
+            if x[0] != "_"
+        ]
 
     def __repr__(self):
         return "<User: %s>" % self.showname
 
     @property
     def age(self):
-        return self.styles._profile['about']['age']
+        return self.styles._profile["about"]["age"]
 
     @property
     def last_change(self):
-        return self.styles._profile['about']['last_change']
+        return self.styles._profile["about"]["last_change"]
 
     @property
     def gender(self):
-        return self.styles._profile['about']['gender']
+        return self.styles._profile["about"]["gender"]
 
     @property
     def location(self):
-        return self.styles._profile['about']['location']
+        return self.styles._profile["about"]["location"]
 
     @property
     def get_user_dir(self):
         if not self.isanon:
-            return '/%s/%s/' % ('/'.join((self.name * 2)[:2]), self.name)
+            return "/%s/%s/" % ("/".join((self.name * 2)[:2]), self.name)
 
     @property
     def fullpic(self):
@@ -158,10 +164,12 @@ class User:  # TODO a new format for users
 
     @property
     def _links(self):
-        return [["msgstyles", f"{self._ust}{self.get_user_dir}msgstyles.json"],
-                ["msgbg", f"{self._ust}{self.get_user_dir}msgbg.xml"],
-                ["mod1", f"{self._ust}{self.get_user_dir}mod1.xml"],
-                ["mod2", f"{self._ust}{self.get_user_dir}mod2.xml"]]
+        return [
+            ["msgstyles", f"{self._ust}{self.get_user_dir}msgstyles.json"],
+            ["msgbg", f"{self._ust}{self.get_user_dir}msgbg.xml"],
+            ["mod1", f"{self._ust}{self.get_user_dir}mod1.xml"],
+            ["mod2", f"{self._ust}{self.get_user_dir}mod2.xml"],
+        ]
 
     @property
     def isanon(self):
@@ -200,18 +208,19 @@ class User:  # TODO a new format for users
         if self.isanon:
             return
         result = await self.__get_prof()
-        self._styles._bgstyle = result['msgbg']
-        self._styles._profile['about'] = result['mod1']
-        self._styles._profile['full'] = result['mod2']
+        self._styles._bgstyle = result["msgbg"]
+        self._styles._profile["about"] = result["mod1"]
+        self._styles._profile["full"] = result["mod2"]
 
     def __links(self, user_dir):
-        directory = '/%s/%s/' % ('/'.join((user_dir * 2)[:2]), user_dir)
+        directory = "/%s/%s/" % ("/".join((user_dir * 2)[:2]), user_dir)
         url = "http://ust.chatango.com/profileimg"
         urls = [
-            ['msgstyles', f"{url}{directory}msgstyles.json"],
-            ['msgbg', f"{url}{directory}msgbg.xml"],
-            ['mod1', f"{url}{directory}mod1.xml"],
-            ['mod2', f"{url}{directory}mod2.xml"]]
+            ["msgstyles", f"{url}{directory}msgstyles.json"],
+            ["msgbg", f"{url}{directory}msgbg.xml"],
+            ["mod1", f"{url}{directory}mod1.xml"],
+            ["mod2", f"{url}{directory}mod2.xml"],
+        ]
         return urls
 
     async def __get_prof(self):
@@ -222,52 +231,85 @@ class User:  # TODO a new format for users
                     r = None
                     _src = await response.read()
                     try:
-                        src = str(_src, 'utf-8')
+                        src = str(_src, "utf-8")
                     except:
                         if ph[0] == "mod2":
                             src = dict(about=dict(), full=dict())
                     if ph[0] == "msgstyles":
                         jp = json.loads(src)
-                        r = self._styles = Styles(font_face=jp['fontFamily'],
-                                                  name_color=jp['nameColor'],
-                                                  font_color=jp['textColor'],
-                                                  font_size=jp['fontSize'],
-                                                  use_background=jp["usebackground"]
-                                                  )
+                        r = self._styles = Styles(
+                            font_face=jp["fontFamily"],
+                            name_color=jp["nameColor"],
+                            font_color=jp["textColor"],
+                            font_size=jp["fontSize"],
+                            use_background=jp["usebackground"],
+                        )
 
                     elif ph[0] == "msgbg":
-                        position = dict(tl='top left', tr='top right',
-                                        bl='bottom left', br='bottom right')
-                        r = dict([url.replace('"', '').split("=")
-                                  for url in re.findall('(\w+=".*?")', src)])
-                        if "fontFamily" in src: # No bg in account / maybe a bug  #TODO
-                            r = {'align': 'None', 'bgalp': 'None', 'bgc': 'None',
-                             'hasrec': 'None', 'ialp': 'None',
-                             'isvid': 'None', 'tile': 'None', 'useimg': 'None'}
+                        position = dict(
+                            tl="top left",
+                            tr="top right",
+                            bl="bottom left",
+                            br="bottom right",
+                        )
+                        r = dict(
+                            [
+                                url.replace('"', "").split("=")
+                                for url in re.findall('(\w+=".*?")', src)
+                            ]
+                        )
+                        if "fontFamily" in src:  # No bg in account / maybe a bug  #TODO
+                            r = {
+                                "align": "None",
+                                "bgalp": "None",
+                                "bgc": "None",
+                                "hasrec": "None",
+                                "ialp": "None",
+                                "isvid": "None",
+                                "tile": "None",
+                                "useimg": "None",
+                            }
                         else:
-                            r.update({'align': position[r['align']]})
+                            r.update({"align": position[r["align"]]})
 
                     elif ph[0] == "mod1":
-                        wtt = dict(l="location", body="body",
-                                   d="d", b="last_change", s="gender")
-                        prof = dict(age='?')
+                        wtt = dict(
+                            l="location",
+                            body="body",
+                            d="d",
+                            b="last_change",
+                            s="gender",
+                        )
+                        prof = dict(age="?")
                         for tag in list(wtt.keys()):
                             try:
                                 if tag == "l":
                                     if len(src.split("<l")) > 1:
-                                        r = src.split("<l")[1].split(
-                                            ">", 1)[1].split("</l>")[0]
+                                        r = (
+                                            src.split("<l")[1]
+                                            .split(">", 1)[1]
+                                            .split("</l>")[0]
+                                        )
                                 elif tag == "s":
-                                    r = src.split("<s>")[1].split('<')[0] if len(
-                                        src.split("<s>")) > 1 else '?'
+                                    r = (
+                                        src.split("<s>")[1].split("<")[0]
+                                        if len(src.split("<s>")) > 1
+                                        else "?"
+                                    )
                                 elif tag == "b":
-                                    r = src.split('<b>')[1].split('</b>')[0]
+                                    r = src.split("<b>")[1].split("</b>")[0]
                                     if r:
-                                        prof['age'] = abs(
-                                            datetime.datetime.now().year-int(r.split('-')[0]))
+                                        prof["age"] = abs(
+                                            datetime.datetime.now().year
+                                            - int(r.split("-")[0])
+                                        )
                                 else:
                                     _r = re.findall(
-                                        r"((?:<{0}>)+)([^>].*?[^<])((?:</{0}>)+)".format(tag), src)
+                                        r"((?:<{0}>)+)([^>].*?[^<])((?:</{0}>)+)".format(
+                                            tag
+                                        ),
+                                        src,
+                                    )
                                     if isinstance(_r, type([])):
                                         r = _r[0][1] if _r else ""
                             except:
@@ -277,7 +319,7 @@ class User:  # TODO a new format for users
 
                     elif ph[0] == "mod2":
                         if src and "<body>" in src:
-                            r = src.split("<body>")[1].split('</body>')[0]
+                            r = src.split("<body>")[1].split("</body>")[0]
                     result[ph[0]] = r
         return result
 
@@ -306,27 +348,29 @@ class Friend:
         return Friend._FRIENDS.get(name) or Friend(name)
 
     def __dir__(self):
-        return [x for x in
-                set(list(self.__dict__.keys()) + list(dir(type(self)))) if
-                x[0] != '_']
+        return [
+            x
+            for x in set(list(self.__dict__.keys()) + list(dir(type(self))))
+            if x[0] != "_"
+        ]
 
-    @ property
+    @property
     def showname(self):
         return self.user.showname
 
-    @ property
+    @property
     def client(self):
         return self._client
 
-    @ property
+    @property
     def status(self):
         return self._status
 
-    @ property
+    @property
     def last_active(self):
         return self._last_active
 
-    @ property
+    @property
     def idle(self):
         return self._idle
 
@@ -351,15 +395,15 @@ class Friend:
         if self.is_friend() == True:
             return await self.client.unfriend(self.name)
 
-    @ property
+    @property
     def is_online(self):
         return self.status == "online"
 
-    @ property
+    @property
     def is_offline(self):
         return self.status in ["offline", "app"]
 
-    @ property
+    @property
     def is_on_app(self):
         return self.status == "app"
 

@@ -32,20 +32,23 @@ import data_pics_capybara
 import data_pics_otter
 import data_pics_quokka
 import data_txt_fortunes as fortunes
-#import raid
+
+# import raid
 import aiosqlite
 
 import schedule
 import chuntfm
 
 import mysecrets
+
 shazam_api_key = mysecrets.shazam_api_key
 
 from mopidy_asyncio_client import MopidyClient
-logging.basicConfig()
-logging.getLogger('mopidy_asyncio_client').setLevel(logging.DEBUG)
 
-print('start')
+logging.basicConfig()
+logging.getLogger("mopidy_asyncio_client").setLevel(logging.DEBUG)
+
+print("start")
 commandlist = [
     "help",
     "fortune",
@@ -112,34 +115,36 @@ print("init variables done")
 
 
 def get_chubilee_np():
-    chubilee = {"2022-06-23-00":"welcome st0nerz w kiki and call ins",
-        "2022-06-23-01":"sorting w/ tiger2 not live from prague",
-        "2022-06-23-02":"Trombones w/ Andehhhh",
-        "2022-06-23-03":"Jaanipäev w/meh",
-        "2022-06-23-04":"Nonstop Fit - Trous first appearance",
-        "2022-06-23-05":"faleme loop w/ cinnaron",
-        "2022-06-23-06":"chunting with mavros",
-        "2022-06-23-07":"Ok, I am Awake w/okiamevans",
-        "2022-06-23-08":"Oscar Maldonados morning shift",
-        "2022-06-23-09":"Early Dealer W/ Rival Dealer",
-        "2022-06-23-10":"Early Dealer W/ Rival Dealer",
-        "2022-06-23-11":"Yung Chunny Munny w Chunny Sunny ft. Peanuts MC",
-        "2022-06-23-12":"bubbasee on the high seas",
-        "2022-06-23-13":"Mamma mia it's a balearia ft sayanne",
-        "2022-06-23-14":"DJ Dale - Jap Hip-Hop Special",
-        "2022-06-23-15":"Relaxed Fit w large trou",
-        "2022-06-23-16":"simple features w/ dj pauly c",
-        "2022-06-23-17":"Turbobabe's Turbohour w/ Ginny",
-        "2022-06-23-18":"HUGE DONKS w/ pixel",
-        "2022-06-23-19":"Woi Workout with oscmal",
-        "2022-06-23-20":"sort ur life out NOW w kiki",
-        "2022-06-23-21":"NRG with P-Air",
-        "2022-06-23-22":"Digital Rimming w/WoiKev",
-        "2022-06-23-23":"Bowel Cleansers w/ number2",
-        "2022-06-24-00":"🍍youanas sonic ananas🍍",
-        "2022-06-24-01":"big al's wee drums",
-        "2022-06-24-02":"GO AFTER",
-        "2022-06-24-03":"LATE????????? PARTY"}
+    chubilee = {
+        "2022-06-23-00": "welcome st0nerz w kiki and call ins",
+        "2022-06-23-01": "sorting w/ tiger2 not live from prague",
+        "2022-06-23-02": "Trombones w/ Andehhhh",
+        "2022-06-23-03": "Jaanipäev w/meh",
+        "2022-06-23-04": "Nonstop Fit - Trous first appearance",
+        "2022-06-23-05": "faleme loop w/ cinnaron",
+        "2022-06-23-06": "chunting with mavros",
+        "2022-06-23-07": "Ok, I am Awake w/okiamevans",
+        "2022-06-23-08": "Oscar Maldonados morning shift",
+        "2022-06-23-09": "Early Dealer W/ Rival Dealer",
+        "2022-06-23-10": "Early Dealer W/ Rival Dealer",
+        "2022-06-23-11": "Yung Chunny Munny w Chunny Sunny ft. Peanuts MC",
+        "2022-06-23-12": "bubbasee on the high seas",
+        "2022-06-23-13": "Mamma mia it's a balearia ft sayanne",
+        "2022-06-23-14": "DJ Dale - Jap Hip-Hop Special",
+        "2022-06-23-15": "Relaxed Fit w large trou",
+        "2022-06-23-16": "simple features w/ dj pauly c",
+        "2022-06-23-17": "Turbobabe's Turbohour w/ Ginny",
+        "2022-06-23-18": "HUGE DONKS w/ pixel",
+        "2022-06-23-19": "Woi Workout with oscmal",
+        "2022-06-23-20": "sort ur life out NOW w kiki",
+        "2022-06-23-21": "NRG with P-Air",
+        "2022-06-23-22": "Digital Rimming w/WoiKev",
+        "2022-06-23-23": "Bowel Cleansers w/ number2",
+        "2022-06-24-00": "🍍youanas sonic ananas🍍",
+        "2022-06-24-01": "big al's wee drums",
+        "2022-06-24-02": "GO AFTER",
+        "2022-06-24-03": "LATE????????? PARTY",
+    }
     now = datetime.now()
     key = str(now.strftime("%Y-%m-%d-%H"))
     print(key)
@@ -149,12 +154,13 @@ def get_chubilee_np():
     else:
         return None
 
+
 async def get_now(stream_url, session):
-    headers={"Icy-MetaData": "1"}
+    headers = {"Icy-MetaData": "1"}
     async with session.get(stream_url, headers=headers) as resp:
         for _ in range(10):
             data = await resp.content.read(8192)
-            m = re.search(br"StreamTitle='([^']*)';", data.rstrip(b"\0"))
+            m = re.search(rb"StreamTitle='([^']*)';", data.rstrip(b"\0"))
             if m:
                 title = m.group(1)
                 if title:
@@ -170,8 +176,9 @@ async def get_track():
     result = await get_now(stream_url, session)
     print(f"result: {result}")
     await session.close()
-    print('get_track result: ',result)
+    print("get_track result: ", result)
     return result
+
 
 async def post_gif_of_the_hour(param):
     bots = []
@@ -179,20 +186,26 @@ async def post_gif_of_the_hour(param):
     testroom = environ["wombottestroom"]
     bots.append(bot.get_room(mainroom))
     bots.append(bot.get_room(testroom))
-    #print(datetime.now().time(), param)
+    # print(datetime.now().time(), param)
     goth = random.choice(await bot.db.fetch_gif("bbb"))
     bot.goth = goth
-    #print(gifone)
+    # print(gifone)
     for roombot in bots:
-        await roombot.send_message('the gif of the hour is: ' + goth)
+        await roombot.send_message("the gif of the hour is: " + goth)
 
 
 async def schedule_gif_of_the_hour():
-    #cron_min = aiocron.crontab('*/1 * * * *', func=post_gif_of_the_hour, args=("At every minute",), start=True)
-    cron_jub = aiocron.crontab('0 */1 * * *', func=post_gif_of_the_hour, args=("At minute 0 past every hour.",), start=True)
+    # cron_min = aiocron.crontab('*/1 * * * *', func=post_gif_of_the_hour, args=("At every minute",), start=True)
+    cron_jub = aiocron.crontab(
+        "0 */1 * * *",
+        func=post_gif_of_the_hour,
+        args=("At minute 0 past every hour.",),
+        start=True,
+    )
 
     while True:
         await asyncio.sleep(5)
+
 
 async def post_chuntfm_status():
 
@@ -213,34 +226,36 @@ async def post_chuntfm_status():
         return None
 
     # if theres a new status
-    print('last_posted_status',(bot.chuntfm.get('last_posted_status')))
-    print('bot.chuntfm.get(status) ==',bot.chuntfm.get('status'))
-    if (bot.chuntfm.get('last_posted_status') is None) or (bot.chuntfm.get('status') != bot.chuntfm.get('last_posted_status')):
-        msg = "ChuntFM status: " + bot.chuntfm.get('status') + '!'
-        print('the msg is:',msg)
-    elif bot.chuntfm.get('status') == 'online':
+    print("last_posted_status", (bot.chuntfm.get("last_posted_status")))
+    print("bot.chuntfm.get(status) ==", bot.chuntfm.get("status"))
+    if (bot.chuntfm.get("last_posted_status") is None) or (
+        bot.chuntfm.get("status") != bot.chuntfm.get("last_posted_status")
+    ):
+        msg = "ChuntFM status: " + bot.chuntfm.get("status") + "!"
+        print("the msg is:", msg)
+    elif bot.chuntfm.get("status") == "online":
         msg = "ChuntFM is online!"
         # if the last online status post was less than 15 mins agp, dont post again
-        print(bot.chuntfm.get('last_posted_time'))
-        print(time.time() - bot.chuntfm.get('last_posted_time'))
-        print(time.time() - bot.chuntfm.get('last_posted_time') < 15*60)
-        if time.time() - bot.chuntfm.get('last_posted_time') < 15*60:
+        print(bot.chuntfm.get("last_posted_time"))
+        print(time.time() - bot.chuntfm.get("last_posted_time"))
+        print(time.time() - bot.chuntfm.get("last_posted_time") < 15 * 60)
+        if time.time() - bot.chuntfm.get("last_posted_time") < 15 * 60:
             return None
-    elif bot.chuntfm.get('status') == 'offline':
+    elif bot.chuntfm.get("status") == "offline":
         return None
-        
+
     for roombot in bots:
-        #await roombot.send_message(msg)
-        #print('sending status message to room')
+        # await roombot.send_message(msg)
+        # print('sending status message to room')
         # passing until it's more reliable
         pass
 
-    bot.chuntfm['last_posted_status'] = bot.chuntfm.get('status')
-    bot.chuntfm['last_posted_time'] = time.time()
+    bot.chuntfm["last_posted_status"] = bot.chuntfm.get("status")
+    bot.chuntfm["last_posted_time"] = time.time()
 
 
 async def schedule_chuntfm_livecheck():
-    livecheck = aiocron.crontab('*/1 * * * *', func=post_chuntfm_status, start=True)
+    livecheck = aiocron.crontab("*/1 * * * *", func=post_chuntfm_status, start=True)
 
     while True:
         await asyncio.sleep(5)
@@ -248,30 +263,30 @@ async def schedule_chuntfm_livecheck():
 
 # mopidy logic
 
+
 async def playback_started_handler(data):
     """Callback function, called when the playback started."""
     print(data)
-    print(bot.rooms) # ok
-    source_name = html.unescape(data['tl_track']['track']['name'])
+    print(bot.rooms)  # ok
+    source_name = html.unescape(data["tl_track"]["track"]["name"])
     mainroom = environ["wombotmainroom"]
     myroom = bot.get_room(mainroom)
-    #print(myroom) # ok
-    if data['tl_track']['track']['uri'].startswith('soundcloud'):
-        url = data['tl_track']['track']['comment']
-    elif data['tl_track']['track']['uri'].startswith('mixcloud'):
-        uri = data['tl_track']['track']['uri']
-        url = uri.replace('mixcloud:track:','https://www.mixcloud.com')
+    # print(myroom) # ok
+    if data["tl_track"]["track"]["uri"].startswith("soundcloud"):
+        url = data["tl_track"]["track"]["comment"]
+    elif data["tl_track"]["track"]["uri"].startswith("mixcloud"):
+        uri = data["tl_track"]["track"]["uri"]
+        url = uri.replace("mixcloud:track:", "https://www.mixcloud.com")
     else:
-        url = data['tl_track']['track']['name']
+        url = data["tl_track"]["track"]["name"]
     msg = "https://fm.chunt.org/stream2 jukebox now playing: " + url
     await myroom.send_message(msg)
-
 
 
 async def all_events_handler(event, data):
     """Callback function; catch-all function."""
     print(event, data)
-    if event == 'tracklist_changed':
+    if event == "tracklist_changed":
         print(data)
 
 
@@ -279,17 +294,18 @@ async def mpd_context_manager(mpd):
 
     async with mpd as mopidy:
 
-        mopidy.bind('track_playback_started', playback_started_handler)
-        mopidy.bind('*', all_events_handler)
+        mopidy.bind("track_playback_started", playback_started_handler)
+        mopidy.bind("*", all_events_handler)
         await mpd.tracklist.set_consume(True)
 
         # Your program's logic:
-        #await mopidy.playback.play()
+        # await mopidy.playback.play()
         while True:
             await asyncio.sleep(1)
 
 
-# convert utc to London time 
+# convert utc to London time
+
 
 def convert_utc_to_london(utctime):
     tz = pytz.timezone("UTC")
@@ -303,16 +319,18 @@ def convert_utc_to_london(utctime):
 
     return hoursmins
 
+
 # radioactivity id
 
-async def raid(message,station_query):
+
+async def raid(message, station_query):
 
     ra_stations = await radioactivity.get_station_list()
 
     ra_station_names = list(ra_stations.keys())
 
     # pm a list of station names to the user if the typed !raidlist
-    if station_query == 'list':
+    if station_query == "list":
         msg = "Radioactivity stations: "
         for station in ra_station_names:
             msg += station + ", "
@@ -331,7 +349,7 @@ async def raid(message,station_query):
     # if the provided station name is in the list of stations
     if station_query in ra_station_names:
         station_name = station_query
-        match=True
+        match = True
     # try to guess which station is meant
     else:
         station_name = [
@@ -341,9 +359,13 @@ async def raid(message,station_query):
         # if more than station has particular matches, return an error message
         if station_name is not None:
             if isinstance(station_name, list) and len(station_name) > 1:
-                await message.channel.send('Sorry, station name was ambiguous. Please specify the station name exactly (type !raidlist to get a list of possible options).')
+                await message.channel.send(
+                    "Sorry, station name was ambiguous. Please specify the station name exactly (type !raidlist to get a list of possible options)."
+                )
             elif isinstance(station_name, list) and len(station_name) == 0:
-                await message.channel.send('Sorry, no station name match found (type !raidlist to get a list of possible options).')
+                await message.channel.send(
+                    "Sorry, no station name match found (type !raidlist to get a list of possible options)."
+                )
             else:
                 match = True
                 station_name = station_name[0]
@@ -360,154 +382,167 @@ async def raid(message,station_query):
             stream_url = stream[1]
 
             # shazam it
-            msg = ''
-            artist = ''
-            track = ''
-            shazamapi = shazam.ShazamApi(loop,api_key=shazam_api_key)
-            tz = pytz.timezone('Europe/London')
+            msg = ""
+            artist = ""
+            track = ""
+            shazamapi = shazam.ShazamApi(loop, api_key=shazam_api_key)
+            tz = pytz.timezone("Europe/London")
             london_now = datetime.now(tz)
             hoursmins = london_now.strftime("%H:%M")
 
             stream_sep = "" if stream_name == "" else " "
-
 
             try:
                 result = await shazamapi._get(stream_url)
                 if "track" in result:
                     artist = result["track"]["subtitle"]
                     title = result["track"]["title"]
-                    bandcamp_result_msg = await bandcamp_search(artist,title)
+                    bandcamp_result_msg = await bandcamp_search(artist, title)
                     await message.channel.send(
-                        "ID " + station_name + stream_sep + stream_name + " (from shazam): "
+                        "ID "
+                        + station_name
+                        + stream_sep
+                        + stream_name
+                        + " (from shazam): "
                         + hoursmins
                         + " - "
                         + artist
                         + " - "
                         + title
-                        + bandcamp_result_msg)
+                        + bandcamp_result_msg
+                    )
                 else:
                     await message.channel.send(
-                        "ID " + station_name + stream_sep + stream_name + ": "
+                        "ID "
+                        + station_name
+                        + stream_sep
+                        + stream_name
+                        + ": "
                         + hoursmins
                         + " - "
-                        + "shazam found nothing")
+                        + "shazam found nothing"
+                    )
             except Exception as e:
                 print(str(e))
-        #print(artist + " - " + track)
-        #return artist,track
+        # print(artist + " - " + track)
+        # return artist,track
 
-async def shazam_station(message,station):
+
+async def shazam_station(message, station):
     if station == "nts1":
-        audio_source = 'https://stream-relay-geo.ntslive.net/stream'
+        audio_source = "https://stream-relay-geo.ntslive.net/stream"
     elif station == "nts2":
-        audio_source = 'https://stream-relay-geo.ntslive.net/stream2'
+        audio_source = "https://stream-relay-geo.ntslive.net/stream2"
     elif station == "doyou":
-        audio_source = 'https://doyouworld.out.airtime.pro/doyouworld_a'
+        audio_source = "https://doyouworld.out.airtime.pro/doyouworld_a"
     elif station == "chunt1":
         audio_source = "https://fm.chunt.org/stream"
     elif station == "chunt2":
         audio_source = "https://fm.chunt.org/stream2"
     stationname = station
-    shazamapi = shazam.ShazamApi(loop,api_key=shazam_api_key)
-    #session = ClientSession(trust_env=True)
-    tz = pytz.timezone('Europe/London')
+    shazamapi = shazam.ShazamApi(loop, api_key=shazam_api_key)
+    # session = ClientSession(trust_env=True)
+    tz = pytz.timezone("Europe/London")
     london_now = datetime.now(tz)
     hoursmins = london_now.strftime("%H:%M")
-    out = ''
-    msg = ''
+    out = ""
+    msg = ""
     result = await shazamapi._get(audio_source)
     print(result)
-    
+
     if "track" in result:
         artist = result["track"]["subtitle"]
         title = result["track"]["title"]
-        bandcamp_result_msg = await bandcamp_search(artist,title)
-        
+        bandcamp_result_msg = await bandcamp_search(artist, title)
+
         await message.channel.send(
-            "ID " + stationname + " (from shazam): "
+            "ID "
+            + stationname
+            + " (from shazam): "
             + hoursmins
             + " - "
             + artist
             + " - "
             + title
-            + bandcamp_result_msg)
+            + bandcamp_result_msg
+        )
     else:
         await message.channel.send(
-            "ID " + stationname + ": "
-            + hoursmins
-            + " - "
-            + "shazam found nothing")
+            "ID " + stationname + ": " + hoursmins + " - " + "shazam found nothing"
+        )
 
-async def bandcamp_search(artist,title):
+
+async def bandcamp_search(artist, title):
     googlequery = artist + " " + title
-    res = ''
+    res = ""
     res = await search_google.search(googlequery)
     print(res)
     if res is not None:
         bc_link = res[0]["link"]
         print(bc_link)
-        filters = ['track','album']
+        filters = ["track", "album"]
         parsed = urlparse(bc_link)
-        splitpath = parsed.path.split('/')
+        splitpath = parsed.path.split("/")
         bc_pagetype = splitpath[1]
         if any(word in bc_pagetype for word in filters):
-            bandcamp_result_msg = " | maybe it's: " + bc_link 
+            bandcamp_result_msg = " | maybe it's: " + bc_link
         else:
             bandcamp_result_msg = " | no bandcamp found. "
-        
+
     else:
         bandcamp_result_msg = " | no bandcamp found. "
 
     return bandcamp_result_msg
+
 
 class config:
     rooms = []
     rooms.append(environ["wombotmainroom"])
     rooms.append(environ["wombottestroom"])
 
-    botuser = [mysecrets.chatango_user, mysecrets.chatango_pass] # password
+    botuser = [mysecrets.chatango_user, mysecrets.chatango_pass]  # password
+
 
 class MyBot(chatango.Client):
     async def on_init(self):
         print("Bot initialized")
         self.db = await aiosqliteclass.create_conn()
         self.goth = random.choice(await bot.db.fetch_gif("bbb"))
-        
-        
-        
-    async def on_start(self): # room join queue
+
+    async def on_start(self):  # room join queue
         for room in config.rooms:
             self.set_timeout(1, self.join, room)
 
     async def on_connect(self, room: typing.Union[chatango.Room, chatango.PM]):
         print(f"[{room.type}] Connected to", room)
-       
+
     async def on_disconnect(self, room):
         print(f"[{room.type}] Disconnected from", room)
 
     async def on_room_denied(self, room):
         """
-            This event get out when a room is deleted.
-            self.rooms.remove(room_name)
+        This event get out when a room is deleted.
+        self.rooms.remove(room_name)
         """
         print(f"[{room.type}] Rejected from", room)
-        
+
     async def on_room_init(self, room):
         if room.user.isanon:
             room.set_font(
-                name_color = "000000",
-                font_color = "000000",
-                font_face  = 1,
-                font_size  = 11
+                name_color="000000", font_color="000000", font_face=1, font_size=11
             )
         else:
             await room.user.get_profile()
             await room.enable_bg()
-            
+
     async def on_message(self, message):
-        print(time.strftime("%b/%d-%H:%M:%S", time.localtime(message.time)),
-              message.room.name, message.user.showname, ascii(message.body)[1:-1])
-        
+        print(
+            time.strftime("%b/%d-%H:%M:%S", time.localtime(message.time)),
+            message.room.name,
+            message.user.showname,
+            ascii(message.body)[1:-1],
+        )
+
         if message.body[0] == "!":
 
             print(message.room.name)
@@ -519,30 +554,28 @@ class MyBot(chatango.Client):
                 orig_cmd, args = data[0], ""
             cmd = orig_cmd.lower().strip().lstrip().rstrip()
             print(cmd)
-            #if message.body.startswith("!a"):
+            # if message.body.startswith("!a"):
             if cmd == ("a"):
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
                 await message.channel.send(f"Hello {message.user.showname}")
 
-
             elif cmd == "help":
                 print(helpmessage)
                 await message.room.delete_message(message)
                 await message.channel.send(helpmessage)
-                await message.room.client.pm.send_message(message.user,helpmessage)
+                await message.room.client.pm.send_message(message.user, helpmessage)
 
             elif cmd in ["id1", "idch1", "idnts1", "nts1"]:
                 await message.room.delete_message(message)
-                utctime = ''
+                utctime = ""
                 cur = await get_db_cur()
-                await cur.execute(
-                    "SELECT * FROM nts_one ORDER BY id DESC LIMIT 1;")
+                await cur.execute("SELECT * FROM nts_one ORDER BY id DESC LIMIT 1;")
                 result = await cur.fetchall()
-                sqlid,utctime,artist,title = result[0]
+                sqlid, utctime, artist, title = result[0]
                 hoursmins = convert_utc_to_london(utctime)
-                bandcamp_result_msg = await bandcamp_search(artist,title)
-                
+                bandcamp_result_msg = await bandcamp_search(artist, title)
+
                 await message.channel.send(
                     "ID NTS1 (from acrcloud): "
                     + hoursmins
@@ -550,21 +583,21 @@ class MyBot(chatango.Client):
                     + artist
                     + " - "
                     + title
-                    + bandcamp_result_msg)
+                    + bandcamp_result_msg
+                )
 
-                asyncio.ensure_future(shazam_station(message,'nts1'))
+                asyncio.ensure_future(shazam_station(message, "nts1"))
 
             elif cmd in ["id2", "idch2", "idnts2"]:
                 await message.room.delete_message(message)
-                utctime = ''
+                utctime = ""
                 cur = await get_db_cur()
-                await cur.execute(
-                    "SELECT * FROM nts_two ORDER BY id DESC LIMIT 1;")
+                await cur.execute("SELECT * FROM nts_two ORDER BY id DESC LIMIT 1;")
                 result = await cur.fetchall()
-                sqlid,utctime,artist,title = result[0]
+                sqlid, utctime, artist, title = result[0]
                 hoursmins = convert_utc_to_london(utctime)
-                bandcamp_result_msg = await bandcamp_search(artist,title)
-                
+                bandcamp_result_msg = await bandcamp_search(artist, title)
+
                 await message.channel.send(
                     "ID NTS2 (from acrcloud): "
                     + hoursmins
@@ -572,33 +605,35 @@ class MyBot(chatango.Client):
                     + artist
                     + " - "
                     + title
-                    + bandcamp_result_msg)
+                    + bandcamp_result_msg
+                )
 
-                asyncio.ensure_future(shazam_station(message,'nts2'))
+                asyncio.ensure_future(shazam_station(message, "nts2"))
 
             elif cmd in ["iddy", "iddoyou"]:
                 await message.room.delete_message(message)
-                
+
                 londontime, artist, title = await get_id_doyou.get()
                 hoursmins = londontime
-                
+
                 if title != None:
-                    bandcamp_result_msg = await bandcamp_search(artist,title)
-                    
+                    bandcamp_result_msg = await bandcamp_search(artist, title)
+
                     await message.channel.send(
                         "ID DOYOU (from doyou): "
-                            + hoursmins
-                            + " - "
-                            + artist
-                            + " - "
-                            + title
-                            + bandcamp_result_msg)
-                    asyncio.ensure_future(shazam_station(message,'doyou'))
-                        
+                        + hoursmins
+                        + " - "
+                        + artist
+                        + " - "
+                        + title
+                        + bandcamp_result_msg
+                    )
+                    asyncio.ensure_future(shazam_station(message, "doyou"))
+
                 else:
                     print("no id from doyou")
                     await message.channel.send("No ID on doyou website, trying shazam")
-                    asyncio.ensure_future(shazam_station(message,'doyou'))
+                    asyncio.ensure_future(shazam_station(message, "doyou"))
 
             #
             # elif cmd in ["idchunt"]:
@@ -625,20 +660,19 @@ class MyBot(chatango.Client):
             #
             #     asyncio.ensure_future(shazam_station(message,'chunt1'))
             #     asyncio.ensure_future(shazam_station(message,'chunt2'))
-            elif cmd in ["idchunt1","idchu2"]:
+            elif cmd in ["idchunt1", "idchu2"]:
                 await message.room.delete_message(message)
-                #trackinfo = await get_track()
-                #print('idchunt get_track result', trackinfo)
-                #if trackinfo != "Unknown":
-                    #await message.channel.send("ID chunt1 from stream: " + trackinfo)
-                
-                asyncio.ensure_future(shazam_station(message,'chunt1'))
-            elif cmd in ["idchunt2","idjukebox","idchu2"]:
+                # trackinfo = await get_track()
+                # print('idchunt get_track result', trackinfo)
+                # if trackinfo != "Unknown":
+                # await message.channel.send("ID chunt1 from stream: " + trackinfo)
+
+                asyncio.ensure_future(shazam_station(message, "chunt1"))
+            elif cmd in ["idchunt2", "idjukebox", "idchu2"]:
                 await message.room.delete_message(message)
-                asyncio.ensure_future(shazam_station(message,'chunt2'))
-                
-            
-            elif cmd.startswith('id') or cmd.startswith('raid'):
+                asyncio.ensure_future(shazam_station(message, "chunt2"))
+
+            elif cmd.startswith("id") or cmd.startswith("raid"):
                 if cmd.startswith("raid"):
 
                     cmd = cmd[4:]
@@ -646,7 +680,7 @@ class MyBot(chatango.Client):
                 elif cmd.startswith("id"):
                     cmd = cmd[2:]
                     print(cmd)
-                asyncio.ensure_future(raid(message,cmd))
+                asyncio.ensure_future(raid(message, cmd))
 
             elif cmd == "randomstation":
                 await message.room.delete_message(message)
@@ -655,101 +689,122 @@ class MyBot(chatango.Client):
                 online_stations = []
 
                 for station in ra_stations.values():
-                    if station.get('stream_url'):
-                        if any([stream[2] == 'online' for stream in station.get('stream_url')]):
+                    if station.get("stream_url"):
+                        if any(
+                            [
+                                stream[2] == "online"
+                                for stream in station.get("stream_url")
+                            ]
+                        ):
                             online_stations.append(station)
 
                 # choose a random online station
                 if len(online_stations) > 0:
                     station = random.choice(online_stations)
 
-                    await message.channel.send("Oi, here's a random station: " + station['name'] + " (" + station.get('url') + ")" + " from " + station['location'])
+                    await message.channel.send(
+                        "Oi, here's a random station: "
+                        + station["name"]
+                        + " ("
+                        + station.get("url")
+                        + ")"
+                        + " from "
+                        + station["location"]
+                    )
                 else:
                     await message.channel.send("No online stations found :(")
 
-
             # jukebox controls
 
-            elif cmd.startswith('np'):
-                
+            elif cmd.startswith("np"):
 
                 await message.room.delete_message(message)
                 np = get_chubilee_np()
                 if np is not None:
-                    await message.channel.send("Now live on https://fm.chunt.org/stream : " + np)
-                
+                    await message.channel.send(
+                        "Now live on https://fm.chunt.org/stream : " + np
+                    )
+
                 data = await mpd.playback.get_current_track()
                 print(data)
                 if data is not None:
-                    if '__model__' in data:
-                        if data['uri'].startswith('mixcloud'):
-                            uri = data['uri']
-                            url = uri.replace('mixcloud:track:','https://www.mixcloud.com')
+                    if "__model__" in data:
+                        if data["uri"].startswith("mixcloud"):
+                            uri = data["uri"]
+                            url = uri.replace(
+                                "mixcloud:track:", "https://www.mixcloud.com"
+                            )
 
-                        elif data['uri'].startswith('soundcloud'):
-                            url = data['comment']
-                        elif data['uri'].startswith('bandcamp'):
-                            comment = data['comment']
-                            url = comment.replace('URL: ','')
+                        elif data["uri"].startswith("soundcloud"):
+                            url = data["comment"]
+                        elif data["uri"].startswith("bandcamp"):
+                            comment = data["comment"]
+                            url = comment.replace("URL: ", "")
                         else:
-                            url = ''
-                        await message.channel.send(" https://fm.chunt.org/stream2 jukebox now playing: " + url)
+                            url = ""
+                        await message.channel.send(
+                            " https://fm.chunt.org/stream2 jukebox now playing: " + url
+                        )
                 else:
-                    await message.channel.send("jukebox is not playing anything right now")
-            elif cmd.startswith('jukebox'):
+                    await message.channel.send(
+                        "jukebox is not playing anything right now"
+                    )
+            elif cmd.startswith("jukebox"):
                 await message.room.delete_message(message)
-                await message.channel.send("https://fm.chunt.org/stream2 jukebox commands: !add url !skip !np \r accepts links from mixcloud,soundcloud,nts")
+                await message.channel.send(
+                    "https://fm.chunt.org/stream2 jukebox commands: !add url !skip !np \r accepts links from mixcloud,soundcloud,nts"
+                )
 
-            elif cmd == 'clear':
+            elif cmd == "clear":
                 await message.room.delete_message(message)
                 await mpd.tracklist.clear()
 
-            elif cmd in ['play','add']:
+            elif cmd in ["play", "add"]:
                 await message.room.delete_message(message)
-                #await mpd.tracklist.add(uris=['mixcloud:track:/NTSRadio/siren-w-dj-fart-in-the-club-14th-may-2020/'])
-                #await mpd.tracklist.add(uris=['sc:https://soundcloud.com/sirenldn/nts-dj-fart-in-the-club'])
+                # await mpd.tracklist.add(uris=['mixcloud:track:/NTSRadio/siren-w-dj-fart-in-the-club-14th-may-2020/'])
+                # await mpd.tracklist.add(uris=['sc:https://soundcloud.com/sirenldn/nts-dj-fart-in-the-club'])
                 playback_state = await mpd.playback.get_state()
                 schemes = await mpd.core.get_uri_schemes()
                 print(schemes)
                 if args:
 
-                    #print(args)
+                    # print(args)
                     splitargs = args.split(" ")
-                    #print(splitargs)
+                    # print(splitargs)
                     url = splitargs[0]
-                    
-                    #print(mypath)
-                    uri = ''
+
+                    # print(mypath)
+                    uri = ""
                     print(url)
                     strippedurl = url.strip().lstrip().rstrip()
                     url = strippedurl
                     print(url)
-                    results = ''
-                    added = ''
+                    results = ""
+                    added = ""
 
-                    if url.startswith('https://www.nts.live'):
+                    if url.startswith("https://www.nts.live"):
                         async with ClientSession() as s:
                             r = await s.get(url)
                             html = await r.read()
                             soup = bs4.BeautifulSoup(html, features="lxml")
-                            buttons = soup.find('button', {'data-src' : True})
-                            source = buttons.get('data-src')
+                            buttons = soup.find("button", {"data-src": True})
+                            source = buttons.get("data-src")
                             url = source
 
                     parsed = urlparse(url)
                     mypath = parsed.path
 
-                    if url.startswith('https://www.mixcloud.com'):
+                    if url.startswith("https://www.mixcloud.com"):
                         uri = "mixcloud:track:" + mypath
                         searchlist = []
                         searchlist.append(uri)
                         added = await mpd.tracklist.add(uris=searchlist)
-                    elif url.startswith('https://m.mixcloud.com'):
+                    elif url.startswith("https://m.mixcloud.com"):
                         uri = "mixcloud:track:" + mypath
                         searchlist = []
                         searchlist.append(uri)
                         added = await mpd.tracklist.add(uris=searchlist)
-                    elif url.startswith('https://soundcloud.com/'):
+                    elif url.startswith("https://soundcloud.com/"):
                         uri = "sc:" + url
                         searchlist = []
                         searchlist.append(uri)
@@ -761,42 +816,49 @@ class MyBot(chatango.Client):
                         searchlist.append(uri)
                         added = await mpd.tracklist.add(uris=searchlist)
 
-                    if url.startswith('https://www.youtube.com/watch'):
-                        added = ''
-                        #uri = "yt:" + url
+                    if url.startswith("https://www.youtube.com/watch"):
+                        added = ""
+                        # uri = "yt:" + url
                         # yt seems very broken, causes "wrong stream type" somewhere in liquidsoap/icecast/mopidy chain
-                        await message.channel.send("jukebox can currently add links from mixcloud,soundcloud,bandcamp,nts")
-                    print('added:',added)
+                        await message.channel.send(
+                            "jukebox can currently add links from mixcloud,soundcloud,bandcamp,nts"
+                        )
+                    print("added:", added)
                     if added:
-                        if '__model__' in added[0]:
-                            print('added okay')
-                            await message.channel.send('jukebox successfully added ' + url)
-                        elif 'ValidationError' in added:
-                            print('ValidationError')
-                            await message.channel.send('could not add ' + url + ' to jukebox. supported links: mixcloud,soundcloud,bandcamp,nts')
+                        if "__model__" in added[0]:
+                            print("added okay")
+                            await message.channel.send(
+                                "jukebox successfully added " + url
+                            )
+                        elif "ValidationError" in added:
+                            print("ValidationError")
+                            await message.channel.send(
+                                "could not add "
+                                + url
+                                + " to jukebox. supported links: mixcloud,soundcloud,bandcamp,nts"
+                            )
                     else:
-                        await message.channel.send('could not add ' + url + ' to jukebox. supported links: mixcloud,soundcloud,bandcamp,nts')
+                        await message.channel.send(
+                            "could not add "
+                            + url
+                            + " to jukebox. supported links: mixcloud,soundcloud,bandcamp,nts"
+                        )
 
-                    
-                    
-
-                    if playback_state != 'playing':
+                    if playback_state != "playing":
                         print("it's not playing")
-                        topslice = await mpd.tracklist.slice(0,1)
+                        topslice = await mpd.tracklist.slice(0, 1)
                         if topslice is not None:
-                            tlid = topslice[0]['tlid']
+                            tlid = topslice[0]["tlid"]
                             await mpd.playback.play(tlid=tlid)
                     else:
-                        print('should be playing')
+                        print("should be playing")
 
                     if results:
                         print(results)
-                
 
-
-            elif cmd in ['queue','tl']:
+            elif cmd in ["queue", "tl"]:
                 await message.room.delete_message(message)
-                tracklist = ''
+                tracklist = ""
                 tracklist = await mpd.tracklist.get_tl_tracks()
                 print(tracklist)
                 i = 0
@@ -804,29 +866,29 @@ class MyBot(chatango.Client):
 
                 for item in tracklist:
                     i += 1
-                    trackname = item['track']['name']
+                    trackname = item["track"]["name"]
                     smalllist.append(trackname)
-                print('i',i)
+                print("i", i)
                 if len(smalllist) > 3:
                     tinylist = smalllist[0:3]
                 else:
                     tinylist = smalllist
                 if i == 0:
-                    msg = 'jukebox is not playing anything. add a link from sc,mc,bc or nts!'
+                    msg = "jukebox is not playing anything. add a link from sc,mc,bc or nts!"
                 else:
 
                     msg = str(i) + " tracks in jukebox queue. "
                 for item in tinylist:
                     msg = msg + " | " + item
                 await message.channel.send(msg)
-                
-            elif cmd in ['skip','next']:
+
+            elif cmd in ["skip", "next"]:
                 await message.room.delete_message(message)
-                print('consume mode ',await mpd.tracklist.get_consume())
+                print("consume mode ", await mpd.tracklist.get_consume())
                 await mpd.playback.next()
 
             # radio schedule commands
-            elif cmd.startswith('sched'):
+            elif cmd.startswith("sched"):
 
                 await message.room.delete_message(message)
 
@@ -834,14 +896,25 @@ class MyBot(chatango.Client):
                     splitargs = args.split(" ")
                     for arg in splitargs:
                         if arg.lower() in schedule.apis.keys():
-                            s_schedule = await schedule.get_schedule(schedule.apis[arg.lower()])
+                            s_schedule = await schedule.get_schedule(
+                                schedule.apis[arg.lower()]
+                            )
 
-                            s_schedule_subset = await schedule.subset_schedule(s_schedule, datetime.now(timezone.utc), future_hours=12)
-                            pretty_schedule = await schedule.pprint_schedule(s_schedule_subset)
-                            await message.room.client.pm.send_message(message.user, arg.upper() + '\n' + pretty_schedule)
+                            s_schedule_subset = await schedule.subset_schedule(
+                                s_schedule, datetime.now(timezone.utc), future_hours=12
+                            )
+                            pretty_schedule = await schedule.pprint_schedule(
+                                s_schedule_subset
+                            )
+                            await message.room.client.pm.send_message(
+                                message.user, arg.upper() + "\n" + pretty_schedule
+                            )
                         else:
-                            await message.room.client.pm.send_message(message.user, arg.upper() + ': Sorry, I don\'t know that radio station.')
-
+                            await message.room.client.pm.send_message(
+                                message.user,
+                                arg.upper()
+                                + ": Sorry, I don't know that radio station.",
+                            )
 
             elif cmd == "fortune":
                 await message.room.delete_message(message)
@@ -849,9 +922,7 @@ class MyBot(chatango.Client):
                     "your fortune, "
                     + message.user.showname
                     + " : "
-                    + (random.choice(fortunes.fortunecookie))
-                    .replace(".", "")
-                    .lower()
+                    + (random.choice(fortunes.fortunecookie)).replace(".", "").lower()
                 )
 
             # gif/image/snippets spam commands
@@ -879,12 +950,12 @@ class MyBot(chatango.Client):
                 await message.room.delete_message(message)
                 toast = "https://media.giphy.com/media/GhPxSf3KazSZsJ4XSo/giphy.gif"
                 await message.channel.send(
-                    toast + " " +
-                    random.choice(await self.db.fetch_gif("bbb"))
+                    toast
+                    + " "
+                    + random.choice(await self.db.fetch_gif("bbb"))
                     + " "
                     + toast
                 )
-
 
             elif cmd in ["whatdoesthatmean", "benufo", "bufo"]:
                 await message.room.delete_message(message)
@@ -920,25 +991,27 @@ class MyBot(chatango.Client):
 
                 taglist = sorted(taglist_unsorted)
 
-                thelongeststring = (
-                    "to tag a gif: !tag link-to-the-gif tagname \r\r tags that post gifs/links: \r"
-                )
+                thelongeststring = "to tag a gif: !tag link-to-the-gif tagname \r\r tags that post gifs/links: \r"
                 for key in taglist:
                     thelongeststring += "!" + key + " "
                 print(thelongeststring)
 
-                await message.room.client.pm.send_message(message.user, str(thelongeststring))
+                await message.room.client.pm.send_message(
+                    message.user, str(thelongeststring)
+                )
 
             elif cmd == "tag":
                 await message.room.delete_message(message)
-                
+
                 if args:
                     args = args.replace(",", " ")
                     splitargs = args.split(" ")
                     inurl = splitargs[0]
                     intags = splitargs[1:]
                     if not inurl.startswith("http"):
-                        await message.channel.send("to tag a gif: !tag url-to-gif tag1 tag2 tag3")
+                        await message.channel.send(
+                            "to tag a gif: !tag url-to-gif tag1 tag2 tag3"
+                        )
                     else:
                         for intag in intags:
                             intag = intag.strip()
@@ -958,43 +1031,50 @@ class MyBot(chatango.Client):
                 if args:
                     splitargs = args.split(" ")
                     arg = splitargs[0]
-                    urls,tags = await self.db.info(arg)
-                    print(urls,tags)
-                    urlstring = ''
-                    tagstring = ''
+                    urls, tags = await self.db.info(arg)
+                    print(urls, tags)
+                    urlstring = ""
+                    tagstring = ""
                     urllist = urls[0]
                     taglist = tags[0]
                     for url in urllist:
                         print(url)
-                        if url.startswith('https://ust.chatango.com/'):
-                            nurl = url.replace('https://ust.chatango.com/', 'https://ust.chatango.com/ ')
-                        if urlstring == '':
+                        if url.startswith("https://ust.chatango.com/"):
+                            nurl = url.replace(
+                                "https://ust.chatango.com/",
+                                "https://ust.chatango.com/ ",
+                            )
+                        if urlstring == "":
                             urlstring = "'" + nurl + "'"
                         else:
-                            urlstring = urlstring + ', ' + "'" + nurl +"'"
+                            urlstring = urlstring + ", " + "'" + nurl + "'"
                     for tag in taglist:
                         print(tag)
-                        if tagstring == '':
+                        if tagstring == "":
                             tagstring = "'" + tag + "'"
                         else:
-                            tagstring = tagstring + ', ' + tag
-                    if urlstring != '':
-                        #await message.channel.send("'" + arg + "'" + " tags these urls: " + urlstring )
-                        await message.room.client.pm.send_message(message.user,"'" + arg + "'" + " tags these urls: " + urlstring )
-                    if tagstring != '':
-                        #await message.channel.send("'" + arg + "'" + "  has these tags:" + tagstring)
-                        await message.room.client.pm.send_message(message.user,"'" + arg + "'" + " tags these urls: " + tagstring )
+                            tagstring = tagstring + ", " + tag
+                    if urlstring != "":
+                        # await message.channel.send("'" + arg + "'" + " tags these urls: " + urlstring )
+                        await message.room.client.pm.send_message(
+                            message.user,
+                            "'" + arg + "'" + " tags these urls: " + urlstring,
+                        )
+                    if tagstring != "":
+                        # await message.channel.send("'" + arg + "'" + "  has these tags:" + tagstring)
+                        await message.room.client.pm.send_message(
+                            message.user,
+                            "'" + arg + "'" + " tags these urls: " + tagstring,
+                        )
                 else:
-                    await message.room.client.pm.send_message(message.user,"use like '!info woi' to get info about tags and urls")
-
-
-                    
-                    
-
+                    await message.room.client.pm.send_message(
+                        message.user,
+                        "use like '!info woi' to get info about tags and urls",
+                    )
 
             # automated gif posting / spamming
 
-            elif cmd in ["gif","gift","dance"]:
+            elif cmd in ["gif", "gift", "dance"]:
                 await message.room.delete_message(message)
                 gifone = random.choice(await self.db.fetch_gif("dance"))
                 await message.channel.send(gifone + " " + gifone + " " + gifone)
@@ -1017,10 +1097,10 @@ class MyBot(chatango.Client):
                 gifthree = random.choice(await self.db.fetch_gif("bbb"))
                 await message.channel.send(gifone + " " + giftwo + " " + gifthree)
 
-            elif cmd == 'goth':
+            elif cmd == "goth":
                 await message.room.delete_message(message)
-            
-                await message.channel.send('the gif of the hour is ' + self.goth)
+
+                await message.channel.send("the gif of the hour is " + self.goth)
 
             # text spam
 
@@ -1028,25 +1108,25 @@ class MyBot(chatango.Client):
 
             elif cmd == "chuntfm":
                 await message.room.delete_message(message)
-                #np = get_chubilee_np()
-                #if np is not None:
-                    #await message.channel.send("live on https://fm.chunt.org/stream : "+ np)
-                
+                # np = get_chubilee_np()
+                # if np is not None:
+                # await message.channel.send("live on https://fm.chunt.org/stream : "+ np)
 
                 # check cfm status
                 try:
-                    cfm_status = bot.chuntfm.get('status')
+                    cfm_status = bot.chuntfm.get("status")
                 except:
                     cfm_status = None
 
-                msg_status = ''
+                msg_status = ""
                 if cfm_status is not None:
-                    msg_status = '(' + cfm_status + ')'
+                    msg_status = "(" + cfm_status + ")"
 
                 await message.channel.send(
-                    "live: https://fm.chunt.org/stream " + msg_status + " jukebox: https://fm.chunt.org/stream2"
-                    )
-                    
+                    "live: https://fm.chunt.org/stream "
+                    + msg_status
+                    + " jukebox: https://fm.chunt.org/stream2"
+                )
 
             elif cmd == "fortune":
                 await message.room.delete_message(message)
@@ -1054,9 +1134,7 @@ class MyBot(chatango.Client):
                     "your fortune, "
                     + message.user.showname
                     + " : "
-                    + (random.choice(fortunes.fortunecookie))
-                    .replace(".", "")
-                    .lower()
+                    + (random.choice(fortunes.fortunecookie)).replace(".", "").lower()
                 )
 
             elif cmd == "say":
@@ -1134,12 +1212,12 @@ class MyBot(chatango.Client):
                         + random.choice(room.usernames)
                         + "! "
                         + random.choice(shoutend)
-                        )
+                    )
 
             else:
                 print(cmd)
-                print(cmd.startswith('raid'))
-                print(cmd.startswith('id') or cmd.startswith('raid'))
+                print(cmd.startswith("raid"))
+                print(cmd.startswith("id") or cmd.startswith("raid"))
                 try:
                     gifres = await self.db.fetch_gif(cmd)
                 except Exception as e:
@@ -1169,10 +1247,11 @@ class MyBot(chatango.Client):
                         with open(allgif_file, "a") as file:
                             file.write(word + "\n")
 
+
 async def get_db_cur():
     conn = await aiosqlite.connect("/db/trackids.db")
-    #conn.row_factory = lambda cursor, row: row[0]
-    #self.conn.row_factory = aiosqlite.Row
+    # conn.row_factory = lambda cursor, row: row[0]
+    # self.conn.row_factory = aiosqlite.Row
     cursor = await conn.cursor()
     return cursor
 
@@ -1180,18 +1259,18 @@ async def get_db_cur():
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
     bot = MyBot()
-    bot.default_user(config.botuser[0], config.botuser[1]) # easy_start
+    bot.default_user(config.botuser[0], config.botuser[1])  # easy_start
 
-#     or_accounts = [["user1","passwd1"], ["user2","passwd2"]]
-#     bot.default_user(accounts=or_accounts, pm=False) #True if passwd was input.
-    ListBots = [bot.start()] # Multiple instances 
+    #     or_accounts = [["user1","passwd1"], ["user2","passwd2"]]
+    #     bot.default_user(accounts=or_accounts, pm=False) #True if passwd was input.
+    ListBots = [bot.start()]  # Multiple instances
     task = asyncio.gather(*ListBots, return_exceptions=True)
-    mpd = MopidyClient(host='139.177.181.183')
+    mpd = MopidyClient(host="139.177.181.183")
     mpdtask = asyncio.gather(mpd_context_manager(mpd))
     giftask = schedule_gif_of_the_hour()
     cfm_task = schedule_chuntfm_livecheck()
 
-    tasks = asyncio.gather(task,mpdtask,giftask,cfm_task)
+    tasks = asyncio.gather(task, mpdtask, giftask, cfm_task)
 
     allgif_file = os.path.join(basepath, "allgif.txt")
     if not os.path.exists(allgif_file):

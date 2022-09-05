@@ -15,6 +15,7 @@ from .message import _process_pm, message_cut
 
 # TODO Unhandled received command kickingoff
 
+
 class PM(Connection):
     """
     Represents a PM Connection
@@ -40,9 +41,11 @@ class PM(Connection):
         self._history = list()
 
     def __dir__(self):
-        return [x for x in
-                set(list(self.__dict__.keys()) + list(dir(type(self)))) if
-                x[0] != '_']
+        return [
+            x
+            for x in set(list(self.__dict__.keys()) + list(dir(type(self))))
+            if x[0] != "_"
+        ]
 
     def __repr__(self):
         return "<PM>"
@@ -145,7 +148,7 @@ class PM(Connection):
     async def send_message(self, target, message: str, use_html: bool = False):
         if isinstance(target, User):
             target = target.name
-        if self._silent > time.time(): # manual rate limit
+        if self._silent > time.time():  # manual rate limit
             await self.client._call_event("pm_silent", message)
         else:
             if len(message) > 0:
@@ -160,7 +163,7 @@ class PM(Connection):
         await self.client._call_event("pong", self)
 
     async def _rcmd_premium(self, args):
-        if args and args[0] == '210':
+        if args and args[0] == "210":
             self._premium = True
         else:
             self._premium = False
@@ -203,11 +206,14 @@ class PM(Connection):
         msg._offline = True
         self._add_to_history(msg)
 
-    async def _rcmd_wlapp(self, args): pass
+    async def _rcmd_wlapp(self, args):
+        pass
 
-    async def _rcmd_wloffline(self, args): pass
+    async def _rcmd_wloffline(self, args):
+        pass
 
-    async def _rcmd_wlonline(self, args): pass
+    async def _rcmd_wlonline(self, args):
+        pass
 
     async def _rcmd_wl(self, args):
         """Lista de contactos recibida al conectarse"""
@@ -215,7 +221,7 @@ class PM(Connection):
         self._friends.clear()
         # Iterate over each contact
         for i in range(len(args) // 4):
-            name, last_on, is_on, idle = args[i * 4: i * 4 + 4]
+            name, last_on, is_on, idle = args[i * 4 : i * 4 + 4]
             user = User(name)
             friend = Friend(user, self)
             if last_on == "None":
@@ -248,7 +254,7 @@ class PM(Connection):
     async def _rcmd_idleupdate(self, args):
         friend = self.get_friend(args[0])
         friend._last_active = time.time()
-        friend._idle = True if args[1] == '0' else False
+        friend._idle = True if args[1] == "0" else False
 
     async def _rcmd_status(self, args):
         friend = self.get_friend(args[0])

@@ -6,21 +6,21 @@ import logging as LOGGER
 async def create_conn():
     db = Sqlite3Class()
     await db._init()
-    
+
     return db
 
 
-class Sqlite3Class():
-    #async def __init__(self, loop):
-        #pass
-        #self.conn = await aiosqlite.connect("pythonsqlite.db", loop=loop)
-        #self.cursor = await self.conn.cursor()
-        #self.cursor.row_factory = lambda cursor, row: row[0]
+class Sqlite3Class:
+    # async def __init__(self, loop):
+    # pass
+    # self.conn = await aiosqlite.connect("pythonsqlite.db", loop=loop)
+    # self.cursor = await self.conn.cursor()
+    # self.cursor.row_factory = lambda cursor, row: row[0]
 
     async def _init(self):
         self.conn = await aiosqlite.connect("pythonsqlite.db")
         self.conn.row_factory = lambda cursor, row: row[0]
-        #self.conn.row_factory = aiosqlite.Row
+        # self.conn.row_factory = aiosqlite.Row
         self.cursor = await self.conn.cursor()
 
     async def _close():
@@ -30,7 +30,9 @@ class Sqlite3Class():
         # inurl: url
         # returns url id
         print("query_gif", inurl)
-        await self.cursor.execute("SELECT * FROM object_table WHERE object_name=? ", [inurl])
+        await self.cursor.execute(
+            "SELECT * FROM object_table WHERE object_name=? ", [inurl]
+        )
         result = await self.cursor.fetchone()
         if result:
             result_id = result
@@ -42,7 +44,9 @@ class Sqlite3Class():
         # intag: gif tag to search
         #  returns tag id
         query_tag = intag
-        await self.cursor.execute("SELECT * FROM tag_table WHERE tag_name=? ", [query_tag])
+        await self.cursor.execute(
+            "SELECT * FROM tag_table WHERE tag_name=? ", [query_tag]
+        )
         result = await self.cursor.fetchone()
         if result:
             result_tag = result
@@ -56,7 +60,9 @@ class Sqlite3Class():
         # intag: tag name to create
         # returns id of created tag
         query_tag = intag
-        await self.cursor.execute("INSERT INTO tag_table (tag_name) VALUES (?)", [intag])
+        await self.cursor.execute(
+            "INSERT INTO tag_table (tag_name) VALUES (?)", [intag]
+        )
         await self.conn.commit()
         result_tag_id = self.cursor.lastrowid
         return result_tag_id
@@ -117,7 +123,9 @@ class Sqlite3Class():
         test_tag_has_url = await self.fetch_gif(intag)
 
         if not test_tag_has_url:
-            await self.cursor.execute("DELETE FROM tag_table WHERE tag_name = ?", (intag,))
+            await self.cursor.execute(
+                "DELETE FROM tag_table WHERE tag_name = ?", (intag,)
+            )
             await self.conn.commit()
 
     async def info(self, in_string):
@@ -138,37 +146,35 @@ class Sqlite3Class():
         )
         result = await self.cursor.fetchall()
         resulting_tags.append(result)
-        print(resulting_tags,resulting_urls)
-        return resulting_urls,resulting_tags
+        print(resulting_tags, resulting_urls)
+        return resulting_urls, resulting_tags
 
 
-
-
-async def run(loop,query_in):
+async def run(loop, query_in):
     db = await create_conn()
     r = await db.info(query_in)
     print(r)
-    '''
+    """
     async with conn.cursor() as cur:
         await cur.execute("SELECT * FROM tag_table WHERE tag_name=? ", ['woi',])
         r = await cur.fetchall()
         print(r)
-    '''
+    """
     await db.conn.close()
-    
+
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
-    
+
     query_in = input("enter search term: ")
-    #url_in = input("enter url: ")
-    
-    #task = asyncio.gather(run())
+    # url_in = input("enter url: ")
+
+    # task = asyncio.gather(run())
     try:
-        loop.run_until_complete(run(loop,query_in))
-        #loop.run_forever()
+        loop.run_until_complete(run(loop, query_in))
+        # loop.run_forever()
     except KeyboardInterrupt:
         print("[KeyboardInterrupt] Killed bot.")
     finally:
-        #task.cancel()
+        # task.cancel()
         loop.close()

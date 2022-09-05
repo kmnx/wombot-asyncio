@@ -9,16 +9,18 @@ from pathlib import Path
 
 async def get():
     async with aiohttp.ClientSession() as s:
-        r = await s.get("https://www.nts.live/shows/secret-sundaze/episodes/secret-sundaze-10th-march-2022")
+        r = await s.get(
+            "https://www.nts.live/shows/secret-sundaze/episodes/secret-sundaze-10th-march-2022"
+        )
         html = await r.read()
         soup = bs4.BeautifulSoup(html, features="lxml")
-        buttons = soup.find('button', {'data-src' : True})
-        source = buttons.get('data-src')
-        
-        #ultag = soup.find("ul")
-        #firstli = ultag.find("li")
-        
-        '''
+        buttons = soup.find("button", {"data-src": True})
+        source = buttons.get("data-src")
+
+        # ultag = soup.find("ul")
+        # firstli = ultag.find("li")
+
+        """
         buttons = soup.find(("button", {"data-src"}))
         trackartist = firstli.find(("h2", {"class": re.compile(r"^Track_artist")}))
         tracktitle = firstli.find(("h1", {"class": re.compile(r"^Track_title")}))
@@ -43,8 +45,7 @@ async def get():
         else:
             print("no result")
             return None, None, None
-        '''
-            
+        """
 
 
 if __name__ == "__main__":

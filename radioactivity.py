@@ -14,4 +14,3 @@ async def get_station_list():
     ra_stations = json.loads(re.split("<[/]{0,1}script.*?>", decoded)[1])
 
     return ra_stations
-
