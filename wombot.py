@@ -1033,13 +1033,13 @@ class MyBot(chatango.Client):
                     splitargs = args.split(" ")
                     arg = splitargs[0]
                     urls, tags = await self.db.info(arg)
-                    print(urls, tags)
+                    #print(urls, tags)
                     urlstring = ""
                     tagstring = ""
                     urllist = urls[0]
                     taglist = tags[0]
                     for url in urllist:
-                        print(url)
+                        #rint(url)
                         if url.startswith("https://ust.chatango.com/"):
                             nurl = url.replace(
                                 "https://ust.chatango.com/",
@@ -1052,22 +1052,24 @@ class MyBot(chatango.Client):
                         else:
                             urlstring = urlstring + ", " + "'" + nurl + "'"
                     for tag in taglist:
-                        print(tag)
+                        #print(tag)
                         if tagstring == "":
                             tagstring = "'" + tag + "'"
                         else:
                             tagstring = tagstring + ", " + tag
                     if urlstring != "":
+                        print('urlstring is: ',urlstring)
                         # await message.channel.send("'" + arg + "'" + " tags these urls: " + urlstring )
                         await message.room.client.pm.send_message(
                             message.user,
                             "'" + arg + "'" + " tags these urls: " + urlstring,
                         )
                     if tagstring != "":
+                        print('tagstring is: ',tagstring)
                         # await message.channel.send("'" + arg + "'" + "  has these tags:" + tagstring)
                         await message.room.client.pm.send_message(
                             message.user,
-                            "'" + arg + "'" + " tags these urls: " + tagstring,
+                            "'" + arg + "'" + " has these tags: " + tagstring,
                         )
                 else:
                     await message.room.client.pm.send_message(
