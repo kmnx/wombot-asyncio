@@ -3,4 +3,11 @@ aiosqlite
 pydub
 lxml
 mopidy-asyncio-client
+add to requirements.txt:
 aiocron
+aiohttp
+aiocron
+pytz
+bs4
+pydub
+aiosqlite
