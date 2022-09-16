@@ -956,12 +956,49 @@ class MyBot(chatango.Client):
             elif cmd == "fortune":
                 if message.room.name != '<PM>':
                     await message.room.delete_message(message)
-                await message.channel.send(
-                    "your fortune, "
-                    + message.user.showname
-                    + " : "
-                    + (random.choice(fortunes.fortunecookie)).replace(".", "").lower()
-                )
+
+                coinflip = random.choice([0, 1])
+                print(coinflip)
+
+                if coinflip == 0:
+                    await message.channel.send(
+                        "your fortune, "
+                        + message.user.showname
+                        + " : "
+                        + (random.choice(fortunes.fortunecookie)).replace(".", "").lower()
+                    )
+
+                else:
+                
+                    sentence = random.choice(fortunes.fortunecookie)
+                    tokens = nltk.word_tokenize(sentence)
+                    tagged = [[token, tag] for (token, tag) in nltk.pos_tag(tokens)]
+                    nn_idx = []
+                    nns_idx = []
+                    for i, [token, tag] in enumerate(tagged):
+                        if tag == 'VBD':
+                            tagged[i][0] = 'chunted'
+                        elif tag == 'NN':
+                            nn_idx.append(i)
+                        elif tag == 'NNS':
+                            nns_idx.append(i)
+                    try:
+                        tagged[random.choice(nn_idx)][0] = 'chunt'
+                    except IndexError:
+                        pass
+                    try:
+                        tagged[random.choice(nns_idx)][0] = 'chunts'
+                    except IndexError:
+                        pass
+                    cfortune = ' '.join([token[0] for token in tagged])
+                    await message.channel.send(
+                        "your chunted fortune, "
+                        + message.user.showname
+                        + " : "
+                        + cfortune
+                        .replace(".", "")
+                        .lower()
+                    )
 
             # gif/image/snippets spam commands
 
@@ -1248,44 +1285,50 @@ class MyBot(chatango.Client):
             elif cmd == "fortune":
                 if message.room.name != '<PM>':
                     await message.room.delete_message(message)
-                await message.channel.send(
-                    "your fortune, "
-                    + message.user.showname
-                    + " : "
-                    + (random.choice(fortunes.fortunecookie)).replace(".", "").lower()
-                )
 
-            elif cmd == "cfortune":
-                await message.room.delete_message(message)
-                sentence = random.choice(fortunes.fortunecookie)
-                tokens = nltk.word_tokenize(sentence)
-                tagged = [[token, tag] for (token, tag) in nltk.pos_tag(tokens)]
-                nn_idx = []
-                nns_idx = []
-                for i, [token, tag] in enumerate(tagged):
-                    if tag == 'VBD':
-                        tagged[i][0] = 'chunted'
-                    elif tag == 'NN':
-                        nn_idx.append(i)
-                    elif tag == 'NNS':
-                        nns_idx.append(i)
-                try:
-                    tagged[random.choice(nn_idx)][0] = 'chunt'
-                except IndexError:
-                    pass
-                try:
-                    tagged[random.choice(nns_idx)][0] = 'chunts'
-                except IndexError:
-                    pass
-                cfortune = ' '.join([token[0] for token in tagged])
-                await message.channel.send(
-                    "your chunted fortune, "
-                    + message.user.showname
-                    + " : "
-                    + cfortune
-                    .replace(".", "")
-                    .lower()
-                )
+                coinflip = random.choice([0, 1])
+                print(coinflip)
+                print('whatsgoingon')
+
+                if coinflip == 0:
+                    await message.channel.send(
+                        "your fortune, "
+                        + message.user.showname
+                        + " : "
+                        + (random.choice(fortunes.fortunecookie)).replace(".", "").lower()
+                    )
+
+                else:
+                
+                    sentence = random.choice(fortunes.fortunecookie)
+                    tokens = nltk.word_tokenize(sentence)
+                    tagged = [[token, tag] for (token, tag) in nltk.pos_tag(tokens)]
+                    nn_idx = []
+                    nns_idx = []
+                    for i, [token, tag] in enumerate(tagged):
+                        if tag == 'VBD':
+                            tagged[i][0] = 'chunted'
+                        elif tag == 'NN':
+                            nn_idx.append(i)
+                        elif tag == 'NNS':
+                            nns_idx.append(i)
+                    try:
+                        tagged[random.choice(nn_idx)][0] = 'chunt'
+                    except IndexError:
+                        pass
+                    try:
+                        tagged[random.choice(nns_idx)][0] = 'chunts'
+                    except IndexError:
+                        pass
+                    cfortune = ' '.join([token[0] for token in tagged])
+                    await message.channel.send(
+                        "your chunted fortune, "
+                        + message.user.showname
+                        + " : "
+                        + cfortune
+                        .replace(".", "")
+                        .lower()
+                    )
 
             elif cmd == "say":
                 if message.room.name != '<PM>':

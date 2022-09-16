@@ -11,3 +11,4 @@ pytz
 bs4
 pydub
 aiosqlite
+nltk
