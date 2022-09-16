@@ -24,7 +24,7 @@ import nltk
 try:
     nltk.data.find('tokenizers/punkt')
 except LookupError:
-    nlty.download('punkt')
+    nltk.download('punkt')
 try:
     nltk.data.find('taggers/averaged_perceptron_tagger')
 except LookupError:
