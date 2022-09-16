@@ -1060,7 +1060,6 @@ class MyBot(chatango.Client):
                 except IndexError:
                     pass
                 cfortune = ' '.join([token[0] for token in tagged])
-                print(cfortune)
                 await message.channel.send(
                     "your chunted fortune, "
                     + message.user.showname
