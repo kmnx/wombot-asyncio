@@ -580,6 +580,8 @@ class MyBot(chatango.Client):
             elif cmd in ["id1", "idch1", "idnts1", "nts1"]:
                 if message.room.name != '<PM>':
                     await message.room.delete_message(message)
+                # acrcloud retired because expensive and not much better than shazam
+                '''
                 utctime = ""
                 cur = await get_db_cur()
                 await cur.execute("SELECT * FROM nts_one ORDER BY id DESC LIMIT 1;")
@@ -597,12 +599,15 @@ class MyBot(chatango.Client):
                     + title
                     + bandcamp_result_msg
                 )
+                '''
 
                 asyncio.ensure_future(shazam_station(message, "nts1"))
 
             elif cmd in ["id2", "idch2", "idnts2"]:
                 if message.room.name != '<PM>':
                     await message.room.delete_message(message)
+                # acrcloud retired because expensive and not much better than shazam
+                '''
                 utctime = ""
                 cur = await get_db_cur()
                 await cur.execute("SELECT * FROM nts_two ORDER BY id DESC LIMIT 1;")
@@ -620,6 +625,7 @@ class MyBot(chatango.Client):
                     + title
                     + bandcamp_result_msg
                 )
+                '''
 
                 asyncio.ensure_future(shazam_station(message, "nts2"))
 
