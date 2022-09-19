@@ -754,8 +754,10 @@ class MyBot(chatango.Client):
                             r = await s.get("https://chunt.org/restream.json")
                             chu_json = await r.json()
                             print(chu_json)
-                            chuntfm_np = "chuntfm is now playing: " + chu_json['current']['show_title'] + " @ " + chu_json['current']['show_date']
-
+                            if (chu_json['current']['show_title'] and chu_json['current']['show_date']):
+                                chuntfm_np = "chuntfm is now playing: " + chu_json['current']['show_title'] + " @ " + chu_json['current']['show_date']
+                            else:
+                                chuntfm_np = "chuntfm is now playing: " + chu_json['current']['show_title'] 
                 except Exception as e:
                     print(e)
 
@@ -1272,7 +1274,10 @@ class MyBot(chatango.Client):
                             r = await s.get("https://chunt.org/restream.json")
                             chu_json = await r.json()
                             print(chu_json)
-                            chuntfm_np = chu_json['current']['show_title'] + " @ " + chu_json['current']['show_date']
+                            if (chu_json['current']['show_title'] and chu_json['current']['show_date']):
+                                chuntfm_np = "chuntfm is now playing: " + chu_json['current']['show_title'] + " @ " + chu_json['current']['show_date']
+                            else:
+                                chuntfm_np = "chuntfm is now playing: " + chu_json['current']['show_title'] 
 
                 except Exception as e:
                     print(e)
