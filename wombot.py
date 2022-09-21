@@ -92,7 +92,7 @@ helpmessage = (
     + "!shoutout [user]  \r "
     + "!fortune (your daily fortune)  \r \r "
     + "!id1 for NTS1 \r!id2 for NTS2 \r!iddy for DoYouWorld \r \r"
-    + "gifs curated by oscmal, bigbunnybrer and others \r \r"
+    + "gifs curated by bigbunnybrer, oscmal, and others \r \r"
     + "keep chuntin!"
 )
 

@@ -40,11 +40,22 @@ class ShazamApi:
             try:
                 async with session.get(streamsource) as response:
                     print("started recording")
+                    # added chunk_count to counter initial data burst of some stations
+                    chunk_count = 0
                     while asyncio.get_event_loop().time() < (starttime + 4):
+                        
                         chunk = await response.content.read(1024)
+                        chunk_count += 1
+                        print('written chunk ',chunk_count)
                         if not chunk:
                             break
+
+
                         recording.write(chunk)
+                        if chunk_count > 250:
+                            break
+                        
+                        
                     recording.seek(0)
 
                     sound = AudioSegment.from_file(recording)
