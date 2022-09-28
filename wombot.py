@@ -776,8 +776,7 @@ class MyBot(chatango.Client):
 
             elif cmd.startswith("np"):
                 chuntfm_np = ''
-                # first we check official schedule, then
-                
+
                 try:
                     async with ClientSession() as s:
                             r = await s.get("https://chunt.org/schedule.json")
@@ -786,11 +785,11 @@ class MyBot(chatango.Client):
                             timenow = datetime.now(timezone.utc)
                             print('timenow: ',timenow)
                             for show in chu_json:
-                                startime = datetime.fromisoformat(show["startTimestamp"])
-                                endtime = datetime.fromisoformat(show["endTimestamp"])
-                                print('starttime: ',starttime)
-                                if startime < timenow:
-                                    if endtime > timenow:
+                                start_time = datetime.fromisoformat(show["startTimestamp"])
+                                end_time = datetime.fromisoformat(show["endTimestamp"])
+                                print('starttime: ',start_time)
+                                if start_time < timenow:
+                                    if end_time > timenow:
                                         print(show)
 
 
