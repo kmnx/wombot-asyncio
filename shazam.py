@@ -52,6 +52,8 @@ class ShazamApi:
 
 
                         recording.write(chunk)
+                        # some stations send lots of buffered audio on connect which might already be too much for shazam
+                        # so we break at 250 chunks. 4s of 256kbit stream are about 213 chunks
                         if chunk_count > 250:
                             break
                         

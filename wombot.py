@@ -21,6 +21,7 @@ from urllib.parse import urlparse
 import bs4
 import struct
 import nltk
+from anyio import connect_tcp
 try:
     nltk.data.find('tokenizers/punkt')
 except LookupError:
@@ -41,7 +42,7 @@ import data_pics_capybara
 import data_pics_otter
 import data_pics_quokka
 import data_txt_fortunes as fortunes
-
+import anyio, asynctelnet
 # import raid
 import aiosqlite
 
@@ -108,6 +109,22 @@ shoutend = ["😘", "❤️", "💙", "*h*", "<3"]
 
 gifhosts = ["https://c.tenor.com/", "https://media.giphy.com/"]
 
+schedule_test_blob = [{
+        "uid": "2022-06-2300:00",
+        "startTimestamp": "2022-09-28T14:00:00+00:00",
+        "endTimestamp": "2022-09-28T17:00:00+00:00",
+        "dateUK": "2022-06-23",
+        "startTimeUK": "00:00",
+        "endTimeUK": "01:00",
+        "title": "print debugging w/ knmx",
+        "description": "None",
+        "location": "",
+        "lastModified": "2022-08-09T11:14:34+00:00",
+        "status": "CONFIRMED",
+        "invitationStatus": None,
+        "url": None
+    }]
+
 
 basepath = Path().absolute()
 
@@ -162,6 +179,24 @@ def get_chubilee_np():
         return np
     else:
         return None
+
+async def shell(tcp):
+    async with asynctelnet.TelnetClient(tcp, client=True) as stream:
+        while True:
+            # read stream until '?' mark is found
+            outp = await stream.receive(1024)
+            if not outp:
+                # End of File
+                break
+            elif '?' in outp:
+                # reply all questions with 'y'.
+                await stream.send('y')
+
+            # display all server output
+            print(outp, flush=True)
+
+    # EOF
+    print()
 
 
 async def get_now(stream_url, session):
@@ -740,26 +775,85 @@ class MyBot(chatango.Client):
             # jukebox controls
 
             elif cmd.startswith("np"):
+                chuntfm_np = ''
+                # first we check official schedule, then
+                
+                try:
+                    async with ClientSession() as s:
+                            r = await s.get("https://chunt.org/schedule.json")
+                            chu_json = await r.json()
+                            #print(chu_json)
+                            timenow = datetime.now(timezone.utc)
+                            print('timenow: ',timenow)
+                            for show in chu_json:
+                                startime = datetime.fromisoformat(show["startTimestamp"])
+                                endtime = datetime.fromisoformat(show["endTimestamp"])
+                                print('starttime: ',starttime)
+                                if startime < timenow:
+                                    if endtime > timenow:
+                                        print(show)
+
+
+                                        chuntfm_np = (show['title'])
+                                        chuntfm_np = "now live on chuntfm: " + chuntfm_np
+                except Exception as e:
+                    print(e)
+                '''
+                try:
+                    chu_json = schedule_test_blob
+                    #tz = pytz.timezone('Europe/Berlin')
+                    #timenow = datetime.now(tz)
+                    timenow = datetime.now(timezone.utc)
+                    print('timenow is:',timenow)
+                    for show in chu_json:
+                        print('show is: ',show)
+                        start_time = datetime.fromisoformat(show["startTimestamp"])
+                        endtime = datetime.fromisoformat(show["endTimestamp"])
+                        print('starttime is: ',start_time)
+                        print('where we at')
+                        print('start_time < timenow:',start_time < timenow)
+                        print('endtime > timenow',endtime > timenow)
+                        if start_time < timenow:
+                            
+                            if endtime > timenow:
+                                chuntfm_np = (show['title'])
+                                print('printing the show')
+                                print(chuntfm_np)
+                                chuntfm_np = 'chuntfm is now playing: ' + chuntfm_np
+
+                except Exception as e:
+                    print(e)
+                
+                try:
+                    async with await connect_tcp('localhost', 1234) as client:
+                        await shell(client)
+                except Exception as e:
+                    print(e)
+                '''
 
                 if message.room.name != '<PM>':
                     await message.room.delete_message(message)
+                """
                 np = get_chubilee_np()
                 if np is not None:
                     await message.channel.send(
                         "Now live on https://fm.chunt.org/stream : " + np
                     )
                 chuntfm_np = ''
-                try:
-                    async with ClientSession() as s:
-                            r = await s.get("https://chunt.org/restream.json")
-                            chu_json = await r.json()
-                            print(chu_json)
-                            if (chu_json['current']['show_title'] and chu_json['current']['show_date']):
-                                chuntfm_np = "chuntfm is now playing: " + chu_json['current']['show_title'] + " @ " + chu_json['current']['show_date']
-                            else:
-                                chuntfm_np = "chuntfm is now playing: " + chu_json['current']['show_title'] 
-                except Exception as e:
-                    print(e)
+                """
+                
+                if not chuntfm_np:
+                    try:
+                        async with ClientSession() as s:
+                                r = await s.get("https://chunt.org/restream.json")
+                                chu_json = await r.json()
+                                print(chu_json)
+                                if (chu_json['current']['show_title'] and chu_json['current']['show_date']):
+                                    chuntfm_np = "chuntfm is now playing: " + chu_json['current']['show_title'] + " @ " + chu_json['current']['show_date']
+                                else:
+                                    chuntfm_np = "chuntfm is now playing: " + chu_json['current']['show_title'] 
+                    except Exception as e:
+                        print(e)
 
                 data = await mpd.playback.get_current_track()
                 print(data)
