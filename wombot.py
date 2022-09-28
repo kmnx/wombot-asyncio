@@ -1100,6 +1100,40 @@ class MyBot(chatango.Client):
                         .replace(".", "")
                         .lower()
                     )
+            elif cmd == "cfortune":
+                if message.room.name != '<PM>':
+                    await message.room.delete_message(message)
+
+                
+                sentence = random.choice(fortunes.fortunecookie)
+                tokens = nltk.word_tokenize(sentence)
+                tagged = [[token, tag] for (token, tag) in nltk.pos_tag(tokens)]
+                nn_idx = []
+                nns_idx = []
+                for i, [token, tag] in enumerate(tagged):
+                    if tag == 'VBD':
+                        tagged[i][0] = 'chunted'
+                    elif tag == 'NN':
+                        nn_idx.append(i)
+                    elif tag == 'NNS':
+                        nns_idx.append(i)
+                try:
+                    tagged[random.choice(nn_idx)][0] = 'chunt'
+                except IndexError:
+                    pass
+                try:
+                    tagged[random.choice(nns_idx)][0] = 'chunts'
+                except IndexError:
+                    pass
+                cfortune = ' '.join([token[0] for token in tagged])
+                await message.channel.send(
+                    "your chunted fortune, "
+                    + message.user.showname
+                    + " : "
+                    + cfortune
+                    .replace(".", "")
+                    .lower()
+                )
 
             # gif/image/snippets spam commands
 
