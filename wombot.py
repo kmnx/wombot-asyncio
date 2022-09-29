@@ -49,6 +49,8 @@ import aiosqlite
 import schedule
 import chuntfm
 
+import futuresay
+
 import mysecrets
 
 shazam_api_key = mysecrets.shazam_api_key
@@ -249,6 +251,46 @@ async def schedule_gif_of_the_hour():
 
     while True:
         await asyncio.sleep(5)
+
+async def schedule_futuresay():
+    cron_futuresay = aiocron.crontab(
+        "* * * * *",
+        func=post_futuresay,
+        args=("Every minute.",),
+        start=True,
+    )
+
+    while True:
+        await asyncio.sleep(5)
+
+async def post_futuresay(param):
+
+    bots = []
+    mainroom = environ["wombotmainroom"]
+    testroom = environ["wombottestroom"]
+    bots.append(bot.get_room(mainroom))
+    bots.append(bot.get_room(testroom))
+
+    db = await aiosqliteclass.create_conn()
+    says = db.get_futuresay(mins=1)
+
+    for say in says:
+        # check timediff between now and saytime
+        now = datetime.now()
+        back_then = say[2]
+        future = say[1]
+
+        diff = future - now
+
+        if diff > 0:
+            asyncio.sleep(diff)
+
+        # post
+        for roombot in bots:
+            await roombot.send_message(futuresay.format_timedelta(say[2]) + ' ago, ' + str(say[4]) + 'ago said: ' + say[3])
+
+        # mark futuresay as posted
+        await db.mark_futuresay_said(say[0])
 
 
 async def post_chuntfm_status():
@@ -1484,6 +1526,38 @@ class MyBot(chatango.Client):
                             print(arg)
                             await message.channel.send("You are a bg, " + (arg) + "!")
 
+            elif cmd == "futuresay":
+
+                now = datetime.datetime.utcnow()
+                user = message.user.showname
+
+                if message.user.isanon:
+                    user = user + " (anon)"
+
+                if message.room.name != '<PM>':
+                    await message.room.delete_message(message)
+
+                # parse time
+                try:
+                    future = args.split(" ")[0]
+                    say = args.split(" ", 1)[1]
+
+                    # check if future can be parsed
+                    parsed_future = futuresay.parse_future(future)
+
+                except:
+                    await message.channel.send("please specify a time, mate (like !futuresay 30days this is my message)")
+                    return
+
+                # if smaller than a minute, send right away
+                if (now - parsed_future) < datetime.timedelta(minutes=1, seconds = 59):
+                    asyncio.sleep(abs((now - parsed_future).total_seconds()))
+                    await message.channel.send(say)
+                    return
+                else:
+                    # if bigger than a minute, add to db
+                    await self.db.insert_futuresay(parsed_future, say, user)
+
             elif cmd == "kiss":
                 if message.room.name != '<PM>':
                     await message.room.delete_message(message)
@@ -1595,6 +1669,7 @@ async def get_db_cur():
 
 
 if __name__ == "__main__":
+
     loop = asyncio.get_event_loop()
     bot = MyBot()
     bot.default_user(config.botuser[0], config.botuser[1])  # easy_start
@@ -1607,8 +1682,9 @@ if __name__ == "__main__":
     mpdtask = asyncio.gather(mpd_context_manager(mpd))
     giftask = schedule_gif_of_the_hour()
     cfm_task = schedule_chuntfm_livecheck()
+    futuresay_task = schedule_futuresay()
 
-    tasks = asyncio.gather(task, giftask, mpdtask, cfm_task)
+    tasks = asyncio.gather(task, giftask, mpdtask, cfm_task, futuresay_task)
 
     allgif_file = os.path.join(basepath, "allgif.txt")
     if not os.path.exists(allgif_file):

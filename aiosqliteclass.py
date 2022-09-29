@@ -40,6 +40,40 @@ class Sqlite3Class:
         else:
             return None
 
+    async def insert_futuresay(self, future, say, user):
+
+        # if table does not exist, create it
+        await self.cursor.execute(
+            "CREATE TABLE IF NOT EXISTS futuresay_table (id INTEGER PRIMARY KEY, future timestamp, back_then timestamp, say TEXT, user TEXT, said INTEGER DEFAULT 0)"
+        )
+        await self.conn.commit()
+
+        # insert futuresay entry into table
+        await self.cursor.execute(
+            "INSERT INTO futuresay (future, back_then, say, user) VALUES (?,?,?,?)",
+            [future, say, user],
+        )
+        await self.conn.commit()
+
+    # get all future futuresays
+    async def get_futuresays(self, mins = 1):
+        # get all unsaid future futuresays within the next 1 minute
+        await self.cursor.execute(
+            "SELECT * FROM futuresay_table WHERE said = 0 AND future < datetime('now', ?)", [mins]
+        )
+        result = await self.cursor.fetchall()
+        if result:
+            return result
+        else:
+            return None
+
+    async def mark_futuresay_said(self, id):
+        await self.cursor.execute(
+            "UPDATE futuresay_table SET said = 1 WHERE id = ?", (id,)
+        )
+        await self.conn.commit()
+
+
     async def query_tag(self, intag):
         # intag: gif tag to search
         #  returns tag id
