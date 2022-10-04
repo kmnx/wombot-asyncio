@@ -615,8 +615,6 @@ class MyBot(chatango.Client):
             elif cmd in ["id1", "idch1", "idnts1", "nts1"]:
                 if message.room.name != '<PM>':
                     await message.room.delete_message(message)
-                await message.channel.send('who cares about metadata')
-
                 # acrcloud retired because expensive and not much better than shazam
                 '''
                 utctime = ""
@@ -638,12 +636,11 @@ class MyBot(chatango.Client):
                 )
                 '''
 
-                #asyncio.ensure_future(shazam_station(message, "nts1"))
+                asyncio.ensure_future(shazam_station(message, "nts1"))
 
             elif cmd in ["id2", "idch2", "idnts2"]:
                 if message.room.name != '<PM>':
                     await message.room.delete_message(message)
-                await message.channel.send('who cares about metadata')
                 # acrcloud retired because expensive and not much better than shazam
                 '''
                 utctime = ""
@@ -665,14 +662,9 @@ class MyBot(chatango.Client):
                 )
                 '''
 
-                #asyncio.ensure_future(shazam_station(message, "nts2"))
+                asyncio.ensure_future(shazam_station(message, "nts2"))
 
             elif cmd in ["iddy", "iddoyou"]:
-                if message.room.name != '<PM>':
-                    await message.room.delete_message(message)
-
-                await message.channel.send('who cares about metadata')
-                '''
                 if message.room.name != '<PM>':
                     await message.room.delete_message(message)
 
@@ -697,7 +689,6 @@ class MyBot(chatango.Client):
                     print("no id from doyou")
                     await message.channel.send("No ID on doyou website, trying shazam")
                     asyncio.ensure_future(shazam_station(message, "doyou"))
-                    '''
 
             #
             # elif cmd in ["idchunt"]:
@@ -736,20 +727,9 @@ class MyBot(chatango.Client):
             elif cmd in ["idchunt2", "idjukebox", "idchu2"]:
                 if message.room.name != '<PM>':
                     await message.room.delete_message(message)
-
-                await message.channel.send('who cares about metadata')
-                '''
-                if message.room.name != '<PM>':
-                    await message.room.delete_message(message)
                 asyncio.ensure_future(shazam_station(message, "chunt2"))
-                '''
 
             elif cmd.startswith("id") or cmd.startswith("raid"):
-                if message.room.name != '<PM>':
-                    await message.room.delete_message(message)
-
-                await message.channel.send('who cares about metadata')
-                '''
                 if cmd.startswith("raid"):
 
                     cmd = cmd[4:]
@@ -791,7 +771,6 @@ class MyBot(chatango.Client):
                     )
                 else:
                     await message.channel.send("No online stations found :(")
-                    '''
 
             # jukebox controls
 
