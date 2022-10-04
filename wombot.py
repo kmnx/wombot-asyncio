@@ -615,6 +615,8 @@ class MyBot(chatango.Client):
             elif cmd in ["id1", "idch1", "idnts1", "nts1"]:
                 if message.room.name != '<PM>':
                     await message.room.delete_message(message)
+                await message.channel.send('who cares about metadata')
+
                 # acrcloud retired because expensive and not much better than shazam
                 '''
                 utctime = ""
@@ -641,6 +643,7 @@ class MyBot(chatango.Client):
             elif cmd in ["id2", "idch2", "idnts2"]:
                 if message.room.name != '<PM>':
                     await message.room.delete_message(message)
+                await message.channel.send('who cares about metadata')
                 # acrcloud retired because expensive and not much better than shazam
                 '''
                 utctime = ""
@@ -668,6 +671,11 @@ class MyBot(chatango.Client):
                 if message.room.name != '<PM>':
                     await message.room.delete_message(message)
 
+                await message.channel.send('who cares about metadata')
+                '''
+                if message.room.name != '<PM>':
+                    await message.room.delete_message(message)
+
                 londontime, artist, title = await get_id_doyou.get()
                 hoursmins = londontime
 
@@ -689,6 +697,7 @@ class MyBot(chatango.Client):
                     print("no id from doyou")
                     await message.channel.send("No ID on doyou website, trying shazam")
                     asyncio.ensure_future(shazam_station(message, "doyou"))
+                    '''
 
             #
             # elif cmd in ["idchunt"]:
