@@ -638,7 +638,7 @@ class MyBot(chatango.Client):
                 )
                 '''
 
-                “#asyncio.ensure_future(shazam_station(message, "nts1"))
+                #asyncio.ensure_future(shazam_station(message, "nts1"))
 
             elif cmd in ["id2", "idch2", "idnts2"]:
                 if message.room.name != '<PM>':
