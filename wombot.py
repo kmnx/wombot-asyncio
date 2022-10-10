@@ -1009,6 +1009,11 @@ class MyBot(chatango.Client):
                     )
 
             # gif/image/snippets spam commands
+            elif cmd == "simptest":
+                random_user = random.choice(message.room.userlist)
+                base_url = "https://ust.chatango.com/profileimg/"
+                pp_url = base_url + random_user[0] + "/" + random_user[1] + "/" + random_user + "/full.jpg"
+                await message.channel.send(pp_url)
 
             elif cmd in [
                 "legalize",
