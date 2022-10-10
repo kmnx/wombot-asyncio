@@ -3,7 +3,7 @@
 import chatango
 import asyncio
 from aiohttp import ClientSession
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import aiocron
 import random
 import typing
@@ -272,22 +272,35 @@ async def post_futuresay(param):
     bots.append(bot.get_room(testroom))
 
     db = await aiosqliteclass.create_conn()
-    says = db.get_futuresay(mins=1)
+    print('getting futuresays from db')
+    says = await db.get_futuresays(mins=1.5)
+
 
     for say in says:
+
+        print('futuresaying: ')
+        print(say)
+
         # check timediff between now and saytime
-        now = datetime.now()
+        now = datetime.now(timezone.utc)
         back_then = say[2]
         future = say[1]
 
+        # check if future is string
+        if isinstance(future, str):
+            # convert to datetime
+            future = datetime.strptime(future, '%Y-%m-%d %H:%M:%S.%f%z')
+
         diff = future - now
 
-        if diff > 0:
-            asyncio.sleep(diff)
+        # print(diff.total_seconds())
+
+        if diff.total_seconds() > 0:
+            await asyncio.sleep(int(diff.total_seconds()))
 
         # post
         for roombot in bots:
-            await roombot.send_message(futuresay.format_timedelta(say[2]) + ' ago, ' + str(say[4]) + 'ago said: ' + say[3])
+            await roombot.send_message(await futuresay.format_timedelta(diff) + ' ago, ' + str(say[4]) + ' said: ' + say[3])
 
         # mark futuresay as posted
         await db.mark_futuresay_said(say[0])
@@ -593,6 +606,7 @@ class MyBot(chatango.Client):
     async def on_init(self):
         print("Bot initialized")
         self.db = await aiosqliteclass.create_conn()
+        print("connected to db")
         self.goth = random.choice(await bot.db.fetch_gif("bbb"))
         print("seriously")
 
@@ -1528,7 +1542,7 @@ class MyBot(chatango.Client):
 
             elif cmd == "futuresay":
 
-                now = datetime.datetime.utcnow()
+                now = datetime.now(timezone.utc)
                 user = message.user.showname
 
                 if message.user.isanon:
@@ -1542,21 +1556,24 @@ class MyBot(chatango.Client):
                     future = args.split(" ")[0]
                     say = args.split(" ", 1)[1]
 
+                    print('future: ' + future)
+                    print('say: ' + say)
+
                     # check if future can be parsed
-                    parsed_future = futuresay.parse_future(future)
+                    parsed_future = await futuresay.parse_future(future)
 
                 except:
                     await message.channel.send("please specify a time, mate (like !futuresay 30days this is my message)")
                     return
 
                 # if smaller than a minute, send right away
-                if (now - parsed_future) < datetime.timedelta(minutes=1, seconds = 59):
-                    asyncio.sleep(abs((now - parsed_future).total_seconds()))
+                if (parsed_future - now) < timedelta(minutes=1, seconds = 59):
+                    await asyncio.sleep(int((parsed_future - now).total_seconds()))
                     await message.channel.send(say)
                     return
                 else:
                     # if bigger than a minute, add to db
-                    await self.db.insert_futuresay(parsed_future, say, user)
+                    await self.db.insert_futuresay(parsed_future, now, say, user)
 
             elif cmd == "kiss":
                 if message.room.name != '<PM>':

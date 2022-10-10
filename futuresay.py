@@ -7,15 +7,31 @@ async def parse_future(arg):
     Parse the future
     """
 
-    # try to find timedelta strings
-    string_parse = re.findall('([0-9]+)(week|day|hour|minute|second|microseconds)+', arg.lower().strip())
+    print ('trying to parse future: ' + arg)
 
+    arg = str(arg)
+
+    try:
+        # try to find timedelta strings
+        string_parse = re.findall('([0-9]+)((?:week|day|hour|minute|second|microsecond)s*)+', arg.lower().strip())
+    except Exception as e:
+        print('Could not parse future: ' + str(e))
+        raise e
+
+
+    print(string_parse)
     # @TODO try to find timestamps
 
 
     if len(string_parse) > 0:
 
-        delta = datetime.timedelta(**{key: value for value, key in string_parse})
+        args_dict = [(val, key) if key.endswith('s') else (val, key+'s') for val, key in string_parse]
+
+        try:
+            delta = datetime.timedelta(**{key: int(value) for value, key in args_dict})
+        except Exception as e:
+            print('Could not parse future: ' + str(e))
+            raise e
 
         # get the current time
         now = datetime.datetime.now(datetime.timezone.utc)
@@ -29,8 +45,8 @@ async def parse_future(arg):
 
 async def format_timedelta(value, time_format="{days} days, {hours2}:{minutes2}:{seconds2}"):
 
-    if hasattr(value, 'seconds'):
-        seconds = value.seconds + value.days * 24 * 3600
+    if isinstance(value, datetime.timedelta):
+        seconds = value.total_seconds()
     else:
         seconds = int(value)
 
