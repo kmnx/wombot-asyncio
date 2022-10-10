@@ -19,17 +19,11 @@ class Sqlite3Class:
 
     async def _init(self):
         self.conn = await aiosqlite.connect("pythonsqlite.db")
-        # self.conn.row_factory = lambda cursor, row: row[0]
+        self.conn.row_factory = lambda cursor, row: row[0]
         # self.conn.row_factory = aiosqlite.Row
         self.cursor = await self.conn.cursor()
 
-        # if futuresay_table does not exist, create it
-        await self.cursor.execute(
-            "CREATE TABLE IF NOT EXISTS futuresay_table (id INTEGER PRIMARY KEY, future timestamp, back_then timestamp, say TEXT, user TEXT, said INTEGER DEFAULT 0)"
-        )
-        await self.conn.commit()
-
-    async def _close(self):
+    async def _close():
         await self.conn.close()
 
     async def query_gif(self, inurl):
@@ -37,7 +31,7 @@ class Sqlite3Class:
         # returns url id
         print("query_gif", inurl)
         await self.cursor.execute(
-            "SELECT id FROM object_table WHERE object_name=? ", [inurl]
+            "SELECT * FROM object_table WHERE object_name=? ", [inurl]
         )
         result = await self.cursor.fetchone()
         if result:
@@ -45,38 +39,6 @@ class Sqlite3Class:
             return result_id
         else:
             return None
-
-    async def insert_futuresay(self, future, back_then, say, user):
-
-        # insert futuresay entry into table
-        await self.cursor.execute(
-            "INSERT INTO futuresay_table (future, back_then, say, user) VALUES (?,?,?,?)",
-            [future, back_then, say, user],
-        )
-        await self.conn.commit()
-
-    # get all future futuresays
-    async def get_futuresays(self, mins = 1):
-        # get all unsaid future futuresays within the next 1 minute
-        curse = await self.conn.execute(
-            "SELECT * FROM futuresay_table WHERE said = 0 AND ((JULIANDAY(datetime(future))-JULIANDAY(datetime('now'))) * 60 * 60) BETWEEN 0 AND ?", [mins]
-        )
-
-        result = [row for row in await curse.fetchall()]
-
-        await curse.close()
-
-        if result:
-            return result
-        else:
-            return []
-
-    async def mark_futuresay_said(self, id):
-        await self.cursor.execute(
-            "UPDATE futuresay_table SET said = 1 WHERE id = ?", (id,)
-        )
-        await self.conn.commit()
-
 
     async def query_tag(self, intag):
         # intag: gif tag to search
@@ -121,7 +83,7 @@ class Sqlite3Class:
     async def fetch_gif(self, intag):
         # intag: tag name to search
         # returns gif url
-        cursor = await self.execute(
+        await self.cursor.execute(
             "SELECT object_name from object_tag_mapping JOIN object_table ON object_reference = object_table.id JOIN tag_table ON tag_reference = tag_table.id WHERE tag_name = ?",
             [intag],
         )
