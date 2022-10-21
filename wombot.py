@@ -612,7 +612,7 @@ class MyBot(chatango.Client):
                 await message.channel.send(helpmessage)
                 await message.room.client.pm.send_message(message.user, helpmessage)
 
-            elif cmd in ["id1", "idch1", "idnts1", "nts1"]:
+            elif cmd in ["idch1", "idnts1", "nts1"]:
                 if message.room.name != '<PM>':
                     await message.room.delete_message(message)
                 # acrcloud retired because expensive and not much better than shazam
@@ -638,7 +638,7 @@ class MyBot(chatango.Client):
 
                 asyncio.ensure_future(shazam_station(message, "nts1"))
 
-            elif cmd in ["id2", "idch2", "idnts2"]:
+            elif cmd in ["idch2", "idnts2"]:
                 if message.room.name != '<PM>':
                     await message.room.delete_message(message)
                 # acrcloud retired because expensive and not much better than shazam
@@ -715,7 +715,7 @@ class MyBot(chatango.Client):
             #
             #     asyncio.ensure_future(shazam_station(message,'chunt1'))
             #     asyncio.ensure_future(shazam_station(message,'chunt2'))
-            elif cmd in ["idchunt1", "idchu1"]:
+            elif cmd in ["id1","idchunt1", "idchu1"]:
                 if message.room.name != '<PM>':
                     await message.room.delete_message(message)
                 # trackinfo = await get_track()
@@ -724,7 +724,7 @@ class MyBot(chatango.Client):
                 # await message.channel.send("ID chunt1 from stream: " + trackinfo)
 
                 asyncio.ensure_future(shazam_station(message, "chunt1"))
-            elif cmd in ["idchunt2", "idjukebox", "idchu2"]:
+            elif cmd in ["id2","idchunt2", "idjukebox", "idchu2"]:
                 if message.room.name != '<PM>':
                     await message.room.delete_message(message)
                 asyncio.ensure_future(shazam_station(message, "chunt2"))

@@ -112,7 +112,7 @@ class Connection:
     async def s_do_recv(self):
         while self.connected:
             # TODO if the rcv is higher than bytes, may is cutted
-            rcv = await self._recv.read(2048)
+            rcv = await self._recv.read(4096)
             await asyncio.sleep(0.0001)
             if rcv:  # si recibe datos.
                 data = rcv.decode()
