@@ -134,7 +134,7 @@ if not os.path.exists(allgif_file):
         pass
 else:
     with open(allgif_file) as file:
-        allgif_set = set(line.strip() for line in file)
+        allgif_set = set(line.strip() for line in file if line.startswith('http://'))
 
 
 print("init variables done")
@@ -299,7 +299,7 @@ async def post_chuntfm_status():
 
 
 async def schedule_chuntfm_livecheck():
-    livecheck = aiocron.crontab("*/1 * * * *", func=post_chuntfm_status, start=True)
+    #livecheck = aiocron.crontab("*/1 * * * *", func=post_chuntfm_status, start=True)
 
     while True:
         await asyncio.sleep(5)
@@ -1339,6 +1339,12 @@ class MyBot(chatango.Client):
                     )
 
             # automated gif posting / spamming
+            elif cmd in ["random", "rnd", ""]:
+                if message.room.name != '<PM>':
+                    await message.room.delete_message(message)
+                gifone = random.choice(allgif_set)
+                giftwo = random.choice(allgif_set)
+                await message.channel.send(gifone + " " + gifone + " " + gifone)
 
             elif cmd in ["gif", "gift", "dance"]:
                 if message.room.name != '<PM>':
