@@ -11,3 +11,5 @@ bs4
 pydub
 aiosqlite
 nltk
+anyio
+asynctelnet

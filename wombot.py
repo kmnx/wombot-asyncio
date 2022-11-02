@@ -1339,12 +1339,13 @@ class MyBot(chatango.Client):
                     )
 
             # automated gif posting / spamming
-            elif cmd in ["random", "rnd", ""]:
+            elif cmd in ["random", "rnd", "rand"]:
                 if message.room.name != '<PM>':
                     await message.room.delete_message(message)
-                gifone = random.choice(allgif_set)
-                giftwo = random.choice(allgif_set)
-                await message.channel.send(gifone + " " + gifone + " " + gifone)
+               
+                gifone = random.sample(allgif_set,1)[0]
+                giftwo = random.sample(allgif_set,1)[0]
+                await message.channel.send(gifone + " " + giftwo + " " + gifone)
 
             elif cmd in ["gif", "gift", "dance"]:
                 if message.room.name != '<PM>':
@@ -1615,6 +1616,7 @@ if __name__ == "__main__":
     cfm_task = schedule_chuntfm_livecheck()
 
     tasks = asyncio.gather(task, giftask, mpdtask, cfm_task)
+    print('init asyncio tasks started')
 
     allgif_file = os.path.join(basepath, "allgif.txt")
     if not os.path.exists(allgif_file):
@@ -1623,7 +1625,8 @@ if __name__ == "__main__":
         allgif_set = set()
     else:
         with open(allgif_file) as file:
-            allgif_set = set(line.strip() for line in file)
+            allgif_set = set(line.strip() for line in file if line.startswith('http'))
+
     try:
         loop.run_until_complete(tasks)
         loop.run_forever()

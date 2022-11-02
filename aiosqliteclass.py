@@ -22,6 +22,7 @@ class Sqlite3Class:
         self.conn.row_factory = lambda cursor, row: row[0]
         # self.conn.row_factory = aiosqlite.Row
         self.cursor = await self.conn.cursor()
+        print('init aiosqliteclass done ')
 
     async def _close():
         await self.conn.close()
