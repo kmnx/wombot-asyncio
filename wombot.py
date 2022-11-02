@@ -1536,9 +1536,8 @@ class MyBot(chatango.Client):
 
                 await message.channel.send(
                         
-                        message.user.showname
-                        + " , the magic 8 ball says "
-                        + (random.choice(eightball)).replace(".", "").lower()
+                        + "magic 8 ball says: "
+                        + (random.choice(eightball))
                     )
 
             elif cmd in ["heart", "hearts"]:
