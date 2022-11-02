@@ -1535,8 +1535,7 @@ class MyBot(chatango.Client):
                 eb = random.choice(eightball)
 
                 await message.channel.send(
-                        
-                        + "magic 8 ball says: "
+                        "magic 8 ball says: "
                         + (random.choice(eightball))
                     )
 
