@@ -1532,12 +1532,9 @@ class MyBot(chatango.Client):
             elif cmd == "8ball":
                 if message.room.name != '<PM>':
                     await message.room.delete_message(message)
-                eb = random.choice(eightball)
 
                 await message.channel.send(
-                        "magic 8 ball says: "
-                        + (random.choice(eightball))
-                    )
+                        "magic 8 ball says: " + (random.choice(eightball)))
 
             elif cmd in ["heart", "hearts"]:
                 if message.room.name != '<PM>':
