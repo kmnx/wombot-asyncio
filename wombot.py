@@ -1535,10 +1535,11 @@ class MyBot(chatango.Client):
 
                 if args:
                     await message.channel.send(
+                            "@"+
                             message.user.showname + 
-                            "asked: " +
+                            " asked: " +
                             args +
-                            "- 8 ball says: " + (random.choice(eightball)))
+                            " - 8 ball says: " + (random.choice(eightball)))
                 else:
 
                     await message.channel.send(
