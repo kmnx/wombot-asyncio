@@ -797,8 +797,9 @@ class MyBot(chatango.Client):
                 chuntfm_np = ''
 
                 try:
+                    thisproxy = "http://wombot:.LmhLED6@XK@172.105.67.231:3128"
                     async with ClientSession() as s:
-                            r = await s.get("https://chunt.org/schedule.json")
+                            r = await s.get("https://chunt.org/schedule.json",proxy=thisproxy)
                             chu_json = await r.json()
                             #print(chu_json)
                             timenow = datetime.now(timezone.utc)
@@ -863,7 +864,7 @@ class MyBot(chatango.Client):
                 if not chuntfm_np:
                     try:
                         async with ClientSession() as s:
-                                r = await s.get("https://chunt.org/restream.json")
+                                r = await s.get("https://chunt.org/restream.json",proxy=thisproxy)
                                 chu_json = await r.json()
                                 print(chu_json)
                                 if (chu_json['current']['show_title'] and chu_json['current']['show_date']):
