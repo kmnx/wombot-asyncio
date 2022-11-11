@@ -14,9 +14,6 @@ async def shell(tcp):
                 status = None
                 break
             elif 'connected' in str(outp,'utf-8'):
-                # reply all questions with 'y'.
-                print('we have outp')
-                print(str(outp,'utf-8'))
                 gotstatus = True    
                 status = str(outp,'utf-8')
             # display all server output
