@@ -48,6 +48,7 @@ import aiosqlite
 
 import schedule
 import chuntfm
+import telnet
 
 import mysecrets
 
@@ -158,46 +159,6 @@ else:
 
 print("init variables done")
 
-
-def get_chubilee_np():
-    chubilee = {
-        "2022-06-23-00": "welcome st0nerz w kiki and call ins",
-        "2022-06-23-01": "sorting w/ tiger2 not live from prague",
-        "2022-06-23-02": "Trombones w/ Andehhhh",
-        "2022-06-23-03": "Jaanipäev w/meh",
-        "2022-06-23-04": "Nonstop Fit - Trous first appearance",
-        "2022-06-23-05": "faleme loop w/ cinnaron",
-        "2022-06-23-06": "chunting with mavros",
-        "2022-06-23-07": "Ok, I am Awake w/okiamevans",
-        "2022-06-23-08": "Oscar Maldonados morning shift",
-        "2022-06-23-09": "Early Dealer W/ Rival Dealer",
-        "2022-06-23-10": "Early Dealer W/ Rival Dealer",
-        "2022-06-23-11": "Yung Chunny Munny w Chunny Sunny ft. Peanuts MC",
-        "2022-06-23-12": "bubbasee on the high seas",
-        "2022-06-23-13": "Mamma mia it's a balearia ft sayanne",
-        "2022-06-23-14": "DJ Dale - Jap Hip-Hop Special",
-        "2022-06-23-15": "Relaxed Fit w large trou",
-        "2022-06-23-16": "simple features w/ dj pauly c",
-        "2022-06-23-17": "Turbobabe's Turbohour w/ Ginny",
-        "2022-06-23-18": "HUGE DONKS w/ pixel",
-        "2022-06-23-19": "Woi Workout with oscmal",
-        "2022-06-23-20": "sort ur life out NOW w kiki",
-        "2022-06-23-21": "NRG with P-Air",
-        "2022-06-23-22": "Digital Rimming w/WoiKev",
-        "2022-06-23-23": "Bowel Cleansers w/ number2",
-        "2022-06-24-00": "🍍youanas sonic ananas🍍",
-        "2022-06-24-01": "big al's wee drums",
-        "2022-06-24-02": "GO AFTER",
-        "2022-06-24-03": "LATE????????? PARTY",
-    }
-    now = datetime.now()
-    key = str(now.strftime("%Y-%m-%d-%H"))
-    print(key)
-    if key in chubilee:
-        np = chubilee[key]
-        return np
-    else:
-        return None
 
 async def shell(tcp):
     async with asynctelnet.TelnetClient(tcp, client=True) as stream:
@@ -796,83 +757,62 @@ class MyBot(chatango.Client):
             elif cmd.startswith("np"):
                 chuntfm_np = ''
 
+                if message.room.name != '<PM>':
+                    await message.room.delete_message(message)
+                liquidsoap_harbor_status = ''
                 try:
-                    thisproxy = "http://wombot:.LmhLED6@XK@172.105.67.231:3128"
+                    liquidsoap_harbor_status = await telnet.main()
+                except Exception as e:
+                    print(e)
+
+                thisproxy = mysecrets.proxy
+                try:
+                    
                     async with ClientSession() as s:
                             r = await s.get("https://chunt.org/schedule.json",proxy=thisproxy)
-                            chu_json = await r.json()
+                            schedule_json = await r.json()
                             #print(chu_json)
                             timenow = datetime.now(timezone.utc)
                             print('timenow: ',timenow)
-                            for show in chu_json:
+                            for show in schedule_json:
                                 start_time = datetime.fromisoformat(show["startTimestamp"])
                                 end_time = datetime.fromisoformat(show["endTimestamp"])
                                 print('starttime: ',start_time)
                                 if start_time < timenow:
                                     if end_time > timenow:
                                         print(show)
-
-
                                         chuntfm_np = (show['title'])
-                                        chuntfm_np = "now live on chuntfm: " + chuntfm_np
                 except Exception as e:
                     print(e)
-                '''
-                try:
-                    chu_json = schedule_test_blob
-                    #tz = pytz.timezone('Europe/Berlin')
-                    #timenow = datetime.now(tz)
-                    timenow = datetime.now(timezone.utc)
-                    print('timenow is:',timenow)
-                    for show in chu_json:
-                        print('show is: ',show)
-                        start_time = datetime.fromisoformat(show["startTimestamp"])
-                        endtime = datetime.fromisoformat(show["endTimestamp"])
-                        print('starttime is: ',start_time)
-                        print('where we at')
-                        print('start_time < timenow:',start_time < timenow)
-                        print('endtime > timenow',endtime > timenow)
-                        if start_time < timenow:
-                            
-                            if endtime > timenow:
-                                chuntfm_np = (show['title'])
-                                print('printing the show')
-                                print(chuntfm_np)
-                                chuntfm_np = 'chuntfm is now playing: ' + chuntfm_np
 
-                except Exception as e:
-                    print(e)
-                
-                try:
-                    async with await connect_tcp('localhost', 1234) as client:
-                        await shell(client)
-                except Exception as e:
-                    print(e)
-                '''
+                # someone is definitely live
+                if liquidsoap_harbor_status.startswith('source'):
+                    if chuntfm_np:
+                        chuntfm_np = 'LIVE on chuntfm: ' + chuntfm_np
+                    else:
+                        chuntfm_np = 'LIVE on chunfm: unscheduled w/ anon1111'
+                # no one is connected to stream
+                # 
+                else:
+                    # either just a disconnect or scheduled show
+                    if chuntfm_np:
+                        chuntfm_np = 'scheduled to be live on chuntfm but offline: ' + chuntfm_np
+                        # i dont know if it is a prerecord
+                        # prerecord goes into calendar so we have np
+                        # live indicator will be off
+                    else:
+                        try:
+                            async with ClientSession() as s:
+                                    r = await s.get("https://chunt.org/restream.json",proxy=thisproxy)
+                                    chu_json = await r.json()
+                                    print(chu_json)
+                                    if (chu_json['current']['show_title'] and chu_json['current']['show_date']):
+                                        chuntfm_np = "restream on chunt1: " + chu_json['current']['show_title'] + " @ " + chu_json['current']['show_date']
+                                    else:
+                                        chuntfm_np = "restream on chunt1: " + chu_json['current']['show_title'] 
+                        except Exception as e:
+                            print(e)
 
-                if message.room.name != '<PM>':
-                    await message.room.delete_message(message)
-                """
-                np = get_chubilee_np()
-                if np is not None:
-                    await message.channel.send(
-                        "Now live on https://fm.chunt.org/stream : " + np
-                    )
-                chuntfm_np = ''
-                """
-                
-                if not chuntfm_np:
-                    try:
-                        async with ClientSession() as s:
-                                r = await s.get("https://chunt.org/restream.json",proxy=thisproxy)
-                                chu_json = await r.json()
-                                print(chu_json)
-                                if (chu_json['current']['show_title'] and chu_json['current']['show_date']):
-                                    chuntfm_np = "chuntfm is now playing: " + chu_json['current']['show_title'] + " @ " + chu_json['current']['show_date']
-                                else:
-                                    chuntfm_np = "chuntfm is now playing: " + chu_json['current']['show_title'] 
-                    except Exception as e:
-                        print(e)
 
                 data = await mpd.playback.get_current_track()
                 print(data)

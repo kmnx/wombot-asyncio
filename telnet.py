@@ -28,5 +28,7 @@ async def main():
     async with await connect_tcp('localhost', 1234) as client:
         status = await shell(client)
         print(status)
+        return status
+        
 anyio.run(main)
 
