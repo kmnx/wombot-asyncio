@@ -30,5 +30,5 @@ async def main():
         print(status)
         return status
         
-anyio.run(main)
+#anyio.run(main)
 

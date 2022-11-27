@@ -790,7 +790,7 @@ class MyBot(chatango.Client):
                     if chuntfm_np:
                         chuntfm_np = 'LIVE on chuntfm: ' + chuntfm_np
                     else:
-                        chuntfm_np = 'LIVE on chunfm: unscheduled w/ anon1111'
+                        chuntfm_np = 'LIVE on chunfm: unscheduled broadcast w/ anon1111'
                 # no one is connected to stream
                 # 
                 else:

@@ -74,7 +74,10 @@ class ShazamApi:
                     data=payload,
                     headers=self.headers,
                 ) as response:
-                    out = await response.json()
+                    try:
++                      out = await response.json()
++                    except Exception as e:
++                      print(out)
             else:
                 out = ""
                 print("no audio")
