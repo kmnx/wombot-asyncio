@@ -75,9 +75,9 @@ class ShazamApi:
                     headers=self.headers,
                 ) as response:
                     try:
-+                      out = await response.json()
-+                    except Exception as e:
-+                      print(out)
+                        out = await response.json()
+                    except Exception as e:
+                        print(out)
             else:
                 out = ""
                 print("no audio")
