@@ -1488,7 +1488,7 @@ class MyBot(chatango.Client):
 
             elif cmd in ["heart", "hearts"]:
                 if message.room.name != '<PM>':
-                    await message.room.delete_message(message).replace('.','')
+                    await message.room.delete_message(message)
                 a = random.randint(1, 10)
                 heart = ""
                 for i in range(0, a):
