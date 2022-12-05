@@ -644,10 +644,11 @@ class MyBot(chatango.Client):
                 )
                 '''
 
-                asyncio.ensure_future(shazam_station(message, "soho"))
+                asyncio.ensure_future(shazam_station(message, "nts2"))
             elif cmd in ["idsoho"]:
                 if message.room.name != '<PM>':
                     await message.room.delete_message(message)
+                asyncio.ensure_future(shazam_station(message, "soho"))
 
             elif cmd in ["iddy", "iddoyou"]:
                 if message.room.name != '<PM>':
