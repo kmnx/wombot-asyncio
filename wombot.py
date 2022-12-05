@@ -463,6 +463,8 @@ async def shazam_station(message, station):
         audio_source = "https://fm.chunt.org/stream"
     elif station == "chunt2":
         audio_source = "https://fm.chunt.org/stream2"
+    elif station == "soho":
+        audio_source = "https://sohoradiomusic.doughunt.co.uk:8010/128mp3"
     stationname = station
     shazamapi = shazam.ShazamApi(loop, api_key=shazam_api_key)
     # session = ClientSession(trust_env=True)
@@ -642,7 +644,10 @@ class MyBot(chatango.Client):
                 )
                 '''
 
-                asyncio.ensure_future(shazam_station(message, "nts2"))
+                asyncio.ensure_future(shazam_station(message, "soho"))
+            elif cmd in ["idsoho"]:
+                if message.room.name != '<PM>':
+                    await message.room.delete_message(message)
 
             elif cmd in ["iddy", "iddoyou"]:
                 if message.room.name != '<PM>':
