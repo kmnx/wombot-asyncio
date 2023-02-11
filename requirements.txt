@@ -14,3 +14,7 @@ nltk
 anyio
 asynctelnet
 anyio
+matplotlib
+pywt
+PyWavelets
+scipy

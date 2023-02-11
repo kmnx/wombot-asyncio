@@ -771,6 +771,44 @@ class MyBot(chatango.Client):
                 else:
                     await message.channel.send("No online stations found :(")
 
+            elif cmd.startswith("upnext"):
+                chuntfm_upnext = ''
+
+                if message.room.name != '<PM>':
+                    await message.room.delete_message(message)
+                try:
+                    
+                    async with ClientSession() as s:
+                            r = await s.get("https://chunt.org/schedule.json")
+                            schedule_json = await r.json()
+                            #print(chu_json)
+                            timenow = datetime.now(timezone.utc)
+                            print('timenow: ',timenow)
+                            for show in schedule_json:
+                                start_time = datetime.fromisoformat(show["startTimestamp"])
+                                end_time = datetime.fromisoformat(show["endTimestamp"])
+                                print('starttime: ',start_time)
+                                if start_time > timenow:
+                                    print(show)
+                                    timediff = start_time - timenow
+                                    time_rem = str(timediff)
+                                    
+                                    when = time_rem.split('.')[0] + ' hours'
+                                    
+                                    print('stripped desc',show["description"].replace('\n', ' ').replace('\r', '').replace('<br>', ' - '))
+                                    chuntfm_upnext = 'Up next: ' + (show['title']) + " | " + show["description"].replace('\n', ' ').replace('\r', '').replace('<br>', '') + " | " + show['dateUK'] + " " + show['startTimeUK'] + ' LDN time' + ' (in ' + when + ')'
+                                    break
+
+                except Exception as e:
+                    print(e)
+
+                if chuntfm_upnext:
+                    await message.channel.send(chuntfm_upnext)
+
+
+
+
+
             # jukebox controls
 
             elif cmd.startswith("np"):
@@ -788,7 +826,7 @@ class MyBot(chatango.Client):
                 try:
                     
                     async with ClientSession() as s:
-                            r = await s.get("https://chunt.org/schedule.json",proxy=thisproxy)
+                            r = await s.get("https://chunt.org/schedule.json")
                             schedule_json = await r.json()
                             #print(chu_json)
                             timenow = datetime.now(timezone.utc)
@@ -822,15 +860,17 @@ class MyBot(chatango.Client):
                     else:
                         try:
                             async with ClientSession() as s:
-                                    r = await s.get("https://chunt.org/restream.json",proxy=thisproxy)
+                                    r = await s.get("https://chunt.org/restream.json")
                                     chu_json = await r.json()
-                                    print(chu_json)
+                                    #print(chu_json)
                                     if (chu_json['current']['show_title'] and chu_json['current']['show_date']):
                                         chuntfm_np = "restream on chunt1: " + chu_json['current']['show_title'] + " @ " + chu_json['current']['show_date']
                                     else:
                                         chuntfm_np = "restream on chunt1: " + chu_json['current']['show_title'] 
                         except Exception as e:
+                            print('exception in np')
                             print(e)
+
 
 
                 data = await mpd.playback.get_current_track()
@@ -854,10 +894,12 @@ class MyBot(chatango.Client):
                         chu_two_msg = " https://fm.chunt.org/stream2 jukebox now playing: " + url
                         
                 else:
+                    print('no mpd data')
                     # await message.channel.send(
-                    chu_two_msg = "jukebox is not playing anything right now"
+                    chu_two_msg = "jukebox is not playing anything"
 
                 if chuntfm_np:
+                    print('cfm_np is', chuntfm_np)
                     await message.channel.send(chuntfm_np + " | " + chu_two_msg)
                 else:
                     await message.channel.send( chu_two_msg)
@@ -1608,9 +1650,9 @@ if __name__ == "__main__":
     mpd = MopidyClient(host="139.177.181.183")
     mpdtask = asyncio.gather(mpd_context_manager(mpd))
     giftask = schedule_gif_of_the_hour()
-    cfm_task = schedule_chuntfm_livecheck()
+    #cfm_task = schedule_chuntfm_livecheck()
 
-    tasks = asyncio.gather(task, giftask, mpdtask, cfm_task)
+    tasks = asyncio.gather(task, giftask, mpdtask)
     print('init asyncio tasks started')
 
     allgif_file = os.path.join(basepath, "allgif.txt")
