@@ -18,3 +18,4 @@ matplotlib
 pywt
 PyWavelets
 scipy
+PyWavelets
