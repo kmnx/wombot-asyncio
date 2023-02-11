@@ -21,6 +21,8 @@ from urllib.parse import urlparse
 import bs4
 import struct
 import nltk
+import bpm
+
 from anyio import connect_tcp
 try:
     nltk.data.find('tokenizers/punkt')
@@ -534,6 +536,7 @@ class MyBot(chatango.Client):
         print("Bot initialized")
         self.db = await aiosqliteclass.create_conn()
         self.goth = random.choice(await bot.db.fetch_gif("bbb"))
+        self._room = None
         print("seriously")
 
     async def on_start(self):  # room join queue
@@ -542,6 +545,7 @@ class MyBot(chatango.Client):
 
     async def on_connect(self, room: typing.Union[chatango.Room, chatango.PM]):
         print(f"[{room.type}] Connected to", room)
+        self._room = room
 
     async def on_disconnect(self, room):
         print(f"[{room.type}] Disconnected from", room)
@@ -586,6 +590,15 @@ class MyBot(chatango.Client):
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
                 await message.channel.send(f"Hello {message.user.showname}")
+            
+            # works but needs right instance and i cba rn
+            elif cmd == ("count"):
+                if message.room.name != "<PM>":
+                    await message.room.delete_message(message)
+                print('usercount',bot._room.usercount)
+
+            elif cmd == 'bpm':
+                bpm = await loop.run_in_executor()
 
             elif cmd == "help":
                 print(helpmessage)
@@ -796,7 +809,7 @@ class MyBot(chatango.Client):
                     if chuntfm_np:
                         chuntfm_np = 'LIVE on chuntfm: ' + chuntfm_np
                     else:
-                        chuntfm_np = 'LIVE on chunfm: unscheduled broadcast w/ anon1111'
+                        chuntfm_np = 'LIVE on chunfm: unscheduled livestream w/ anon1111'
                 # no one is connected to stream
                 # 
                 else:
