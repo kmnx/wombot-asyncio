@@ -15,7 +15,5 @@ anyio
 asynctelnet
 anyio
 matplotlib
-pywt
-PyWavelets
 scipy
 PyWavelets

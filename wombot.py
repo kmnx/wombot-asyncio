@@ -771,7 +771,7 @@ class MyBot(chatango.Client):
                 else:
                     await message.channel.send("No online stations found :(")
 
-            elif cmd.startswith("upnext"):
+            elif cmd in ["upnext","nextup"]:
                 chuntfm_upnext = ''
 
                 if message.room.name != '<PM>':
