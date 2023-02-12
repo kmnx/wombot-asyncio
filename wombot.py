@@ -58,8 +58,14 @@ shazam_api_key = mysecrets.shazam_api_key
 
 from mopidy_asyncio_client import MopidyClient
 
-logging.basicConfig()
-logging.getLogger("mopidy_asyncio_client").setLevel(logging.DEBUG)
+#logging.basicConfig()
+#logging.getLogger("mopidy_asyncio_client").setLevel(logging.DEBUG)
+
+logging.basicConfig(filename='example.log', encoding='utf-8', level=logging.DEBUG)
+logging.debug('This message should go to the log file')
+logging.info('So should this')
+logging.warning('And this, too')
+logging.error('And non-ASCII stuff, too, like Øresund and Malmö')
 
 print("start")
 commandlist = [
@@ -182,6 +188,7 @@ async def shell(tcp):
 
 
 async def get_now(stream_url, session):
+    logging.debug('get_now')
     headers = {"Icy-MetaData": "1"}
     async with session.get(stream_url, headers=headers) as resp:
         for _ in range(10):
@@ -197,6 +204,8 @@ async def get_now(stream_url, session):
 
 
 async def get_track():
+    logging.debug('get_track')
+
     session = ClientSession()
     stream_url = "https://fm.chunt.org/stream"
     result = await get_now(stream_url, session)
@@ -207,6 +216,8 @@ async def get_track():
 
 
 async def post_gif_of_the_hour(param):
+    logging.debug('post_gif_of_the_hour')
+
     bots = []
     mainroom = environ["wombotmainroom"]
     testroom = environ["wombottestroom"]
@@ -221,6 +232,8 @@ async def post_gif_of_the_hour(param):
 
 
 async def schedule_gif_of_the_hour():
+    logging.debug('schedule_gif_of_the_hour')
+
     # cron_min = aiocron.crontab('*/1 * * * *', func=post_gif_of_the_hour, args=("At every minute",), start=True)
     cron_jub = aiocron.crontab(
         "0 */1 * * *",
@@ -234,6 +247,8 @@ async def schedule_gif_of_the_hour():
 
 
 async def post_chuntfm_status():
+    logging.debug('post_chuntfm_status')
+
 
     bots = []
     mainroom = environ["wombotmainroom"]
@@ -291,6 +306,8 @@ async def schedule_chuntfm_livecheck():
 
 
 async def playback_started_handler(data):
+    logging.debug('playback_started_handler')
+
     """Callback function, called when the playback started."""
     print(data)
     print(bot.rooms)  # ok
@@ -310,6 +327,8 @@ async def playback_started_handler(data):
 
 
 async def all_events_handler(event, data):
+    logging.debug('all_events_handler')
+
     """Callback function; catch-all function."""
     print(event, data)
     if event == "tracklist_changed":
@@ -317,6 +336,8 @@ async def all_events_handler(event, data):
 
 
 async def mpd_context_manager(mpd):
+    logging.debug('mpd_context_manager')
+
 
     async with mpd as mopidy:
 
@@ -350,6 +371,8 @@ def convert_utc_to_london(utctime):
 
 
 async def raid(message, station_query):
+    logging.debug('raid')
+
 
     ra_stations = await radioactivity.get_station_list()
 
@@ -455,6 +478,8 @@ async def raid(message, station_query):
 
 
 async def shazam_station(message, station):
+    logging.debug('shazam_station')
+
     if station == "nts1":
         audio_source = "https://stream-relay-geo.ntslive.net/stream"
     elif station == "nts2":
@@ -501,6 +526,8 @@ async def shazam_station(message, station):
 
 
 async def bandcamp_search(artist, title):
+    logging.debug('bandcamp_search')
+
     googlequery = artist + " " + title
     res = ""
     res = await search_google.search(googlequery)
@@ -540,14 +567,20 @@ class MyBot(chatango.Client):
         print("seriously")
 
     async def on_start(self):  # room join queue
+        logging.debug('on_start')
+
         for room in config.rooms:
             self.set_timeout(1, self.join, room)
 
     async def on_connect(self, room: typing.Union[chatango.Room, chatango.PM]):
+        logging.debug('on_connect')
+
         print(f"[{room.type}] Connected to", room)
         self._room = room
 
     async def on_disconnect(self, room):
+        logging.debug('on_disconnect')
+
         print(f"[{room.type}] Disconnected from", room)
 
     async def on_room_denied(self, room):
@@ -558,6 +591,8 @@ class MyBot(chatango.Client):
         print(f"[{room.type}] Rejected from", room)
 
     async def on_room_init(self, room):
+        logging.debug('on_room_init')
+
         if room.user.isanon:
             room.set_font(
                 name_color="000000", font_color="000000", font_face=1, font_size=11
@@ -567,6 +602,7 @@ class MyBot(chatango.Client):
             await room.enable_bg()
 
     async def on_message(self, message):
+
         print(
             time.strftime("%b/%d-%H:%M:%S", time.localtime(message.time)),
             message.room.name,
@@ -1631,6 +1667,8 @@ class MyBot(chatango.Client):
 
 
 async def get_db_cur():
+    logging.debug("get_db_cur")
+
     conn = await aiosqlite.connect("/db/trackids.db")
     # conn.row_factory = lambda cursor, row: row[0]
     # self.conn.row_factory = aiosqlite.Row
@@ -1639,6 +1677,8 @@ async def get_db_cur():
 
 
 if __name__ == "__main__":
+    logging.debug("__main__")
+
     loop = asyncio.get_event_loop()
     bot = MyBot()
     bot.default_user(config.botuser[0], config.botuser[1])  # easy_start
@@ -1653,7 +1693,7 @@ if __name__ == "__main__":
     #cfm_task = schedule_chuntfm_livecheck()
 
     tasks = asyncio.gather(task, giftask, mpdtask)
-    print('init asyncio tasks started')
+    logging.debug('init asyncio tasks started')
 
     allgif_file = os.path.join(basepath, "allgif.txt")
     if not os.path.exists(allgif_file):
