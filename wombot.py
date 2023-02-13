@@ -1269,10 +1269,11 @@ class MyBot(chatango.Client):
                 thelongeststring = "to tag a gif: !tag link-to-the-gif tagname \r\r tags that post gifs/links: \r"
                 for key in taglist:
                     thelongeststring += "!" + key + " "
-                print(thelongeststring)
-                n = 8000 # chunk length
+                #print(thelongeststring)
+                n = 4000 # chunk length
                 chunks = [thelongeststring[i:i+n] for i in range(0, len(thelongeststring), n)]
                 for c in chunks:
+                    print(c)
                     await message.room.client.pm.send_message(
                         message.user, str(c)
                     )
