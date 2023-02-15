@@ -452,7 +452,6 @@ async def raid(message, station_query):
                         + station_name
                         + stream_sep
                         + stream_name
-                        + " (from shazam): "
                         + hoursmins
                         + " - "
                         + artist
@@ -487,8 +486,10 @@ async def shazam_station(message, station):
     elif station == "doyou":
         audio_source = "https://doyouworld.out.airtime.pro/doyouworld_a"
     elif station == "chunt1":
+        station = "CH1"
         audio_source = "https://fm.chunt.org/stream"
     elif station == "chunt2":
+        station = "JUKEBOX"
         audio_source = "https://fm.chunt.org/stream2"
     elif station == "soho":
         audio_source = "https://sohoradiomusic.doughunt.co.uk:8010/128mp3"
@@ -511,7 +512,6 @@ async def shazam_station(message, station):
         await message.channel.send(
             "ID "
             + stationname
-            + " (from shazam): "
             + hoursmins
             + " - "
             + artist
