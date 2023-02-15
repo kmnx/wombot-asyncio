@@ -890,7 +890,7 @@ class MyBot(chatango.Client):
                                     when = time_rem.split('.')[0][:-3] + ' hours'
                                     
                                     print('stripped desc',show["description"].replace('\n', ' ').replace('\r', '').replace('<br>', ' - '))
-                                    chuntfm_upnext = 'Up next: ' + (show['title']) + " | " + show["description"].replace('\n', ' ').replace('\r', '').replace('<br>', '') + " | " + show['dateUK'] + " " + show['startTimeUK'] + ' GMT ' + ' [-' + when + ']'
+                                    chuntfm_upnext = 'UP NEXT: ' + (show['title']) + " | " + show["description"].replace('\n', ' ').replace('\r', '').replace('<br>', '') + " | " + show['dateUK'] + " " + show['startTimeUK'] + ' GMT ' + ' [-' + when + ']'
                                     break
 
 
