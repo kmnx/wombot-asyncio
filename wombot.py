@@ -848,7 +848,7 @@ class MyBot(chatango.Client):
 
 
             # radio status commands
-            elif cmd in ["upnext","nextup"]:
+            elif cmd in ["schedule"]:
                 chuntfm_np = ''
 
                 if message.room.name != '<PM>':
@@ -881,6 +881,8 @@ class MyBot(chatango.Client):
                                     print('stripped desc',show["description"].replace('\n', ' ').replace('\r', '').replace('<br>', ' - '))
                                     chuntfm_upnext = 'UP NEXT: ' + (show['title']) + " | " + show["description"].replace('\n', ' ').replace('\r', '').replace('<br>', '') + " | " + show['dateUK'] + " " + show['startTimeUK'] + ' GMT ' + ' [-' + when + ']'
                                     break
+                except Exception as e:
+                    print(e)
 
             elif cmd in ["upnext","nextup"]:
                 chuntfm_np = ''
@@ -915,6 +917,8 @@ class MyBot(chatango.Client):
                                     print('stripped desc',show["description"].replace('\n', ' ').replace('\r', '').replace('<br>', ' - '))
                                     chuntfm_upnext = 'UP NEXT: ' + (show['title']) + " | " + show["description"].replace('\n', ' ').replace('\r', '').replace('<br>', '') + " | " + show['dateUK'] + " " + show['startTimeUK'] + ' GMT ' + ' [-' + when + ']'
                                     break
+                except Exception as e:
+                    print(e)
 
 
             elif cmd in ["np"]:
