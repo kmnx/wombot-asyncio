@@ -512,6 +512,7 @@ async def shazam_station(message, station):
         await message.channel.send(
             "ID "
             + stationname
+            + " "
             + hoursmins
             + " - "
             + artist
