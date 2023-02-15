@@ -452,6 +452,7 @@ async def raid(message, station_query):
                         + station_name
                         + stream_sep
                         + stream_name
+                        + " (from shazam): "
                         + hoursmins
                         + " - "
                         + artist
@@ -486,10 +487,8 @@ async def shazam_station(message, station):
     elif station == "doyou":
         audio_source = "https://doyouworld.out.airtime.pro/doyouworld_a"
     elif station == "chunt1":
-        station = "CH1"
         audio_source = "https://fm.chunt.org/stream"
     elif station == "chunt2":
-        station = "JUKEBOX"
         audio_source = "https://fm.chunt.org/stream2"
     elif station == "soho":
         audio_source = "https://sohoradiomusic.doughunt.co.uk:8010/128mp3"
@@ -512,7 +511,7 @@ async def shazam_station(message, station):
         await message.channel.send(
             "ID "
             + stationname
-            + " "
+            + " (from shazam): "
             + hoursmins
             + " - "
             + artist
@@ -805,11 +804,10 @@ class MyBot(chatango.Client):
                         + " from "
                         + station["location"]
                     )
-                    '''
                 else:
                     await message.channel.send("No online stations found :(")
 
-            
+            elif cmd in ["upnext","nextup"]:
                 chuntfm_upnext = ''
 
                 if message.room.name != '<PM>':
@@ -841,87 +839,15 @@ class MyBot(chatango.Client):
                     print(e)
 
                 if chuntfm_upnext:
-                    await message.channel.send(chuntfm_upnext)'''
+                    await message.channel.send(chuntfm_upnext)
 
 
 
 
 
-            # radio status commands
-            elif cmd in ["schedule"]:
-                chuntfm_np = ''
+            # jukebox controls
 
-                if message.room.name != '<PM>':
-                    await message.room.delete_message(message)
-                liquidsoap_harbor_status = ''
-                try:
-                    liquidsoap_harbor_status = await telnet.main()
-                except Exception as e:
-                    print(e)
-
-                thisproxy = mysecrets.proxy
-                try:
-                    
-                    async with ClientSession() as s:
-                            r = await s.get("https://chunt.org/schedule.json")
-                            schedule_json = await r.json()
-                            #print(chu_json)
-                            timenow = datetime.now(timezone.utc)
-                            for index,show in enumerate(schedule_json):
-                                start_time = datetime.fromisoformat(show["startTimestamp"])
-                                end_time = datetime.fromisoformat(show["endTimestamp"])
-                                print('starttime: ',start_time)
-                                if start_time > timenow:
-                                    print(show)
-                                    timediff = start_time - timenow
-                                    time_rem = str(timediff)
-                                    
-                                    when = time_rem.split('.')[0][:-3] + ' hours'
-                                    
-                                    print('stripped desc',show["description"].replace('\n', ' ').replace('\r', '').replace('<br>', ' - '))
-                                    chuntfm_upnext = 'UP NEXT: ' + (show['title']) + " | " + show["description"].replace('\n', ' ').replace('\r', '').replace('<br>', '') + " | " + show['dateUK'] + " " + show['startTimeUK'] + ' GMT ' + ' [-' + when + ']'
-                                    break
-                except Exception as e:
-                    print(e)
-
-            elif cmd in ["upnext","nextup"]:
-                chuntfm_np = ''
-
-                if message.room.name != '<PM>':
-                    await message.room.delete_message(message)
-                liquidsoap_harbor_status = ''
-                try:
-                    liquidsoap_harbor_status = await telnet.main()
-                except Exception as e:
-                    print(e)
-
-                thisproxy = mysecrets.proxy
-                try:
-                    
-                    async with ClientSession() as s:
-                            r = await s.get("https://chunt.org/schedule.json")
-                            schedule_json = await r.json()
-                            #print(chu_json)
-                            timenow = datetime.now(timezone.utc)
-                            for show in schedule_json:
-                                start_time = datetime.fromisoformat(show["startTimestamp"])
-                                end_time = datetime.fromisoformat(show["endTimestamp"])
-                                print('starttime: ',start_time)
-                                if start_time > timenow:
-                                    print(show)
-                                    timediff = start_time - timenow
-                                    time_rem = str(timediff)
-                                    
-                                    when = time_rem.split('.')[0][:-3] + ' hours'
-                                    
-                                    print('stripped desc',show["description"].replace('\n', ' ').replace('\r', '').replace('<br>', ' - '))
-                                    chuntfm_upnext = 'UP NEXT: ' + (show['title']) + " | " + show["description"].replace('\n', ' ').replace('\r', '').replace('<br>', '') + " | " + show['dateUK'] + " " + show['startTimeUK'] + ' GMT ' + ' [-' + when + ']'
-                                    break
-                except Exception as e:
-                    print(e)
-
-
-            elif cmd in ["np"]:
+            elif cmd.startswith("np"):
                 chuntfm_np = ''
 
                 if message.room.name != '<PM>':
@@ -949,41 +875,37 @@ class MyBot(chatango.Client):
                                     if end_time > timenow:
                                         print(show)
                                         chuntfm_np = (show['title'])
-
-
-
-
                 except Exception as e:
                     print(e)
 
                 # someone is definitely live
                 if liquidsoap_harbor_status.startswith('source'):
                     if chuntfm_np:
-                        chuntfm_np = 'LIVE NOW: ' + chuntfm_np 
+                        chuntfm_np = 'LIVE on chuntfm: ' + chuntfm_np
                     else:
-                        chuntfm_np = 'LIVE NOW: untitled show w/ anon1111'
+                        chuntfm_np = 'LIVE on chunfm: unscheduled livestream w/ anon1111'
                 # no one is connected to stream
                 # 
                 else:
                     # either just a disconnect or scheduled show
-                    #if chuntfm_np:
-                        #chuntfm_np = 'scheduled to be live on chuntfm but offline: ' + chuntfm_np
+                    if chuntfm_np:
+                        chuntfm_np = 'scheduled to be live on chuntfm but offline: ' + chuntfm_np
                         # i dont know if it is a prerecord
                         # prerecord goes into calendar so we have np
                         # live indicator will be off
-                    
-                    try:
-                        async with ClientSession() as s:
-                                r = await s.get("https://chunt.org/restream.json")
-                                chu_json = await r.json()
-                                #print(chu_json)
-                                if (chu_json['current']['show_title'] and chu_json['current']['show_date']):
-                                    chuntfm_np = "RESTREAM: " + chu_json['current']['show_title'] + " @ " + chu_json['current']['show_date']  + " | " 
-                                else:
-                                    chuntfm_np = "RESTREAM: " + chu_json['current']['show_title']  + " | " 
-                    except Exception as e:
-                        print('exception in np')
-                        print(e)
+                    else:
+                        try:
+                            async with ClientSession() as s:
+                                    r = await s.get("https://chunt.org/restream.json")
+                                    chu_json = await r.json()
+                                    #print(chu_json)
+                                    if (chu_json['current']['show_title'] and chu_json['current']['show_date']):
+                                        chuntfm_np = "restream on chunt1: " + chu_json['current']['show_title'] + " @ " + chu_json['current']['show_date']
+                                    else:
+                                        chuntfm_np = "restream on chunt1: " + chu_json['current']['show_title'] 
+                        except Exception as e:
+                            print('exception in np')
+                            print(e)
 
 
 
@@ -1005,29 +927,25 @@ class MyBot(chatango.Client):
                         else:
                             url = ""
                         # await message.channel.send(
-                        chu_two_msg = "JUKEBOX: " + url
+                        chu_two_msg = " https://fm.chunt.org/stream2 jukebox now playing: " + url
                         
                 else:
                     print('no mpd data')
                     # await message.channel.send(
-                    chu_two_msg = ""
+                    chu_two_msg = "jukebox is not playing anything"
 
                 if chuntfm_np:
                     print('cfm_np is', chuntfm_np)
-                    if chu_two_msg:
-
-                        await message.channel.send(chuntfm_np + " | " + chu_two_msg)
-                    else:
-                        await message.channel.send(chuntfm_np )
+                    await message.channel.send(chuntfm_np + " | " + chu_two_msg)
                 else:
-                    await message.channel.send( chuntfm_np)
+                    await message.channel.send( chu_two_msg)
 
                     
             elif cmd.startswith("jukebox"):
                 if message.room.name != '<PM>':
                     await message.room.delete_message(message)
                 await message.channel.send(
-                    "https://fm.chunt.org/stream2 jukebox commands: !add url !skip \r accepts links from mixcloud,soundcloud,nts"
+                    "https://fm.chunt.org/stream2 jukebox commands: !add url !skip !np \r accepts links from mixcloud,soundcloud,nts"
                 )
 
             elif cmd == "clear":
@@ -1768,8 +1686,8 @@ if __name__ == "__main__":
     bot = MyBot()
     bot.default_user(config.botuser[0], config.botuser[1])  # easy_start
 
-    #     or_accounts = [["user1","passwd1"], ["user2","passwd2"]]
-    #     bot.default_user(accounts=or_accounts, pm=False) #True if passwd was input.
+    #    or_accounts = [["user1","passwd1"], ["user2","passwd2"]]
+    #    bot.default_user(accounts=or_accounts, pm=False) #True if passwd was input.
     ListBots = [bot.start()]  # Multiple instances
     task = asyncio.gather(*ListBots, return_exceptions=True)
     mpd = MopidyClient(host="139.177.181.183")
