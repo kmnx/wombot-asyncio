@@ -867,7 +867,7 @@ class MyBot(chatango.Client):
                             schedule_json = await r.json()
                             #print(chu_json)
                             timenow = datetime.now(timezone.utc)
-                            for index,show in enumarate(schedule_json):
+                            for index,show in enumerate(schedule_json):
                                 start_time = datetime.fromisoformat(show["startTimestamp"])
                                 end_time = datetime.fromisoformat(show["endTimestamp"])
                                 print('starttime: ',start_time)
