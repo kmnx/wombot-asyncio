@@ -848,8 +848,76 @@ class MyBot(chatango.Client):
 
 
             # radio status commands
+            elif cmd in ["upnext","nextup"]:
+                chuntfm_np = ''
 
-            elif cmd in ["upnext","nextup","np","schedule"]:
+                if message.room.name != '<PM>':
+                    await message.room.delete_message(message)
+                liquidsoap_harbor_status = ''
+                try:
+                    liquidsoap_harbor_status = await telnet.main()
+                except Exception as e:
+                    print(e)
+
+                thisproxy = mysecrets.proxy
+                try:
+                    
+                    async with ClientSession() as s:
+                            r = await s.get("https://chunt.org/schedule.json")
+                            schedule_json = await r.json()
+                            #print(chu_json)
+                            timenow = datetime.now(timezone.utc)
+                            for index,show in enumarate(schedule_json):
+                                start_time = datetime.fromisoformat(show["startTimestamp"])
+                                end_time = datetime.fromisoformat(show["endTimestamp"])
+                                print('starttime: ',start_time)
+                                if start_time > timenow:
+                                    print(show)
+                                    timediff = start_time - timenow
+                                    time_rem = str(timediff)
+                                    
+                                    when = time_rem.split('.')[0][:-3] + ' hours'
+                                    
+                                    print('stripped desc',show["description"].replace('\n', ' ').replace('\r', '').replace('<br>', ' - '))
+                                    chuntfm_upnext = 'UP NEXT: ' + (show['title']) + " | " + show["description"].replace('\n', ' ').replace('\r', '').replace('<br>', '') + " | " + show['dateUK'] + " " + show['startTimeUK'] + ' GMT ' + ' [-' + when + ']'
+                                    break
+
+            elif cmd in ["upnext","nextup"]:
+                chuntfm_np = ''
+
+                if message.room.name != '<PM>':
+                    await message.room.delete_message(message)
+                liquidsoap_harbor_status = ''
+                try:
+                    liquidsoap_harbor_status = await telnet.main()
+                except Exception as e:
+                    print(e)
+
+                thisproxy = mysecrets.proxy
+                try:
+                    
+                    async with ClientSession() as s:
+                            r = await s.get("https://chunt.org/schedule.json")
+                            schedule_json = await r.json()
+                            #print(chu_json)
+                            timenow = datetime.now(timezone.utc)
+                            for show in schedule_json:
+                                start_time = datetime.fromisoformat(show["startTimestamp"])
+                                end_time = datetime.fromisoformat(show["endTimestamp"])
+                                print('starttime: ',start_time)
+                                if start_time > timenow:
+                                    print(show)
+                                    timediff = start_time - timenow
+                                    time_rem = str(timediff)
+                                    
+                                    when = time_rem.split('.')[0][:-3] + ' hours'
+                                    
+                                    print('stripped desc',show["description"].replace('\n', ' ').replace('\r', '').replace('<br>', ' - '))
+                                    chuntfm_upnext = 'UP NEXT: ' + (show['title']) + " | " + show["description"].replace('\n', ' ').replace('\r', '').replace('<br>', '') + " | " + show['dateUK'] + " " + show['startTimeUK'] + ' GMT ' + ' [-' + when + ']'
+                                    break
+
+
+            elif cmd in ["np"]:
                 chuntfm_np = ''
 
                 if message.room.name != '<PM>':
@@ -879,20 +947,6 @@ class MyBot(chatango.Client):
                                         chuntfm_np = (show['title'])
 
 
-                            for show in schedule_json:
-                                start_time = datetime.fromisoformat(show["startTimestamp"])
-                                end_time = datetime.fromisoformat(show["endTimestamp"])
-                                print('starttime: ',start_time)
-                                if start_time > timenow:
-                                    print(show)
-                                    timediff = start_time - timenow
-                                    time_rem = str(timediff)
-                                    
-                                    when = time_rem.split('.')[0][:-3] + ' hours'
-                                    
-                                    print('stripped desc',show["description"].replace('\n', ' ').replace('\r', '').replace('<br>', ' - '))
-                                    chuntfm_upnext = 'UP NEXT: ' + (show['title']) + " | " + show["description"].replace('\n', ' ').replace('\r', '').replace('<br>', '') + " | " + show['dateUK'] + " " + show['startTimeUK'] + ' GMT ' + ' [-' + when + ']'
-                                    break
 
 
                 except Exception as e:
@@ -901,9 +955,9 @@ class MyBot(chatango.Client):
                 # someone is definitely live
                 if liquidsoap_harbor_status.startswith('source'):
                     if chuntfm_np:
-                        chuntfm_np = 'LIVE NOW: ' + chuntfm_np + " | " + chuntfm_upnext
+                        chuntfm_np = 'LIVE NOW: ' + chuntfm_np 
                     else:
-                        chuntfm_np = 'LIVE NOW: untitled show w/ anon1111' + " | " + chuntfm_upnext
+                        chuntfm_np = 'LIVE NOW: untitled show w/ anon1111'
                 # no one is connected to stream
                 # 
                 else:
@@ -920,9 +974,9 @@ class MyBot(chatango.Client):
                                 chu_json = await r.json()
                                 #print(chu_json)
                                 if (chu_json['current']['show_title'] and chu_json['current']['show_date']):
-                                    chuntfm_np = "RESTREAM: " + chu_json['current']['show_title'] + " @ " + chu_json['current']['show_date']  + " | " + chuntfm_upnext
+                                    chuntfm_np = "RESTREAM: " + chu_json['current']['show_title'] + " @ " + chu_json['current']['show_date']  + " | " 
                                 else:
-                                    chuntfm_np = "RESTREAM: " + chu_json['current']['show_title']  + " | " + chuntfm_upnext
+                                    chuntfm_np = "RESTREAM: " + chu_json['current']['show_title']  + " | " 
                     except Exception as e:
                         print('exception in np')
                         print(e)
