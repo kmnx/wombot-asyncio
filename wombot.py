@@ -452,7 +452,7 @@ async def raid(message, station_query):
                         + station_name
                         + stream_sep
                         + stream_name
-                        + " (from shazam): "
+                        + " "
                         + hoursmins
                         + " - "
                         + artist
@@ -511,7 +511,7 @@ async def shazam_station(message, station):
         await message.channel.send(
             "ID "
             + stationname
-            + " (from shazam): "
+            + " "
             + hoursmins
             + " - "
             + artist
@@ -832,7 +832,7 @@ class MyBot(chatango.Client):
                                     when = time_rem.split('.')[0] + ' hours'
                                     
                                     print('stripped desc',show["description"].replace('\n', ' ').replace('\r', '').replace('<br>', ' - '))
-                                    chuntfm_upnext = 'Up next: ' + (show['title']) + " | " + show["description"].replace('\n', ' ').replace('\r', '').replace('<br>', '') + " | " + show['dateUK'] + " " + show['startTimeUK'] + ' LDN time' + ' (in ' + when + ')'
+                                    chuntfm_upnext = 'UP NEXT: ' + (show['title']) + " | " + show["description"].replace('\n', ' ').replace('\r', '').replace('<br>', '') + " | " + show['dateUK'] + " " + show['startTimeUK'] + ' GMT' + ' (in ' + when + ')'
                                     break
 
                 except Exception as e:
@@ -881,15 +881,15 @@ class MyBot(chatango.Client):
                 # someone is definitely live
                 if liquidsoap_harbor_status.startswith('source'):
                     if chuntfm_np:
-                        chuntfm_np = 'LIVE on chuntfm: ' + chuntfm_np
+                        chuntfm_np = 'LIVE NOW: ' + chuntfm_np
                     else:
-                        chuntfm_np = 'LIVE on chunfm: unscheduled livestream w/ anon1111'
+                        chuntfm_np = 'LIVE NOW: unscheduled livestream w/ anon1111'
                 # no one is connected to stream
                 # 
                 else:
                     # either just a disconnect or scheduled show
                     if chuntfm_np:
-                        chuntfm_np = 'scheduled to be live on chuntfm but offline: ' + chuntfm_np
+                        chuntfm_np = 'scheduled but offline: ' + chuntfm_np
                         # i dont know if it is a prerecord
                         # prerecord goes into calendar so we have np
                         # live indicator will be off
@@ -900,9 +900,9 @@ class MyBot(chatango.Client):
                                     chu_json = await r.json()
                                     #print(chu_json)
                                     if (chu_json['current']['show_title'] and chu_json['current']['show_date']):
-                                        chuntfm_np = "restream on chunt1: " + chu_json['current']['show_title'] + " @ " + chu_json['current']['show_date']
+                                        chuntfm_np = "RESTREAM: " + chu_json['current']['show_title'] + " @ " + chu_json['current']['show_date']
                                     else:
-                                        chuntfm_np = "restream on chunt1: " + chu_json['current']['show_title'] 
+                                        chuntfm_np = "RESTREAM: " + chu_json['current']['show_title'] 
                         except Exception as e:
                             print('exception in np')
                             print(e)
@@ -932,13 +932,15 @@ class MyBot(chatango.Client):
                 else:
                     print('no mpd data')
                     # await message.channel.send(
-                    chu_two_msg = "jukebox is not playing anything"
+                    chu_two_msg = ""
 
                 if chuntfm_np:
                     print('cfm_np is', chuntfm_np)
-                    await message.channel.send(chuntfm_np + " | " + chu_two_msg)
-                else:
-                    await message.channel.send( chu_two_msg)
+                    if chu_two_msg:
+                        await message.channel.send(chuntfm_np + " | " + chu_two_msg)
+                    else:
+                        await message.channel.send(chuntfm_np)
+                
 
                     
             elif cmd.startswith("jukebox"):
