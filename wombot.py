@@ -22,6 +22,7 @@ import bs4
 import struct
 import nltk
 import bpm
+import edamam
 
 from anyio import connect_tcp
 try:
