@@ -96,8 +96,8 @@ async def main(loop):
 
     # audio_source = 'https://stream-relay-geo.ntslive.net/stream'
     # audio_source = 'https://fm.chunt.org/stream'
-    # audio_source = 'https://doyouworld.out.airtime.pro/doyouworld_a'
-    audio_source = "https://kioskradiobxl.out.airtime.pro/kioskradiobxl_a"
+    audio_source = 'https://doyouworld.out.airtime.pro/doyouworld_a'
+    # audio_source = "https://kioskradiobxl.out.airtime.pro/kioskradiobxl_a"
     asyncio.ensure_future(loopy(loop))
     api = ShazamApi(loop, shazam_api_key)
     out = await api._get(audio_source)

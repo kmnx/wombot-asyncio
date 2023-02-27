@@ -169,6 +169,7 @@ print("init variables done")
 
 
 async def shell(tcp):
+    logging.debug('shell')
     async with asynctelnet.TelnetClient(tcp, client=True) as stream:
         while True:
             # read stream until '?' mark is found
@@ -1193,6 +1194,16 @@ class MyBot(chatango.Client):
                     .replace(".", "")
                     .lower()
                 )
+            elif cmd in ["scran", "recipe"]:
+                if message.room.name != '<PM>':
+                    await message.room.delete_message(message)
+                if args:
+                    q = args
+                else:
+                    q = "vegetarian"
+                title, url = await edamam.scran(q)
+                if title:
+                    await message.channel.send("hungry? how about: " + title + " | " + url)
 
             # gif/image/snippets spam commands
 
