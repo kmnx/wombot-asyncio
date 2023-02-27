@@ -1195,7 +1195,7 @@ class MyBot(chatango.Client):
                     .replace(".", "")
                     .lower()
                 )
-            elif cmd in ["scran", "recipe"]:
+            elif cmd in ["scran", "recipe", "hungry"]:
                 if message.room.name != '<PM>':
                     await message.room.delete_message(message)
                 if args:
