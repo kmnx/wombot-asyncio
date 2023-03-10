@@ -628,6 +628,10 @@ class MyBot(chatango.Client):
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
                 await message.channel.send(f"Hello {message.user.showname}")
+            if cmd == ("z"):
+                if message.room.name != "<PM>":
+                    await message.room.delete_message(message)
+                await message.channel.send(f"goodbye {message.user.showname}")
             
             # works but needs right instance and i cba rn
             elif cmd == ("count"):
