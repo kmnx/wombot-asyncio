@@ -827,8 +827,8 @@ class MyBot(chatango.Client):
                             timenow = datetime.now(timezone.utc)
                             print('timenow: ',timenow)
                             for show in schedule_json:
-                                start_time = datetime.fromisoformat(show["startTimestamp"])
-                                end_time = datetime.fromisoformat(show["endTimestamp"])
+                                start_time = datetime.fromisoformat(show["startTimestampUTC"])
+                                end_time = datetime.fromisoformat(show["endTimestampUTC"])
                                 print('starttime: ',start_time)
                                 if start_time > timenow:
                                     print(show)
@@ -838,7 +838,7 @@ class MyBot(chatango.Client):
                                     when = time_rem.split('.')[0] + ' hours'
                                     
                                     print('stripped desc',show["description"].replace('\n', ' ').replace('\r', '').replace('<br>', ' - '))
-                                    chuntfm_upnext = 'UP NEXT: ' + (show['title']) + " | " + show["description"].replace('\n', ' ').replace('\r', '').replace('<br>', '') + " | " + show['dateUK'] + " " + show['startTimeUK'] + ' GMT' + ' (in ' + when + ')'
+                                    chuntfm_upnext = 'UP NEXT: ' + (show['title']) + " | " + show["description"].replace('\n', ' ').replace('\r', '').replace('<br>', '') + " | " + show['dateUK'] + " " + show['startTimestamp'] + ' GMT' + ' (in ' + when + ')'
                                     break
 
                 except Exception as e:
@@ -874,8 +874,8 @@ class MyBot(chatango.Client):
                             timenow = datetime.now(timezone.utc)
                             print('timenow: ',timenow)
                             for show in schedule_json:
-                                start_time = datetime.fromisoformat(show["startTimestamp"])
-                                end_time = datetime.fromisoformat(show["endTimestamp"])
+                                start_time = datetime.fromisoformat(show["startTimestampUTC"])
+                                end_time = datetime.fromisoformat(show["endTimestampUTC"])
                                 print('starttime: ',start_time)
                                 if start_time < timenow:
                                     if end_time > timenow:
