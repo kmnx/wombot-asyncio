@@ -197,7 +197,7 @@ async def _process(room, args):
         msg._styles._font_face,
     ) = _parseFont(f)
     if msg._styles._font_size == None:
-        msg._styles._font_size = 11
+        msg._styles._font_size = 22
     msg._flags = MessageFlags(int(flags))
     if MessageFlags.BG_ON in msg.flags:
         if MessageFlags.PREMIUM in msg.flags:

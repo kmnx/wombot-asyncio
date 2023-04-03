@@ -597,7 +597,7 @@ class MyBot(chatango.Client):
 
         if room.user.isanon:
             room.set_font(
-                name_color="000000", font_color="000000", font_face=1, font_size=22
+                name_color="000000", font_color="000000", font_face=1, font_size=11
             )
         else:
             await room.user.get_profile()
