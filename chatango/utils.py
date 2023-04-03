@@ -301,7 +301,7 @@ class Styles:
     ):
         self._name_color = name_color if name_color else str("000000")
         self._font_color = font_color if font_color else str("000000")
-        self._font_size = font_size if font_size else 11
+        self._font_size = font_size if font_size else 22
         self._font_face = font_face if font_face else 0
         self._use_background = int(use_background) if use_background else 0
 
