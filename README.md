@@ -16,17 +16,18 @@ install requirements
 
     pip3 install -r requirements.txt
 
-create secrets.py file with secret keys as needed.
-keys are:
-
-tenor_key = ""
-giphy_key = ""
+create mysecrets.py file with keys as needed.
+required keys are:
 chatango_user = ""
 chatango_pass = ""
+
+possible additional keys are:
+tenor_key = ""
+giphy_key = ""
 google_key = ""
 google_cx = ""
 
-export environment variables in your shell for easier deployment
+export environment variables in your shell for easier deployment, replace "mainroom" and "testroom" with the roomnames you want to run the bot in
 
     export wombotmainroom="mainroom"
     export wombottestroom="testroom"
