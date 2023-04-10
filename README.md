@@ -2,7 +2,9 @@
 
 Install instructions:
 
-clone the git
+clone the repo
+
+    git clone https://github.com/kmnx/wombot-asyncio.git
 
 create a virtual environment:
 
@@ -16,22 +18,27 @@ install requirements
 
     pip3 install -r requirements.txt
 
-create mysecrets.py file with keys as needed.
-required keys are:
-chatango_user = ""
-chatango_pass = ""
-
-possible additional keys are:
-tenor_key = ""
-giphy_key = ""
-google_key = ""
-google_cx = ""
-
-export environment variables in your shell for easier deployment, replace "mainroom" and "testroom" with the roomnames you want to run the bot in
+export environment variables for rooms to be joined, replace "mainroom" and "testroom" with the roomnames you want to run the bot in
 
     export wombotmainroom="mainroom"
     export wombottestroom="testroom"
 
+to avoid having to add environment variables every time, 
 also include these variables in your ~/.bashrc (or ~/.zshrc for ZSH) or ~/.profile
+
+run with:
+
+    python3 wombot.py
+
+
+on first run it will ask for chatango username and password.
+these will be stored in "mysecrets.py"
+
+for shazam functionality you also need to add your RapidAPI key to this file as
+"shazam_api_key" 
+
+
+
+
 
 
