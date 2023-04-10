@@ -21,8 +21,6 @@ keys are:
 
 tenor_key = ""
 giphy_key = ""
-nts_user = ""
-nts_pass = ""
 chatango_user = ""
 chatango_pass = ""
 google_key = ""
@@ -33,10 +31,6 @@ export environment variables in your shell for easier deployment
     export wombotmainroom="mainroom"
     export wombottestroom="testroom"
 
-and maybe include them in your ~/.bashrc ( or or ~/.zshrc for ZSH) or or ~/.profile
+also include these variables in your ~/.bashrc (or ~/.zshrc for ZSH) or ~/.profile
 
 
-optional if trying to scrape something behind login:
-install chromedriver if required
-on debian:
-    apt install chromium-driver
