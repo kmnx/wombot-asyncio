@@ -16,27 +16,22 @@ install requirements
 
     pip3 install -r requirements.txt
 
-create secrets.py file with secret keys as needed.
-keys are:
-
-tenor_key = ""
-giphy_key = ""
-nts_user = ""
-nts_pass = ""
+create mysecrets.py file with keys as needed.
+required keys are:
 chatango_user = ""
 chatango_pass = ""
+
+possible additional keys are:
+tenor_key = ""
+giphy_key = ""
 google_key = ""
 google_cx = ""
 
-export environment variables in your shell for easier deployment
+export environment variables in your shell for easier deployment, replace "mainroom" and "testroom" with the roomnames you want to run the bot in
 
     export wombotmainroom="mainroom"
     export wombottestroom="testroom"
 
-and maybe include them in your ~/.bashrc ( or or ~/.zshrc for ZSH) or or ~/.profile
+also include these variables in your ~/.bashrc (or ~/.zshrc for ZSH) or ~/.profile
 
 
-optional if trying to scrape something behind login:
-install chromedriver if required
-on debian:
-    apt install chromium-driver
