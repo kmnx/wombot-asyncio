@@ -2,6 +2,16 @@
 # -*- coding: utf-8 -*-
 import chatango
 import asyncio
+import os
+try:
+    import mysecrets
+except ImportError:
+    print("mysecrets.py not found. it will now be created")
+    chatango_user = input("Please enter Chatango Username:")
+    chatango_pass = input("Please enter Chatango Password:")
+    with open("mysecrets.py", 'a') as f:
+        f.write('chatango_user = ' + '\'' + chatango_user + 
+            '\'' + '\n' + 'chatango_pass = ' + '\'' + chatango_pass + '\'' + '\n'   )
 from aiohttp import ClientSession
 from datetime import datetime, timezone
 import aiocron
@@ -39,7 +49,10 @@ import radioactivity
 import schedule
 import search_google
 import get_id_doyou
-import shazam
+try:
+    import shazam
+except Exception:
+    print("Please add shazam_api_key to mysecrets.py for rapidapi shazam functionality ")
 import aiosqliteclass
 import data_pics_wombat
 import data_pics_capybara
@@ -55,7 +68,6 @@ import schedule
 import chuntfm
 import telnet
 from telebot.async_telebot import AsyncTeleBot
-import mysecrets
 shazam_api_key = mysecrets.shazam_api_key
 
 from mopidy_asyncio_client import MopidyClient
