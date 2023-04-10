@@ -23,10 +23,12 @@ async def scran(q):
         print(e)
     return recipe_name, recipe_url
 
+
 async def main(loop):
     thisscran = await scran("vegetarian")
     print(thisscran)
+
+
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main(loop))
-    

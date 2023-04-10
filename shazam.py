@@ -43,21 +43,19 @@ class ShazamApi:
                     # added chunk_count to counter initial data burst of some stations
                     chunk_count = 0
                     while asyncio.get_event_loop().time() < (starttime + 4):
-                        
+
                         chunk = await response.content.read(1024)
                         chunk_count += 1
-                        print('written chunk ',chunk_count)
+                        print("written chunk ", chunk_count)
                         if not chunk:
                             break
-
 
                         recording.write(chunk)
                         # some stations send lots of buffered audio on connect which might already be too much for shazam
                         # so we break at 250 chunks. 4s of 256kbit stream are about 213 chunks
                         if chunk_count > 250:
                             break
-                        
-                        
+
                     recording.seek(0)
 
                     sound = AudioSegment.from_file(recording)
@@ -96,7 +94,7 @@ async def main(loop):
 
     # audio_source = 'https://stream-relay-geo.ntslive.net/stream'
     # audio_source = 'https://fm.chunt.org/stream'
-    audio_source = 'https://doyouworld.out.airtime.pro/doyouworld_a'
+    audio_source = "https://doyouworld.out.airtime.pro/doyouworld_a"
     # audio_source = "https://kioskradiobxl.out.airtime.pro/kioskradiobxl_a"
     asyncio.ensure_future(loopy(loop))
     api = ShazamApi(loop, shazam_api_key)
