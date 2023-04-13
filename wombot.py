@@ -67,7 +67,7 @@ import aiosqlite
 import schedule
 import chuntfm
 import telnet
-from telebot.async_telebot import AsyncTeleBot
+#from telebot.async_telebot import AsyncTeleBot
 shazam_api_key = mysecrets.shazam_api_key
 
 from mopidy_asyncio_client import MopidyClient
