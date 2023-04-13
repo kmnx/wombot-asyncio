@@ -1793,7 +1793,7 @@ async def tg_bot():
     async def echo_all(message):
         await tgbot.reply_to(message, message.text)
 
-    asyncio.ensure_future(tgbot.polling())
+    #asyncio.ensure_future(tgbot.polling())
 if __name__ == "__main__":
     logging.debug("__main__")
 
