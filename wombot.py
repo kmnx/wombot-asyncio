@@ -1391,11 +1391,14 @@ class MyBot(chatango.Client):
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
                 if message.room.get_level(message.user) > 0:
+                    print(args)
                     if args:
                         splitargs = args.split(" ")
                         inurl = splitargs[0]
                         intag = splitargs[1]
                         await self.db.untag(inurl, intag)
+                else:
+                    print("not mod")
 
             elif cmd == "info":
                 if message.room.name != "<PM>":
