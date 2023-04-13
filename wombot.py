@@ -1811,7 +1811,7 @@ if __name__ == "__main__":
     mpd = MopidyClient(host="139.177.181.183")
     mpdtask = asyncio.gather(mpd_context_manager(mpd))
     giftask = schedule_gif_of_the_hour()
-    tgtask = tg_bot()
+    #tgtask = tg_bot()
     # cfm_task = schedule_chuntfm_livecheck()
 
     tasks = asyncio.gather(task, giftask, mpdtask,tgtask)
