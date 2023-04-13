@@ -1814,7 +1814,7 @@ if __name__ == "__main__":
     #tgtask = tg_bot()
     # cfm_task = schedule_chuntfm_livecheck()
 
-    tasks = asyncio.gather(task, giftask, mpdtask,tgtask)
+    tasks = asyncio.gather(task, giftask, mpdtask)
     logging.debug("init asyncio tasks started")
 
     allgif_file = os.path.join(basepath, "allgif.txt")
