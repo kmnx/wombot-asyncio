@@ -1787,7 +1787,7 @@ async def get_db_cur():
     cursor = await conn.cursor()
     return cursor
 async def tg_bot():
-    tgbot = AsyncTeleBot("5984981509:AAGPBThxqufCaj2Gu5A36ta096Dz7_-Tbb4", parse_mode=None) # You can set parse_mode by default. HTML or MARKDOWN
+    tgbot = AsyncTeleBot(mysecrets.telegram_key, parse_mode=None) # You can set parse_mode by default. HTML or MARKDOWN
 
     @tgbot.message_handler(commands=['start', 'help'])
     async def send_welcome(message):
