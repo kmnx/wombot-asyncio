@@ -513,6 +513,11 @@ async def shazam_station(message, station):
         audio_source = "https://fm.chunt.org/stream2"
     elif station == "soho":
         audio_source = "https://sohoradiomusic.doughunt.co.uk:8010/128mp3"
+    elif station == "rinse"
+        audio_source = "https://streamer-uk.rinse.fm:8443/stream"
+    elif station == "rinsefr"
+        audio_source = "https://radio10.pro-fhi.net/flux-trmqtiat/stream"
+
     stationname = station
     shazamapi = shazam.ShazamApi(loop, api_key=shazam_api_key)
     # session = ClientSession(trust_env=True)
