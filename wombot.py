@@ -752,11 +752,11 @@ class MyBot(chatango.Client):
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
                 asyncio.ensure_future(shazam_station(message, "soho"))
-            elif cmd in ["rinse"]:
+            elif cmd in ["idrinse"]:
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
                 asyncio.ensure_future(shazam_station(message, "rinse"))
-            elif cmd in ["rinsefr"]:
+            elif cmd in ["idrinsefr"]:
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
                 asyncio.ensure_future(shazam_station(message, "rinse"))
