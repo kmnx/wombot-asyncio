@@ -3,15 +3,26 @@
 import chatango
 import asyncio
 import os
+
 try:
     import mysecrets
 except ImportError:
     print("mysecrets.py not found. it will now be created")
     chatango_user = input("Please enter Chatango Username:")
     chatango_pass = input("Please enter Chatango Password:")
-    with open("mysecrets.py", 'a') as f:
-        f.write('chatango_user = ' + '\'' + chatango_user + 
-            '\'' + '\n' + 'chatango_pass = ' + '\'' + chatango_pass + '\'' + '\n'   )
+    with open("mysecrets.py", "a") as f:
+        f.write(
+            "chatango_user = "
+            + "'"
+            + chatango_user
+            + "'"
+            + "\n"
+            + "chatango_pass = "
+            + "'"
+            + chatango_pass
+            + "'"
+            + "\n"
+        )
 from aiohttp import ClientSession
 from datetime import datetime, timezone
 import aiocron
@@ -49,10 +60,13 @@ import radioactivity
 import schedule
 import search_google
 import get_id_doyou
+
 try:
     import shazam
 except Exception:
-    print("Please add shazam_api_key to mysecrets.py for rapidapi shazam functionality ")
+    print(
+        "Please add shazam_api_key to mysecrets.py for rapidapi shazam functionality "
+    )
 import aiosqliteclass
 import data_pics_wombat
 import data_pics_capybara
@@ -67,12 +81,11 @@ import aiosqlite
 import schedule
 import chuntfm
 import telnet
-#from telebot.async_telebot import AsyncTeleBot
+
+# from telebot.async_telebot import AsyncTeleBot
 shazam_api_key = mysecrets.shazam_api_key
 
 from mopidy_asyncio_client import MopidyClient
-
-
 
 
 # logging.basicConfig()
@@ -572,7 +585,6 @@ async def shazam_station(message, station):
         await message.channel.send(
             "ID " + stationname + ": " + hoursmins + " - " + "shazam found nothing"
         )
-        
 
 
 async def bandcamp_search(artist, title):
@@ -972,34 +984,41 @@ class MyBot(chatango.Client):
                 #
                 else:
                     # either just a disconnect or scheduled show
+                    try:
+                        async with ClientSession() as s:
+                            r = await s.get("https://chunt.org/restream.json")
+                            chu_json = await r.json()
+                            # print(chu_json)
+                            if (
+                                chu_json["current"]["show_title"]
+                                and chu_json["current"]["show_date"]
+                            ):
+                                chuntfm_restream = (
+                                    "RESTREAM: "
+                                    + chu_json["current"]["show_title"]
+                                    + " @ "
+                                    + chu_json["current"]["show_date"]
+                                )
+                            else:
+                                chuntfm_restream = (
+                                    "RESTREAM: " + chu_json["current"]["show_title"]
+                                )
+                    except Exception as e:
+                        print("exception in np")
+                        print(e)
+
                     if chuntfm_np:
-                        chuntfm_np = "scheduled but offline: " + chuntfm_np
+                        chuntfm_np = (
+                            "scheduled but offline: "
+                            + chuntfm_np
+                            + " "
+                            + chuntfm_restream
+                        )
                         # i dont know if it is a prerecord
                         # prerecord goes into calendar so we have np
                         # live indicator will be off
                     else:
-                        try:
-                            async with ClientSession() as s:
-                                r = await s.get("https://chunt.org/restream.json")
-                                chu_json = await r.json()
-                                # print(chu_json)
-                                if (
-                                    chu_json["current"]["show_title"]
-                                    and chu_json["current"]["show_date"]
-                                ):
-                                    chuntfm_np = (
-                                        "RESTREAM: "
-                                        + chu_json["current"]["show_title"]
-                                        + " @ "
-                                        + chu_json["current"]["show_date"]
-                                    )
-                                else:
-                                    chuntfm_np = (
-                                        "RESTREAM: " + chu_json["current"]["show_title"]
-                                    )
-                        except Exception as e:
-                            print("exception in np")
-                            print(e)
+                        chuntfm_np = chuntfm_restream
 
                 data = await mpd.playback.get_current_track()
                 print(data)
@@ -1034,6 +1053,30 @@ class MyBot(chatango.Client):
                         await message.channel.send(chuntfm_np + " | " + chu_two_msg)
                     else:
                         await message.channel.send(chuntfm_np)
+
+            elif cmd in ["actualnp", "actuallynp"]:
+                try:
+                    async with ClientSession() as s:
+                        r = await s.get("https://chunt.org/restream.json")
+                        chu_json = await r.json()
+                        # print(chu_json)
+                        if (
+                            chu_json["current"]["show_title"]
+                            and chu_json["current"]["show_date"]
+                        ):
+                            chuntfm_restream = (
+                                "RESTREAM: "
+                                + chu_json["current"]["show_title"]
+                                + " @ "
+                                + chu_json["current"]["show_date"]
+                            )
+                        else:
+                            chuntfm_restream = (
+                                "RESTREAM: " + chu_json["current"]["show_title"]
+                            )
+                except Exception as e:
+                    print("exception in np")
+                    print(e)
 
             elif cmd.startswith("jukebox"):
                 if message.room.name != "<PM>":
@@ -1799,17 +1842,24 @@ async def get_db_cur():
     # self.conn.row_factory = aiosqlite.Row
     cursor = await conn.cursor()
     return cursor
-async def tg_bot():
-    tgbot = AsyncTeleBot(mysecrets.telegram_key, parse_mode=None) # You can set parse_mode by default. HTML or MARKDOWN
 
-    @tgbot.message_handler(commands=['start', 'help'])
+
+async def tg_bot():
+    tgbot = AsyncTeleBot(
+        mysecrets.telegram_key, parse_mode=None
+    )  # You can set parse_mode by default. HTML or MARKDOWN
+
+    @tgbot.message_handler(commands=["start", "help"])
     async def send_welcome(message):
         await tgbot.reply_to(message, "Howdy, how are you doing?")
+
     @tgbot.message_handler(func=lambda m: True)
     async def echo_all(message):
         await tgbot.reply_to(message, message.text)
 
-    #asyncio.ensure_future(tgbot.polling())
+    # asyncio.ensure_future(tgbot.polling())
+
+
 if __name__ == "__main__":
     logging.debug("__main__")
 
@@ -1818,7 +1868,6 @@ if __name__ == "__main__":
     bot.default_user(config.botuser[0], config.botuser[1])  # easy_start
 
     #    #or
-    
 
     #    or_accounts = [["user1","passwd1"], ["user2","passwd2"]]
     #    bot.default_user(accounts=or_accounts, pm=False) #True if passwd was input.
@@ -1827,7 +1876,7 @@ if __name__ == "__main__":
     mpd = MopidyClient(host="139.177.181.183")
     mpdtask = asyncio.gather(mpd_context_manager(mpd))
     giftask = schedule_gif_of_the_hour()
-    #tgtask = tg_bot()
+    # tgtask = tg_bot()
     # cfm_task = schedule_chuntfm_livecheck()
 
     tasks = asyncio.gather(task, giftask, mpdtask)
