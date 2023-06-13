@@ -1083,10 +1083,8 @@ class MyBot(chatango.Client):
 
                 if chuntfm_np:
                     print("cfm_np is", chuntfm_np)
-                    if chu_two_msg:
-                        await message.channel.send(chuntfm_np + " | " + chu_two_msg)
-                    else:
-                        await message.channel.send(chuntfm_np)
+
+                    await message.channel.send(chuntfm_np)
 
             elif cmd.startswith("jukebox"):
                 if message.room.name != "<PM>":
