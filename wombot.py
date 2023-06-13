@@ -1076,9 +1076,11 @@ class MyBot(chatango.Client):
                             chuntfm_restream = (
                                 "RESTREAM: " + chu_json["current"]["show_title"]
                             )
+                        chuntfm_np = chuntfm_restream
                 except Exception as e:
                     print("exception in np")
                     print(e)
+
                 if chuntfm_np:
                     print("cfm_np is", chuntfm_np)
                     if chu_two_msg:
