@@ -1055,6 +1055,8 @@ class MyBot(chatango.Client):
                         await message.channel.send(chuntfm_np)
 
             elif cmd in ["actualnp", "actuallynp"]:
+                if message.room.name != "<PM>":
+                    await message.room.delete_message(message)
                 try:
                     async with ClientSession() as s:
                         r = await s.get("https://chunt.org/restream.json")
@@ -1077,6 +1079,12 @@ class MyBot(chatango.Client):
                 except Exception as e:
                     print("exception in np")
                     print(e)
+                if chuntfm_np:
+                    print("cfm_np is", chuntfm_np)
+                    if chu_two_msg:
+                        await message.channel.send(chuntfm_np + " | " + chu_two_msg)
+                    else:
+                        await message.channel.send(chuntfm_np)
 
             elif cmd.startswith("jukebox"):
                 if message.room.name != "<PM>":
