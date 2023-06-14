@@ -1333,6 +1333,37 @@ class MyBot(chatango.Client):
                     + " : "
                     + cfortune.replace(".", "").lower()
                 )
+            elif cmd == "boshtune":
+                if message.room.name != "<PM>":
+                    await message.room.delete_message(message)
+
+                sentence = random.choice(fortunes.fortunecookie)
+                tokens = nltk.word_tokenize(sentence)
+                tagged = [[token, tag] for (token, tag) in nltk.pos_tag(tokens)]
+                nn_idx = []
+                nns_idx = []
+                for i, [token, tag] in enumerate(tagged):
+                    if tag == "VBD":
+                        tagged[i][0] = "boshed"
+                    elif tag == "NN":
+                        nn_idx.append(i)
+                    elif tag == "NNS":
+                        nns_idx.append(i)
+                try:
+                    tagged[random.choice(nn_idx)][0] = "bosh"
+                except IndexError:
+                    pass
+                try:
+                    tagged[random.choice(nns_idx)][0] = "boshs"
+                except IndexError:
+                    pass
+                cfortune = " ".join([token[0] for token in tagged])
+                await message.channel.send(
+                    "your boshed fortune, "
+                    + message.user.showname
+                    + " : "
+                    + cfortune.replace(".", "").lower()
+                )
             elif cmd in ["scran", "recipe", "hungry"]:
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
