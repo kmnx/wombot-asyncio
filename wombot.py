@@ -1255,6 +1255,15 @@ class MyBot(chatango.Client):
                                 arg.upper()
                                 + ": Sorry, I don't know that radio station.",
                             )
+            elif cmd == "normalfortune":
+                if message.room.name != "<PM>":
+                    await message.room.delete_message(message)
+
+                await message.channel.send(
+                    "your fortune, "
+                    + message.user.showname
+                    + " : "
+                    + (random.choice(fortunes.fortunecookie)).replace(".", "").lower())
 
             elif cmd == "fortune":
                 if message.room.name != "<PM>":
