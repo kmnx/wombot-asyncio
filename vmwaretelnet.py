@@ -36,13 +36,13 @@ class AsyncTelnet:
     def __init__(self, reader, opt_handler):
         self._reader = reader
         self._opt_handler = opt_handler
-        self.rawq = b''
+        self.rawq = b""
         self.irawq = 0
-        self.cookedq = b''
+        self.cookedq = b""
         self.eof = 0
-        self.iacseq = b''  # Buffer for IAC sequence.
+        self.iacseq = b""  # Buffer for IAC sequence.
         self.sb = 0  # flag for SB and SE sequence.
-        self.sbdataq = b''
+        self.sbdataq = b""
 
     @asyncio.coroutine
     def process_rawq(self):
@@ -50,7 +50,7 @@ class AsyncTelnet:
 
         Set self.eof when connection is closed.
         """
-        buf = [b'', b'']
+        buf = [b"", b""]
         try:
             while self.rawq:
                 c = await self.rawq_getchar()
@@ -70,34 +70,32 @@ class AsyncTelnet:
                         self.iacseq += c
                         continue
 
-                    self.iacseq = b''
+                    self.iacseq = b""
                     if c == IAC:
                         buf[self.sb] = buf[self.sb] + c
                     else:
                         if c == SB:  # SB ... SE start.
                             self.sb = 1
-                            self.sbdataq = b''
+                            self.sbdataq = b""
                         elif c == SE:
                             self.sb = 0
                             self.sbdataq = self.sbdataq + buf[1]
-                            buf[1] = b''
-                        await self._opt_handler(c, NOOPT,
-                                                     data=self.sbdataq)
+                            buf[1] = b""
+                        await self._opt_handler(c, NOOPT, data=self.sbdataq)
                 elif len(self.iacseq) == 2:
                     cmd = self.iacseq[1:2]
-                    self.iacseq = b''
+                    self.iacseq = b""
                     opt = c
                     if cmd in (DO, DONT):
                         await self._opt_handler(cmd, opt)
                     elif cmd in (WILL, WONT):
-                     await self._opt_handler(cmd, opt)
+                        await self._opt_handler(cmd, opt)
         except EOFError:  # raised by self.rawq_getchar()
-            self.iacseq = b''  # Reset on EOF
+            self.iacseq = b""  # Reset on EOF
             self.sb = 0
             pass
         self.cookedq = self.cookedq + buf[0]
         self.sbdataq = self.sbdataq + buf[1]
-
 
     async def rawq_getchar(self):
         """Get next char from raw queue.
@@ -108,13 +106,12 @@ class AsyncTelnet:
             await self.fill_rawq()
             if self.eof:
                 raise EOFError
-        c = self.rawq[self.irawq:self.irawq + 1]
+        c = self.rawq[self.irawq : self.irawq + 1]
         self.irawq = self.irawq + 1
         if self.irawq >= len(self.rawq):
-            self.rawq = b''
+            self.rawq = b""
             self.irawq = 0
         return c
-
 
     async def fill_rawq(self):
         """Fill raw queue from exactly one recv() system call.
@@ -122,14 +119,13 @@ class AsyncTelnet:
         Set self.eof when connection is closed.
         """
         if self.irawq >= len(self.rawq):
-            self.rawq = b''
+            self.rawq = b""
             self.irawq = 0
         # The buffer size should be fairly small so as to avoid quadratic
         # behavior in process_rawq() above
         buf = await self._reader.read(50)
-        self.eof = (not buf)
+        self.eof = not buf
         self.rawq = self.rawq + buf
-
 
     async def read_some(self):
         """Read at least one byte of cooked data unless EOF is hit.
@@ -141,6 +137,5 @@ class AsyncTelnet:
             await self.fill_rawq()
             await self.process_rawq()
         buf = self.cookedq
-        self.cookedq = b''
+        self.cookedq = b""
         return buf
-

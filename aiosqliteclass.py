@@ -22,7 +22,7 @@ class Sqlite3Class:
         self.conn.row_factory = lambda cursor, row: row[0]
         # self.conn.row_factory = aiosqlite.Row
         self.cursor = await self.conn.cursor()
-        print('init aiosqliteclass done ')
+        print("init aiosqliteclass done ")
 
     async def _close():
         await self.conn.close()
@@ -114,6 +114,8 @@ class Sqlite3Class:
     async def untag(self, inurl, intag):
         urlid = await self.query_gif(inurl)
         tagid = await self.query_tag(intag)
+        print(urlid)
+        print(tagid)
         if urlid and tagid:
             await self.cursor.execute(
                 "DELETE FROM object_tag_mapping  WHERE object_reference = ? AND tag_reference = ?",
@@ -122,6 +124,7 @@ class Sqlite3Class:
             await self.conn.commit()
 
         test_tag_has_url = await self.fetch_gif(intag)
+        print(test_tag_has_url)
 
         if not test_tag_has_url:
             await self.cursor.execute(

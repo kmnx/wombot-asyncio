@@ -1,5 +1,6 @@
 import anyio, asynctelnet
 
+
 async def shell(tcp):
     async with asynctelnet.TelnetClient(tcp, client=True) as stream:
         while True:
@@ -8,9 +9,9 @@ async def shell(tcp):
             if not outp:
                 # End of File
                 break
-            elif '?' in outp:
+            elif "?" in outp:
                 # reply all questions with 'y'.
-                await stream.send('y')
+                await stream.send("y")
 
             # display all server output
             print(outp, flush=True)
@@ -18,8 +19,10 @@ async def shell(tcp):
     # EOF
     print()
 
+
 async def main():
-    async with await connect_tcp('localhost', 1234) as client:
+    async with await connect_tcp("localhost", 1234) as client:
         await shell(client)
+
 
 anyio.run(main)

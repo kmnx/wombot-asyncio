@@ -8,12 +8,13 @@ import traceback
 import socket
 import logging
 
-#logging.basicConfig(filename='connection.log', encoding='utf-8', level=logging.DEBUG)
+# logging.basicConfig(filename='connection.log', encoding='utf-8', level=logging.DEBUG)
 background_tasks = set()
+
 
 class Connection:
     def __init__(self, client, ws=True):
-        logging.debug('__init__')
+        logging.debug("__init__")
         self.client = client
         self._connected = False
         self.type = "ws" if ws else "sock"
@@ -42,11 +43,11 @@ class Connection:
         self._connected = True
         self._recv_task = asyncio.create_task(self.s_do_recv())
         background_tasks.add(self._recv_task)
-        logging.debug('add_done_callback sock_connect _recv')
+        logging.debug("add_done_callback sock_connect _recv")
         self._recv_task.add_done_callback(background_tasks.discard)
         self._ping_task = asyncio.create_task(self._do_ping())
         background_tasks.add(self._ping_task)
-        logging.debug('add_done_callback sock_connect _ping_task')
+        logging.debug("add_done_callback sock_connect _ping_task")
         self._ping_task.add_done_callback(background_tasks.discard)
         await self._login(user_name, password)
 
@@ -66,11 +67,11 @@ class Connection:
         self._recv_task = asyncio.create_task(self.ws_do_recv())
         background_tasks.add(self._recv_task)
         self._recv_task.add_done_callback(background_tasks.discard)
-        logging.debug('add_done_callback connect _recv_task')
+        logging.debug("add_done_callback connect _recv_task")
         self._ping_task = asyncio.create_task(self._do_ping())
         background_tasks.add(self._ping_task)
         self._ping_task.add_done_callback(background_tasks.discard)
-        logging.debug('add_done_callback connect _ping_task')
+        logging.debug("add_done_callback connect _ping_task")
 
     @property
     def connected(self):
@@ -111,7 +112,7 @@ class Connection:
         if self.connected:
             self._ping_task = asyncio.create_task(self._do_ping())
             background_tasks.add(self._ping_task)
-            logging.debug('add_done_callback _do_ping ')
+            logging.debug("add_done_callback _do_ping ")
             self._ping_task.add_done_callback(background_tasks.discard)
 
     async def ws_do_recv(self):
