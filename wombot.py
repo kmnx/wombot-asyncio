@@ -17,7 +17,6 @@ import logging
 from urllib.parse import urlparse
 import bs4
 import nltk
-import sqlite_create_idhistory_db
 
 try:
     nltk.data.find("tokenizers/punkt")
