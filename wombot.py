@@ -7,34 +7,27 @@ from datetime import datetime, timezone
 import aiocron
 import random
 import typing
-from urllib.parse import urlparse
 from os import environ
 import os.path
 from pathlib import Path
 import time
 import pytz
-import json
 import re
 import logging
-import html
 from urllib.parse import urlparse
 import bs4
-import struct
 import nltk
-import bpm
 
-from anyio import connect_tcp
 try:
-    nltk.data.find('tokenizers/punkt')
+    nltk.data.find("tokenizers/punkt")
 except LookupError:
-    nltk.download('punkt')
+    nltk.download("punkt")
 try:
-    nltk.data.find('taggers/averaged_perceptron_tagger')
+    nltk.data.find("taggers/averaged_perceptron_tagger")
 except LookupError:
-    nltk.download('averaged_perceptron_tagger')
+    nltk.download("averaged_perceptron_tagger")
 
 import radioactivity
-import schedule
 import search_google
 import get_id_doyou
 import shazam
@@ -44,7 +37,8 @@ import data_pics_capybara
 import data_pics_otter
 import data_pics_quokka
 import data_txt_fortunes as fortunes
-import anyio, asynctelnet
+import asynctelnet
+
 # import raid
 import aiosqlite
 
@@ -58,17 +52,17 @@ shazam_api_key = mysecrets.shazam_api_key
 
 from mopidy_asyncio_client import MopidyClient
 
-#logging.basicConfig()
-#logging.getLogger("mopidy_asyncio_client").setLevel(logging.DEBUG)
+# logging.basicConfig()
+# logging.getLogger("mopidy_asyncio_client").setLevel(logging.DEBUG)
 
-logging.basicConfig(filename='example.log', encoding='utf-8', level=logging.DEBUG)
-logging.debug('This message should go to the log file')
-logging.info('So should this')
-logging.warning('And this, too')
-logging.error('And non-ASCII stuff, too, like Øresund and Malmö')
+logging.basicConfig(filename="example.log", encoding="utf-8", level=logging.DEBUG)
+logging.debug("This message should go to the log file")
+logging.info("So should this")
+logging.warning("And this, too")
+logging.error("And non-ASCII stuff, too, like Øresund and Malmö")
 
 print("start")
-commandlist = [
+command_list = [
     "help",
     "fortune",
     "id1",
@@ -96,7 +90,7 @@ commandlist = [
     "ntsweirdo",
 ]
 
-helpmessage = (
+help_message = (
     "commands: \r \r "
     + "GIFs: \r!gif (some dancing gif) \r !bbb / !b2b (more and random gifs) \r"
     + "!shoutout [user]  \r "
@@ -106,7 +100,7 @@ helpmessage = (
     + "keep chuntin!"
 )
 
-shoutstart = [
+shout_start = [
     "out to you, ",
     "out to the absolute legend ",
     "much love out to ",
@@ -114,11 +108,12 @@ shoutstart = [
     "out to the inimitable",
 ]
 
-shoutend = ["😘", "❤️", "💙", "*h*", "<3"]
+shout_end = ["😘", "❤️", "💙", "*h*", "<3"]
 
-gifhosts = ["https://c.tenor.com/", "https://media.giphy.com/"]
+gif_hosts = ["https://c.tenor.com/", "https://media.giphy.com/"]
 
-schedule_test_blob = [{
+schedule_test_blob = [
+    {
         "uid": "2022-06-2300:00",
         "startTimestamp": "2022-09-28T14:00:00+00:00",
         "endTimestamp": "2022-09-28T17:00:00+00:00",
@@ -131,39 +126,42 @@ schedule_test_blob = [{
         "lastModified": "2022-08-09T11:14:34+00:00",
         "status": "CONFIRMED",
         "invitationStatus": None,
-        "url": None
-    }]
+        "url": None,
+    }
+]
 
-eightball = ['It is certain.','It is decidedly so.','Without a doubt.',
-            'Yes definitely.',
-            'You may rely on it.',
-            'As I see it, yes.',
-            'Most likely.',
-            'Outlook good.',
-            'Yes.',
-            'Signs point to yes.',
-            'Reply hazy, try again.',
-            'Ask again later.',
-            'Better not tell you now.',
-            'Cannot predict now.',
-            'Concentrate and ask again.',
-            "Don't count on it.",
-            'My reply is no.',
-            'My sources say no.',
-            'Outlook not so good.',
-            'Very doubtful.']
+eightball = [
+    "It is certain.",
+    "It is decidedly so.",
+    "Without a doubt.",
+    "Yes definitely.",
+    "You may rely on it.",
+    "As I see it, yes.",
+    "Most likely.",
+    "Outlook good.",
+    "Yes.",
+    "Signs point to yes.",
+    "Reply hazy, try again.",
+    "Ask again later.",
+    "Better not tell you now.",
+    "Cannot predict now.",
+    "Concentrate and ask again.",
+    "Don't count on it.",
+    "My reply is no.",
+    "My sources say no.",
+    "Outlook not so good.",
+    "Very doubtful.",
+]
 
+base_path = Path().absolute()
 
-basepath = Path().absolute()
-
-allgif_file = os.path.join(basepath, "allgif.txt")
+allgif_file = os.path.join(base_path, "allgif.txt")
 if not os.path.exists(allgif_file):
     with open(allgif_file, "a") as file:
         pass
 else:
     with open(allgif_file) as file:
-        allgif_set = set(line.strip() for line in file if line.startswith('http://'))
-
+        allgif_set = set(line.strip() for line in file if line.startswith("http://"))
 
 print("init variables done")
 
@@ -172,23 +170,23 @@ async def shell(tcp):
     async with asynctelnet.TelnetClient(tcp, client=True) as stream:
         while True:
             # read stream until '?' mark is found
-            outp = await stream.receive(1024)
-            if not outp:
+            output = await stream.receive(1024)
+            if not output:
                 # End of File
                 break
-            elif '?' in outp:
+            elif "?" in output:
                 # reply all questions with 'y'.
-                await stream.send('y')
+                await stream.send("y")
 
             # display all server output
-            print(outp, flush=True)
+            print(output, flush=True)
 
     # EOF
     print()
 
 
 async def get_now(stream_url, session):
-    logging.debug('get_now')
+    logging.debug("get_now")
     headers = {"Icy-MetaData": "1"}
     async with session.get(stream_url, headers=headers) as resp:
         for _ in range(10):
@@ -204,7 +202,7 @@ async def get_now(stream_url, session):
 
 
 async def get_track():
-    logging.debug('get_track')
+    logging.debug("get_track")
 
     session = ClientSession()
     stream_url = "https://fm.chunt.org/stream"
@@ -215,24 +213,23 @@ async def get_track():
     return result
 
 
-async def post_gif_of_the_hour(param):
-    logging.debug('post_gif_of_the_hour')
+async def post_gif_of_the_hour():
+    logging.debug("post_gif_of_the_hour")
 
     bots = []
-    mainroom = environ["wombotmainroom"]
-    testroom = environ["wombottestroom"]
-    bots.append(bot.get_room(mainroom))
-    bots.append(bot.get_room(testroom))
+    main_room = environ["wombotmainroom"]
+    test_room = environ["wombottestroom"]
+    bots.append(bot.get_room(main_room))
+    bots.append(bot.get_room(test_room))
     # print(datetime.now().time(), param)
     goth = random.choice(await bot.db.fetch_gif("bbb"))
     bot.goth = goth
-    # print(gifone)
     for roombot in bots:
         await roombot.send_message("the gif of the hour is: " + goth)
 
 
 async def schedule_gif_of_the_hour():
-    logging.debug('schedule_gif_of_the_hour')
+    logging.debug("schedule_gif_of_the_hour")
 
     # cron_min = aiocron.crontab('*/1 * * * *', func=post_gif_of_the_hour, args=("At every minute",), start=True)
     cron_jub = aiocron.crontab(
@@ -247,14 +244,13 @@ async def schedule_gif_of_the_hour():
 
 
 async def post_chuntfm_status():
-    logging.debug('post_chuntfm_status')
-
+    logging.debug("post_chuntfm_status")
 
     bots = []
-    mainroom = environ["wombotmainroom"]
-    testroom = environ["wombottestroom"]
-    bots.append(bot.get_room(mainroom))
-    bots.append(bot.get_room(testroom))
+    main_room = environ["wombotmainroom"]
+    test_room = environ["wombottestroom"]
+    bots.append(bot.get_room(main_room))
+    bots.append(bot.get_room(test_room))
 
     if not hasattr(bot, "chuntfm"):
         bot.chuntfm = dict()
@@ -266,7 +262,7 @@ async def post_chuntfm_status():
     else:
         return None
 
-    # if theres a new status
+    # if there's a new status
     print("last_posted_status", (bot.chuntfm.get("last_posted_status")))
     print("bot.chuntfm.get(status) ==", bot.chuntfm.get("status"))
     if (bot.chuntfm.get("last_posted_status") is None) or (
@@ -275,8 +271,7 @@ async def post_chuntfm_status():
         msg = "ChuntFM status: " + bot.chuntfm.get("status") + "!"
         print("the msg is:", msg)
     elif bot.chuntfm.get("status") == "online":
-        msg = "ChuntFM is online!"
-        # if the last online status post was less than 15 mins agp, dont post again
+        # if the last online status post was less than 15 minutes ago, don't post again
         print(bot.chuntfm.get("last_posted_time"))
         print(time.time() - bot.chuntfm.get("last_posted_time"))
         print(time.time() - bot.chuntfm.get("last_posted_time") < 15 * 60)
@@ -285,18 +280,12 @@ async def post_chuntfm_status():
     elif bot.chuntfm.get("status") == "offline":
         return None
 
-    for roombot in bots:
-        # await roombot.send_message(msg)
-        # print('sending status message to room')
-        # passing until it's more reliable
-        pass
-
     bot.chuntfm["last_posted_status"] = bot.chuntfm.get("status")
     bot.chuntfm["last_posted_time"] = time.time()
 
 
 async def schedule_chuntfm_livecheck():
-    #livecheck = aiocron.crontab("*/1 * * * *", func=post_chuntfm_status, start=True)
+    # livecheck = aiocron.crontab("*/1 * * * *", func=post_chuntfm_status, start=True)
 
     while True:
         await asyncio.sleep(5)
@@ -306,15 +295,14 @@ async def schedule_chuntfm_livecheck():
 
 
 async def playback_started_handler(data):
-    logging.debug('playback_started_handler')
+    logging.debug("playback_started_handler")
 
     """Callback function, called when the playback started."""
     print(data)
     print(bot.rooms)  # ok
-    source_name = html.unescape(data["tl_track"]["track"]["name"])
-    mainroom = environ["wombotmainroom"]
-    myroom = bot.get_room(mainroom)
-    # print(myroom) # ok
+    main_room = environ["wombotmainroom"]
+    my_room = bot.get_room(main_room)
+    # print(my_room) # ok
     if data["tl_track"]["track"]["uri"].startswith("soundcloud"):
         url = data["tl_track"]["track"]["comment"]
     elif data["tl_track"]["track"]["uri"].startswith("mixcloud"):
@@ -323,11 +311,11 @@ async def playback_started_handler(data):
     else:
         url = data["tl_track"]["track"]["name"]
     msg = "https://fm.chunt.org/stream2 jukebox now playing: " + url
-    await myroom.send_message(msg)
+    await my_room.send_message(msg)
 
 
 async def all_events_handler(event, data):
-    logging.debug('all_events_handler')
+    logging.debug("all_events_handler")
 
     """Callback function; catch-all function."""
     print(event, data)
@@ -336,11 +324,9 @@ async def all_events_handler(event, data):
 
 
 async def mpd_context_manager(mpd):
-    logging.debug('mpd_context_manager')
-
+    logging.debug("mpd_context_manager")
 
     async with mpd as mopidy:
-
         mopidy.bind("track_playback_started", playback_started_handler)
         mopidy.bind("*", all_events_handler)
         await mpd.tracklist.set_consume(True)
@@ -355,27 +341,26 @@ async def mpd_context_manager(mpd):
 
 
 def convert_utc_to_london(utctime):
-    tz = pytz.timezone("UTC")
+    pytz.timezone("UTC")
     naive_time = datetime.strptime(utctime, "%Y-%m-%d %H:%M:%S")
     utc_time = naive_time.replace(tzinfo=pytz.UTC)
     london_tz = pytz.timezone("Europe/London")
     london_time = utc_time.astimezone(london_tz)
     string_time = str(london_time)
-    lesstime = string_time.split(" ")[1].split(":")
-    hoursmins = str(lesstime[0]) + ":" + str(lesstime[1])
+    less_time = string_time.split(" ")[1].split(":")
+    hours_minutes = str(less_time[0]) + ":" + str(less_time[1])
 
-    return hoursmins
+    return hours_minutes
 
 
 # radioactivity id
 
 
 async def raid(message, station_query):
-    logging.debug('raid')
-
+    logging.debug("raid")
 
     ra_stations = await radioactivity.get_station_list()
-
+    print("wtf")
     ra_station_names = list(ra_stations.keys())
 
     # pm a list of station names to the user if the typed !raidlist
@@ -390,8 +375,6 @@ async def raid(message, station_query):
         await message.room.client.pm.send_message(message.user, msg)
 
         return None
-
-    station_name = None
 
     match = False
 
@@ -431,13 +414,13 @@ async def raid(message, station_query):
             stream_url = stream[1]
 
             # shazam it
-            msg = ""
-            artist = ""
-            track = ""
+            ""
+            ""
+            ""
             shazamapi = shazam.ShazamApi(loop, api_key=shazam_api_key)
             tz = pytz.timezone("Europe/London")
             london_now = datetime.now(tz)
-            hoursmins = london_now.strftime("%H:%M")
+            hours_minutes = london_now.strftime("%H:%M")
 
             stream_sep = "" if stream_name == "" else " "
 
@@ -453,7 +436,7 @@ async def raid(message, station_query):
                         + stream_sep
                         + stream_name
                         + " "
-                        + hoursmins
+                        + hours_minutes
                         + " - "
                         + artist
                         + " - "
@@ -467,7 +450,7 @@ async def raid(message, station_query):
                         + stream_sep
                         + stream_name
                         + ": "
-                        + hoursmins
+                        + hours_minutes
                         + " - "
                         + "shazam found nothing"
                     )
@@ -478,7 +461,7 @@ async def raid(message, station_query):
 
 
 async def shazam_station(message, station):
-    logging.debug('shazam_station')
+    logging.debug("shazam_station")
 
     if station == "nts1":
         audio_source = "https://stream-relay-geo.ntslive.net/stream"
@@ -492,14 +475,14 @@ async def shazam_station(message, station):
         audio_source = "https://fm.chunt.org/stream2"
     elif station == "soho":
         audio_source = "https://sohoradiomusic.doughunt.co.uk:8010/128mp3"
-    stationname = station
+    station_name = station
     shazamapi = shazam.ShazamApi(loop, api_key=shazam_api_key)
     # session = ClientSession(trust_env=True)
     tz = pytz.timezone("Europe/London")
     london_now = datetime.now(tz)
-    hoursmins = london_now.strftime("%H:%M")
-    out = ""
-    msg = ""
+    hours_minutes = london_now.strftime("%H:%M")
+    ""
+    ""
     result = await shazamapi._get(audio_source)
     print(result)
 
@@ -510,9 +493,9 @@ async def shazam_station(message, station):
 
         await message.channel.send(
             "ID "
-            + stationname
+            + station_name
             + " "
-            + hoursmins
+            + hours_minutes
             + " - "
             + artist
             + " - "
@@ -521,25 +504,25 @@ async def shazam_station(message, station):
         )
     else:
         await message.channel.send(
-            "ID " + stationname + ": " + hoursmins + " - " + "shazam found nothing"
+            "ID " + station_name + ": " + hours_minutes + " - " + "shazam found nothing"
         )
 
 
 async def bandcamp_search(artist, title):
-    logging.debug('bandcamp_search')
+    logging.debug("bandcamp_search")
 
-    googlequery = artist + " " + title
-    res = ""
-    res = await search_google.search(googlequery)
+    google_query = artist + " " + title
+    ""
+    res = await search_google.search(google_query)
     print(res)
     if res is not None:
         bc_link = res[0]["link"]
         print(bc_link)
         filters = ["track", "album"]
         parsed = urlparse(bc_link)
-        splitpath = parsed.path.split("/")
-        bc_pagetype = splitpath[1]
-        if any(word in bc_pagetype for word in filters):
+        split_path = parsed.path.split("/")
+        bc_page_type = split_path[1]
+        if any(word in bc_page_type for word in filters):
             bandcamp_result_msg = " | maybe it's: " + bc_link
         else:
             bandcamp_result_msg = " | no bandcamp found. "
@@ -550,12 +533,10 @@ async def bandcamp_search(artist, title):
     return bandcamp_result_msg
 
 
-class config:
-    rooms = []
-    rooms.append(environ["wombotmainroom"])
-    rooms.append(environ["wombottestroom"])
+class Config:
+    rooms = [environ["wombotmainroom"], environ["wombottestroom"]]
 
-    botuser = [mysecrets.chatango_user, mysecrets.chatango_pass]  # password
+    bot_user = [mysecrets.chatango_user, mysecrets.chatango_pass]  # password
 
 
 class MyBot(chatango.Client):
@@ -567,19 +548,19 @@ class MyBot(chatango.Client):
         print("seriously")
 
     async def on_start(self):  # room join queue
-        logging.debug('on_start')
+        logging.debug("on_start")
 
-        for room in config.rooms:
+        for room in Config.rooms:
             self.set_timeout(1, self.join, room)
 
     async def on_connect(self, room: typing.Union[chatango.Room, chatango.PM]):
-        logging.debug('on_connect')
+        logging.debug("on_connect")
 
         print(f"[{room.type}] Connected to", room)
         self._room = room
 
     async def on_disconnect(self, room):
-        logging.debug('on_disconnect')
+        logging.debug("on_disconnect")
 
         print(f"[{room.type}] Disconnected from", room)
 
@@ -591,7 +572,7 @@ class MyBot(chatango.Client):
         print(f"[{room.type}] Rejected from", room)
 
     async def on_room_init(self, room):
-        logging.debug('on_room_init')
+        logging.debug("on_room_init")
 
         if room.user.isanon:
             room.set_font(
@@ -602,7 +583,6 @@ class MyBot(chatango.Client):
             await room.enable_bg()
 
     async def on_message(self, message):
-
         print(
             time.strftime("%b/%d-%H:%M:%S", time.localtime(message.time)),
             message.room.name,
@@ -611,9 +591,9 @@ class MyBot(chatango.Client):
         )
 
         if message.body[0] == "!":
-
+            delete_message = True
             print(message.room.name)
-            print('message.body: ',message.body)
+            print("message.body: ", message.body)
             data = message.body[1:].split(" ", 1)
             if len(data) > 1:
                 orig_cmd, args = data[0], data[1]
@@ -621,97 +601,53 @@ class MyBot(chatango.Client):
                 orig_cmd, args = data[0], ""
             cmd = orig_cmd.lower().strip().lstrip().rstrip()
             print(cmd)
-            # if message.body.startswith("!a"):
-            if cmd == ("a"):
+            if cmd == "a":
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
                 await message.channel.send(f"Hello {message.user.showname}")
-            
+
             # works but needs right instance and i cba rn
-            elif cmd == ("count"):
+            elif cmd == "count":
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
-                print('usercount',bot._room.usercount)
-
-            elif cmd == 'bpm':
-                bpm = await loop.run_in_executor()
+                print("user count", bot._room.usercount)
 
             elif cmd == "help":
-                print(helpmessage)
-                if message.room.name != '<PM>':
+                print(help_message)
+                if message.room.name != "<PM>":
                     await message.room.delete_message(message)
-                await message.channel.send(helpmessage)
-                await message.room.client.pm.send_message(message.user, helpmessage)
+                await message.channel.send(help_message)
+                await message.room.client.pm.send_message(message.user, help_message)
 
             elif cmd in ["idch1", "idnts1", "nts1"]:
-                if message.room.name != '<PM>':
+                if message.room.name != "<PM>":
                     await message.room.delete_message(message)
-                # acrcloud retired because expensive and not much better than shazam
-                '''
-                utctime = ""
-                cur = await get_db_cur()
-                await cur.execute("SELECT * FROM nts_one ORDER BY id DESC LIMIT 1;")
-                result = await cur.fetchall()
-                sqlid, utctime, artist, title = result[0]
-                hoursmins = convert_utc_to_london(utctime)
-                bandcamp_result_msg = await bandcamp_search(artist, title)
-
-                await message.channel.send(
-                    "ID NTS1 (from acrcloud): "
-                    + hoursmins
-                    + " - "
-                    + artist
-                    + " - "
-                    + title
-                    + bandcamp_result_msg
-                )
-                '''
 
                 asyncio.ensure_future(shazam_station(message, "nts1"))
 
             elif cmd in ["idch2", "idnts2"]:
-                if message.room.name != '<PM>':
+                if message.room.name != "<PM>":
                     await message.room.delete_message(message)
-                # acrcloud retired because expensive and not much better than shazam
-                '''
-                utctime = ""
-                cur = await get_db_cur()
-                await cur.execute("SELECT * FROM nts_two ORDER BY id DESC LIMIT 1;")
-                result = await cur.fetchall()
-                sqlid, utctime, artist, title = result[0]
-                hoursmins = convert_utc_to_london(utctime)
-                bandcamp_result_msg = await bandcamp_search(artist, title)
-
-                await message.channel.send(
-                    "ID NTS2 (from acrcloud): "
-                    + hoursmins
-                    + " - "
-                    + artist
-                    + " - "
-                    + title
-                    + bandcamp_result_msg
-                )
-                '''
 
                 asyncio.ensure_future(shazam_station(message, "nts2"))
             elif cmd in ["idsoho"]:
-                if message.room.name != '<PM>':
+                if message.room.name != "<PM>":
                     await message.room.delete_message(message)
                 asyncio.ensure_future(shazam_station(message, "soho"))
 
             elif cmd in ["iddy", "iddoyou"]:
-                if message.room.name != '<PM>':
+                if message.room.name != "<PM>":
                     await message.room.delete_message(message)
 
-                londontime, artist, title = await get_id_doyou.get()
-                hoursmins = londontime
+                london_time, artist, title = await get_id_doyou.get()
+                hours_minutes = london_time
 
-                if title != None:
+                if title is not None:
                     bandcamp_result_msg = await bandcamp_search(artist, title)
 
                     await message.channel.send(
                         "ID DOYOU (from doyou): "
-                        + hoursmins
+                        + hours_minutes
                         + " - "
                         + artist
                         + " - "
@@ -725,48 +661,18 @@ class MyBot(chatango.Client):
                     await message.channel.send("No ID on doyou website, trying shazam")
                     asyncio.ensure_future(shazam_station(message, "doyou"))
 
-            #
-            # elif cmd in ["idchunt"]:
-            #     await message.room.delete_message(message)
-            #     url = 'https://fm.chunt.org/stream'
-            #     headers={'Icy-MetaData': "1"}
-            #     '''
-            #     async with ClientSession() as s:
-            #         r = await s.get(url, headers=headers)
-            #         print(r.headers)
-            #         metaint = int(r.headers['icy-metaint'])
-            #         print(metaint)
-            #         print(r)
-            #         for _ in range(10): # # title may be empty initially, try several times
-            #             r.read(metaint)  # skip to metadata
-            #             metadata_length = struct.unpack('B', r.read(1))[0] * 16  # length byte
-            #             metadata = r.read(metadata_length).rstrip(b'\0')
-            #             print(metadata)
-            #     '''
-            #     #trackinfo = await get_track()
-            #     #print('idchunt get_track result', trackinfo)
-            #     #if trackinfo != "Unknown":
-            #         #await message.channel.send("ID chunt1 from stream: " + trackinfo)
-            #
-            #     asyncio.ensure_future(shazam_station(message,'chunt1'))
-            #     asyncio.ensure_future(shazam_station(message,'chunt2'))
-            elif cmd in ["id1","idchunt1", "idchu1"]:
-                if message.room.name != '<PM>':
+            elif cmd in ["id1", "idchunt1", "idchu1"]:
+                if message.room.name != "<PM>":
                     await message.room.delete_message(message)
-                # trackinfo = await get_track()
-                # print('idchunt get_track result', trackinfo)
-                # if trackinfo != "Unknown":
-                # await message.channel.send("ID chunt1 from stream: " + trackinfo)
-
                 asyncio.ensure_future(shazam_station(message, "chunt1"))
-            elif cmd in ["id2","idchunt2", "idjukebox", "idchu2"]:
-                if message.room.name != '<PM>':
+
+            elif cmd in ["id2", "idchunt2", "idjukebox", "idchu2"]:
+                if message.room.name != "<PM>":
                     await message.room.delete_message(message)
                 asyncio.ensure_future(shazam_station(message, "chunt2"))
 
             elif cmd.startswith("id") or cmd.startswith("raid"):
                 if cmd.startswith("raid"):
-
                     cmd = cmd[4:]
                     print(cmd)
                 elif cmd.startswith("id"):
@@ -775,7 +681,7 @@ class MyBot(chatango.Client):
                 asyncio.ensure_future(raid(message, cmd))
 
             elif cmd == "randomstation":
-                if message.room.name != '<PM>':
+                if message.room.name != "<PM>":
                     await message.room.delete_message(message)
                 ra_stations = radioactivity.get_station_list()
 
@@ -807,33 +713,54 @@ class MyBot(chatango.Client):
                 else:
                     await message.channel.send("No online stations found :(")
 
-            elif cmd in ["upnext","nextup"]:
-                chuntfm_upnext = ''
+            elif cmd in ["upnext", "nextup"]:
+                chuntfm_upnext = ""
 
-                if message.room.name != '<PM>':
+                if message.room.name != "<PM>":
                     await message.room.delete_message(message)
                 try:
-                    
                     async with ClientSession() as s:
-                            r = await s.get("https://chunt.org/schedule.json")
-                            schedule_json = await r.json()
-                            #print(chu_json)
-                            timenow = datetime.now(timezone.utc)
-                            print('timenow: ',timenow)
-                            for show in schedule_json:
-                                start_time = datetime.fromisoformat(show["startTimestamp"])
-                                end_time = datetime.fromisoformat(show["endTimestamp"])
-                                print('starttime: ',start_time)
-                                if start_time > timenow:
-                                    print(show)
-                                    timediff = start_time - timenow
-                                    time_rem = str(timediff)
-                                    
-                                    when = time_rem.split('.')[0] + ' hours'
-                                    
-                                    print('stripped desc',show["description"].replace('\n', ' ').replace('\r', '').replace('<br>', ' - '))
-                                    chuntfm_upnext = 'UP NEXT: ' + (show['title']) + " | " + show["description"].replace('\n', ' ').replace('\r', '').replace('<br>', '') + " | " + show['dateUK'] + " " + show['startTimeUK'] + ' GMT' + ' (in ' + when + ')'
-                                    break
+                        r = await s.get("https://chunt.org/schedule.json")
+                        schedule_json = await r.json()
+                        # print(chu_json)
+                        time_now = datetime.now(timezone.utc)
+                        print("time_now: ", time_now)
+                        for show in schedule_json:
+                            start_time = datetime.fromisoformat(show["startTimestamp"])
+                            datetime.fromisoformat(show["endTimestamp"])
+                            print("start_time: ", start_time)
+                            if start_time > time_now:
+                                print(show)
+                                timediff = start_time - time_now
+                                time_rem = str(timediff)
+
+                                when = time_rem.split(".")[0] + " hours"
+
+                                print(
+                                    "stripped desc",
+                                    show["description"]
+                                    .replace("\n", " ")
+                                    .replace("\r", "")
+                                    .replace("<br>", " - "),
+                                )
+                                chuntfm_upnext = (
+                                    "UP NEXT: "
+                                    + (show["title"])
+                                    + " | "
+                                    + show["description"]
+                                    .replace("\n", " ")
+                                    .replace("\r", "")
+                                    .replace("<br>", "")
+                                    + " | "
+                                    + show["dateUK"]
+                                    + " "
+                                    + show["startTimeUK"]
+                                    + " GMT"
+                                    + " (in "
+                                    + when
+                                    + ")"
+                                )
+                                break
 
                 except Exception as e:
                     print(e)
@@ -841,73 +768,75 @@ class MyBot(chatango.Client):
                 if chuntfm_upnext:
                     await message.channel.send(chuntfm_upnext)
 
-
-
-
-
             # jukebox controls
 
             elif cmd.startswith("np"):
-                chuntfm_np = ''
+                chuntfm_np = ""
 
-                if message.room.name != '<PM>':
+                if message.room.name != "<PM>":
                     await message.room.delete_message(message)
-                liquidsoap_harbor_status = ''
+                liquidsoap_harbor_status = ""
                 try:
                     liquidsoap_harbor_status = await telnet.main()
                 except Exception as e:
                     print(e)
 
-                thisproxy = mysecrets.proxy
                 try:
-                    
                     async with ClientSession() as s:
-                            r = await s.get("https://chunt.org/schedule.json")
-                            schedule_json = await r.json()
-                            #print(chu_json)
-                            timenow = datetime.now(timezone.utc)
-                            print('timenow: ',timenow)
-                            for show in schedule_json:
-                                start_time = datetime.fromisoformat(show["startTimestamp"])
-                                end_time = datetime.fromisoformat(show["endTimestamp"])
-                                print('starttime: ',start_time)
-                                if start_time < timenow:
-                                    if end_time > timenow:
-                                        print(show)
-                                        chuntfm_np = (show['title'])
+                        r = await s.get("https://chunt.org/schedule.json")
+                        schedule_json = await r.json()
+                        # print(chu_json)
+                        time_now = datetime.now(timezone.utc)
+                        print("time_now: ", time_now)
+                        for show in schedule_json:
+                            start_time = datetime.fromisoformat(show["startTimestamp"])
+                            end_time = datetime.fromisoformat(show["endTimestamp"])
+                            print("start_time: ", start_time)
+                            if start_time < time_now:
+                                if end_time > time_now:
+                                    print(show)
+                                    chuntfm_np = show["title"]
                 except Exception as e:
                     print(e)
 
                 # someone is definitely live
-                if liquidsoap_harbor_status.startswith('source'):
+                if liquidsoap_harbor_status.startswith("source"):
                     if chuntfm_np:
-                        chuntfm_np = 'LIVE NOW: ' + chuntfm_np
+                        chuntfm_np = "LIVE NOW: " + chuntfm_np
                     else:
-                        chuntfm_np = 'LIVE NOW: unscheduled livestream w/ anon1111'
+                        chuntfm_np = "LIVE NOW: unscheduled livestream w/ anon1111"
                 # no one is connected to stream
-                # 
+                #
                 else:
                     # either just a disconnect or scheduled show
                     if chuntfm_np:
-                        chuntfm_np = 'scheduled but offline: ' + chuntfm_np
-                        # i dont know if it is a prerecord
-                        # prerecord goes into calendar so we have np
+                        chuntfm_np = "scheduled but offline: " + chuntfm_np
+                        # I don't know if it is a prerec
+                        # prerecord goes into calendar, so we have np
                         # live indicator will be off
                     else:
                         try:
                             async with ClientSession() as s:
-                                    r = await s.get("https://chunt.org/restream.json")
-                                    chu_json = await r.json()
-                                    #print(chu_json)
-                                    if (chu_json['current']['show_title'] and chu_json['current']['show_date']):
-                                        chuntfm_np = "RESTREAM: " + chu_json['current']['show_title'] + " @ " + chu_json['current']['show_date']
-                                    else:
-                                        chuntfm_np = "RESTREAM: " + chu_json['current']['show_title'] 
+                                r = await s.get("https://chunt.org/restream.json")
+                                chu_json = await r.json()
+                                # print(chu_json)
+                                if (
+                                    chu_json["current"]["show_title"]
+                                    and chu_json["current"]["show_date"]
+                                ):
+                                    chuntfm_np = (
+                                        "RESTREAM: "
+                                        + chu_json["current"]["show_title"]
+                                        + " @ "
+                                        + chu_json["current"]["show_date"]
+                                    )
+                                else:
+                                    chuntfm_np = (
+                                        "RESTREAM: " + chu_json["current"]["show_title"]
+                                    )
                         except Exception as e:
-                            print('exception in np')
+                            print("exception in np")
                             print(e)
-
-
 
                 data = await mpd.playback.get_current_track()
                 print(data)
@@ -927,24 +856,24 @@ class MyBot(chatango.Client):
                         else:
                             url = ""
                         # await message.channel.send(
-                        chu_two_msg = " https://fm.chunt.org/stream2 jukebox now playing: " + url
-                        
+                        chu_two_msg = (
+                            " https://fm.chunt.org/stream2 jukebox now playing: " + url
+                        )
+
                 else:
-                    print('no mpd data')
+                    print("no mpd data")
                     # await message.channel.send(
                     chu_two_msg = ""
 
                 if chuntfm_np:
-                    print('cfm_np is', chuntfm_np)
+                    print("cfm_np is", chuntfm_np)
                     if chu_two_msg:
                         await message.channel.send(chuntfm_np + " | " + chu_two_msg)
                     else:
                         await message.channel.send(chuntfm_np)
-                
 
-                    
             elif cmd.startswith("jukebox"):
-                if message.room.name != '<PM>':
+                if message.room.name != "<PM>":
                     await message.room.delete_message(message)
                 await message.channel.send(
                     "https://fm.chunt.org/stream2 jukebox commands: !add url !skip !np \r accepts links from mixcloud,soundcloud,nts"
@@ -962,17 +891,15 @@ class MyBot(chatango.Client):
                 schemes = await mpd.core.get_uri_schemes()
                 print(schemes)
                 if args:
-
                     # print(args)
                     splitargs = args.split(" ")
                     # print(splitargs)
                     url = splitargs[0]
 
                     # print(mypath)
-                    uri = ""
                     print(url)
-                    strippedurl = url.strip().lstrip().rstrip()
-                    url = strippedurl
+                    stripped_url = url.strip().lstrip().rstrip()
+                    url = stripped_url
                     print(url)
                     results = ""
                     added = ""
@@ -991,25 +918,21 @@ class MyBot(chatango.Client):
 
                     if url.startswith("https://www.mixcloud.com"):
                         uri = "mixcloud:track:" + mypath
-                        searchlist = []
-                        searchlist.append(uri)
-                        added = await mpd.tracklist.add(uris=searchlist)
+                        search_uri = [uri]
+                        added = await mpd.tracklist.add(uris=search_uri)
                     elif url.startswith("https://m.mixcloud.com"):
                         uri = "mixcloud:track:" + mypath
-                        searchlist = []
-                        searchlist.append(uri)
-                        added = await mpd.tracklist.add(uris=searchlist)
+                        search_uri = [uri]
+                        added = await mpd.tracklist.add(uris=search_uri)
                     elif url.startswith("https://soundcloud.com/"):
                         uri = "sc:" + url
-                        searchlist = []
-                        searchlist.append(uri)
-                        added = await mpd.tracklist.add(uris=searchlist)
+                        search_uri = [uri]
+                        added = await mpd.tracklist.add(uris=search_uri)
 
                     elif "bandcamp" in url:
                         uri = "bandcamp:" + url
-                        searchlist = []
-                        searchlist.append(uri)
-                        added = await mpd.tracklist.add(uris=searchlist)
+                        search_uri = [uri]
+                        added = await mpd.tracklist.add(uris=search_uri)
 
                     if url.startswith("https://www.youtube.com/watch"):
                         added = ""
@@ -1041,10 +964,10 @@ class MyBot(chatango.Client):
 
                     if playback_state != "playing":
                         print("it's not playing")
-                        topslice = await mpd.tracklist.slice(0, 1)
-                        if topslice is not None:
-                            tlid = topslice[0]["tlid"]
-                            await mpd.playback.play(tlid=tlid)
+                        top_slice = await mpd.tracklist.slice(0, 1)
+                        if top_slice is not None:
+                            tl_id = top_slice[0]["tl_id"]
+                            await mpd.playback.play(tlid=tl_id)
                     else:
                         print("should be playing")
 
@@ -1052,29 +975,28 @@ class MyBot(chatango.Client):
                         print(results)
 
             elif cmd in ["queue", "tl"]:
-                if message.room.name != '<PM>':
+                if message.room.name != "<PM>":
                     await message.room.delete_message(message)
                 tracklist = ""
                 tracklist = await mpd.tracklist.get_tl_tracks()
                 print(tracklist)
                 i = 0
-                smalllist = []
+                small_list = []
 
                 for item in tracklist:
                     i += 1
-                    trackname = item["track"]["name"]
-                    smalllist.append(trackname)
+                    track_name = item["track"]["name"]
+                    small_list.append(track_name)
                 print("i", i)
-                if len(smalllist) > 3:
-                    tinylist = smalllist[0:3]
+                if len(small_list) > 3:
+                    tiny_list = small_list[0:3]
                 else:
-                    tinylist = smalllist
+                    tiny_list = small_list
                 if i == 0:
                     msg = "jukebox is not playing anything. add a link from sc,mc,bc or nts!"
                 else:
-
                     msg = str(i) + " tracks in jukebox queue. "
-                for item in tinylist:
+                for item in tiny_list:
                     msg = msg + " | " + item
                 await message.channel.send(msg)
 
@@ -1085,8 +1007,7 @@ class MyBot(chatango.Client):
 
             # radio schedule commands
             elif cmd.startswith("sched"):
-
-                if message.room.name != '<PM>':
+                if message.room.name != "<PM>":
                     await message.room.delete_message(message)
 
                 if args:
@@ -1114,7 +1035,7 @@ class MyBot(chatango.Client):
                             )
 
             elif cmd == "fortune":
-                if message.room.name != '<PM>':
+                if message.room.name != "<PM>":
                     await message.room.delete_message(message)
 
                 coinflip = random.choice([0, 1])
@@ -1125,73 +1046,69 @@ class MyBot(chatango.Client):
                         "your fortune, "
                         + message.user.showname
                         + " : "
-                        + (random.choice(fortunes.fortunecookie)).replace(".", "").lower()
+                        + (random.choice(fortunes.fortunecookie))
+                        .replace(".", "")
+                        .lower()
                     )
 
                 else:
-                
                     sentence = random.choice(fortunes.fortunecookie)
                     tokens = nltk.word_tokenize(sentence)
                     tagged = [[token, tag] for (token, tag) in nltk.pos_tag(tokens)]
                     nn_idx = []
                     nns_idx = []
                     for i, [token, tag] in enumerate(tagged):
-                        if tag == 'VBD':
-                            tagged[i][0] = 'chunted'
-                        elif tag == 'NN':
+                        if tag == "VBD":
+                            tagged[i][0] = "chunted"
+                        elif tag == "NN":
                             nn_idx.append(i)
-                        elif tag == 'NNS':
+                        elif tag == "NNS":
                             nns_idx.append(i)
                     try:
-                        tagged[random.choice(nn_idx)][0] = 'chunt'
+                        tagged[random.choice(nn_idx)][0] = "chunt"
                     except IndexError:
                         pass
                     try:
-                        tagged[random.choice(nns_idx)][0] = 'chunts'
+                        tagged[random.choice(nns_idx)][0] = "chunts"
                     except IndexError:
                         pass
-                    cfortune = ' '.join([token[0] for token in tagged])
+                    cfortune = " ".join([token[0] for token in tagged])
                     await message.channel.send(
                         "your chunted fortune, "
                         + message.user.showname
                         + " : "
-                        + cfortune
-                        .replace(".", "")
-                        .lower()
+                        + cfortune.replace(".", "").lower()
                     )
             elif cmd == "cfortune":
-                if message.room.name != '<PM>':
+                if message.room.name != "<PM>":
                     await message.room.delete_message(message)
 
-                
                 sentence = random.choice(fortunes.fortunecookie)
                 tokens = nltk.word_tokenize(sentence)
                 tagged = [[token, tag] for (token, tag) in nltk.pos_tag(tokens)]
                 nn_idx = []
                 nns_idx = []
                 for i, [token, tag] in enumerate(tagged):
-                    if tag == 'VBD':
-                        tagged[i][0] = 'chunted'
-                    elif tag == 'NN':
+                    if tag == "VBD":
+                        tagged[i][0] = "chunted"
+                    elif tag == "NN":
                         nn_idx.append(i)
-                    elif tag == 'NNS':
+                    elif tag == "NNS":
                         nns_idx.append(i)
                 try:
-                    tagged[random.choice(nn_idx)][0] = 'chunt'
+                    tagged[random.choice(nn_idx)][0] = "chunt"
                 except IndexError:
                     pass
                 try:
-                    tagged[random.choice(nns_idx)][0] = 'chunts'
+                    tagged[random.choice(nns_idx)][0] = "chunts"
                 except IndexError:
                     pass
-                cfortune = ' '.join([token[0] for token in tagged])
+                cfortune = " ".join([token[0] for token in tagged])
                 await message.channel.send(
                     "your chunted fortune, "
                     + message.user.showname
                     + " : "
-                    + cfortune
-                    .replace(".", "")
-                    .lower()
+                    + cfortune.replace(".", "").lower()
                 )
 
             # gif/image/snippets spam commands
@@ -1208,7 +1125,7 @@ class MyBot(chatango.Client):
                 "blaze it",
                 "blazin",
             ]:
-                if message.room.name != '<PM>':
+                if message.room.name != "<PM>":
                     await message.room.delete_message(message)
                 await message.channel.send(
                     random.choice(await self.db.fetch_gif("bbb"))
@@ -1217,7 +1134,7 @@ class MyBot(chatango.Client):
                 )
 
             elif cmd in ["sandwich"]:
-                if message.room.name != '<PM>':
+                if message.room.name != "<PM>":
                     await message.room.delete_message(message)
                 toast = "https://media.giphy.com/media/GhPxSf3KazSZsJ4XSo/giphy.gif"
                 await message.channel.send(
@@ -1229,170 +1146,134 @@ class MyBot(chatango.Client):
                 )
 
             elif cmd in ["whatdoesthatmean", "benufo", "bufo"]:
-                if message.room.name != '<PM>':
+                if message.room.name != "<PM>":
                     await message.room.delete_message(message)
                 await message.channel.send(
                     "https://f001.backblazeb2.com/file/chuntongo/ben_ufo-whatdoesthatmean.mp3"
                 )
 
             elif cmd == "wombat":
-                if message.room.name != '<PM>':
+                if message.room.name != "<PM>":
                     await message.room.delete_message(message)
                 await message.channel.send(random.choice(data_pics_wombat.pics))
 
             elif cmd == "capybara":
-                if message.room.name != '<PM>':
+                if message.room.name != "<PM>":
                     await message.room.delete_message(message)
                 await message.channel.send(random.choice(data_pics_capybara.pics))
 
             elif cmd == "otter":
-                if message.room.name != '<PM>':
+                if message.room.name != "<PM>":
                     await message.room.delete_message(message)
                 await message.channel.send(random.choice(data_pics_otter.pics))
 
             elif cmd == "quokka":
                 print("quokka")
-                if message.room.name != '<PM>':
+                if message.room.name != "<PM>":
                     await message.room.delete_message(message)
                 await message.channel.send(random.choice(data_pics_quokka.pics))
 
             # gif management
 
             elif cmd == "tags":
-                if message.room.name != '<PM>':
+                if message.room.name != "<PM>":
                     await message.room.delete_message(message)
-                taglist_all = await self.db.cursor.execute(
-                    "SELECT tag_name FROM tag_table"
-                )
-                taglist_unsorted = await self.db.cursor.fetchall()
+                await self.db.cursor.execute("SELECT tag_name FROM tag_table")
+                tag_list_unsorted = await self.db.cursor.fetchall()
 
-                taglist = sorted(taglist_unsorted)
+                tag_list = sorted(tag_list_unsorted)
 
-                thelongeststring = "to tag a gif: !tag link-to-the-gif tagname \r\r tags that post gifs/links: \r"
-                for key in taglist:
-                    thelongeststring += "!" + key + " "
-                #print(thelongeststring)
-                n = 4000 # chunk length
-                chunks = [thelongeststring[i:i+n] for i in range(0, len(thelongeststring), n)]
+                the_longest_string = "to tag a gif: !tag link-to-the-gif tagname \r\r tags that post gifs/links: \r"
+                for key in tag_list:
+                    the_longest_string += "!" + key + " "
+                # print(the_longest_string)
+                n = 4000  # chunk length
+                chunks = [
+                    the_longest_string[i : i + n]
+                    for i in range(0, len(the_longest_string), n)
+                ]
                 for c in chunks:
                     print(c)
-                    await message.room.client.pm.send_message(
-                        message.user, str(c)
-                    )
+                    await message.room.client.pm.send_message(message.user, str(c))
 
             elif cmd == "tag":
-                if message.room.name != '<PM>':
+                if message.room.name != "<PM>":
                     await message.room.delete_message(message)
 
                 if args:
                     args = args.replace(",", " ")
                     splitargs = args.split(" ")
-                    inurl = splitargs[0]
-                    intags = splitargs[1:]
-                    if not inurl.startswith("http"):
+                    in_url = splitargs[0]
+                    in_tags = splitargs[1:]
+                    if not in_url.startswith("http"):
                         await message.channel.send(
                             "to tag a gif: !tag url-to-gif tag1 tag2 tag3"
                         )
                     else:
-                        for intag in intags:
-                            intag = intag.strip()
-                            await self.db.tag(inurl, intag)
+                        for in_tag in in_tags:
+                            in_tag = in_tag.strip()
+                            await self.db.tag(in_url, in_tag)
 
             elif cmd == "untag":
-                if message.room.name != '<PM>':
+                if message.room.name != "<PM>":
                     await message.room.delete_message(message)
                 if message.room.get_level(message.user) > 0:
                     if args:
                         splitargs = args.split(" ")
-                        inurl = splitargs[0]
-                        intag = splitargs[1]
-                        await self.db.untag(inurl, intag)
+                        in_url = splitargs[0]
+                        in_tag = splitargs[1]
+                        await self.db.untag(in_url, in_tag)
 
             elif cmd == "info":
-                if message.room.name != '<PM>':
+                if message.room.name != "<PM>":
                     await message.room.delete_message(message)
                 if args:
-                    print('cmd args:', args)
+                    print("cmd args:", args)
                     splitargs = args.split(" ")
                     arg = splitargs[0]
                     urls, tags = await self.db.info(arg)
-                    #print(urls, tags)
-                    urlstring = ""
-                    tagstring = ""
-                    urllist = urls[0]
-                    taglist = tags[0]
-                    
-                    if urllist:
-                        
+                    # print(urls, tags)
+                    ""
+                    tag_string = ""
+                    url_list = urls[0]
+                    tag_list = tags[0]
+
+                    if url_list:
                         await message.room.client.pm.send_message(
-                            message.user,
-                            "'" + arg + "'" + " tags these urls: "
+                            message.user, "'" + arg + "'" + " tags these urls: "
                         )
-                        for url in urllist:
+                        for url in url_list:
                             if url.startswith("https://ust.chatango.com/"):
-                                nurl = url.replace(
+                                new_url = url.replace(
                                     "https://ust.chatango.com/",
                                     "https://ust.chatango.com/ ",
                                 )
                             else:
-                                nurl = url
-                        
-                            urlstring = nurl  + " '" + nurl + "'"
+                                new_url = url
+
+                            urlstring = new_url + " '" + new_url + "'"
                             await message.room.client.pm.send_message(
-                            message.user,
-                            urlstring
+                                message.user, urlstring
                             )
                             await asyncio.sleep(2)
 
-
-                    if taglist:
-                        for tag in taglist:
-                        #print(tag)
-                            if tagstring == "":
-                                tagstring = "'" + tag + "'"
+                    if tag_list:
+                        for tag in tag_list:
+                            # print(tag)
+                            if tag_string == "":
+                                tag_string = "'" + tag + "'"
                             else:
-                                tagstring = tagstring + ", " + tag
+                                tag_string = tag_string + ", " + tag
 
                             await message.room.client.pm.send_message(
                                 message.user,
-                                arg + " '" + arg + "'" + " has these tags: " + tagstring,
+                                arg
+                                + " '"
+                                + arg
+                                + "'"
+                                + " has these tags: "
+                                + tag_string,
                             )
-
-                    '''
-                    for url in urllist:
-                        #rint(url)
-                        if url.startswith("https://ust.chatango.com/"):
-                            nurl = url.replace(
-                                "https://ust.chatango.com/",
-                                "https://ust.chatango.com/ ",
-                            )
-                        else:
-                            nurl = url
-                        if urlstring == "":
-                            urlstring = "'" + nurl + "'"
-                        else:
-                            urlstring = urlstring + ", " + "'" + nurl + "'"
-                    for tag in taglist:
-                        #print(tag)
-                        if tagstring == "":
-                            tagstring = "'" + tag + "'"
-                        else:
-                            tagstring = tagstring + ", " + tag
-                    if urlstring != "":
-                        print('urlstring is: ',urlstring)
-                        # await message.channel.send("'" + arg + "'" + " tags these urls: " + urlstring )
-                        await message.room.client.pm.send_message(
-                            message.user,
-                            "'" + arg + "'" + " tags these urls: " + urlstring,
-                        )
-                    if tagstring != "":
-                        print('tagstring is: ',tagstring)
-                        # await message.channel.send("'" + arg + "'" + "  has these tags:" + tagstring)
-                        await message.room.client.pm.send_message(
-                            message.user,
-                            arg + " '" + arg + "'" + " has these tags: " + tagstring,
-                        )
-                    '''
 
                 else:
                     await message.room.client.pm.send_message(
@@ -1402,42 +1283,42 @@ class MyBot(chatango.Client):
 
             # automated gif posting / spamming
             elif cmd in ["random", "rnd", "rand"]:
-                if message.room.name != '<PM>':
+                if message.room.name != "<PM>":
                     await message.room.delete_message(message)
-               
-                gifone = random.sample(allgif_set,1)[0]
-                giftwo = random.sample(allgif_set,1)[0]
-                await message.channel.send(gifone + " " + giftwo + " " + gifone)
+
+                gif_one = random.sample(allgif_set, 1)[0]
+                gif_two = random.sample(allgif_set, 1)[0]
+                await message.channel.send(gif_one + " " + gif_two + " " + gif_one)
 
             elif cmd in ["gif", "gift", "dance"]:
-                if message.room.name != '<PM>':
+                if message.room.name != "<PM>":
                     await message.room.delete_message(message)
-                gifone = random.choice(await self.db.fetch_gif("dance"))
-                await message.channel.send(gifone + " " + gifone + " " + gifone)
+                gif_one = random.choice(await self.db.fetch_gif("dance"))
+                await message.channel.send(gif_one + " " + gif_one + " " + gif_one)
 
             elif cmd in ["bbb", "bigb"]:
-                if message.room.name != '<PM>':
+                if message.room.name != "<PM>":
                     await message.room.delete_message(message)
-                gifone = random.choice(await self.db.fetch_gif("bbb"))
-                await message.channel.send(gifone + " " + gifone + " " + gifone)
+                gif_one = random.choice(await self.db.fetch_gif("bbb"))
+                await message.channel.send(gif_one + " " + gif_one + " " + gif_one)
 
             elif cmd == "b2b":
-                if message.room.name != '<PM>':
+                if message.room.name != "<PM>":
                     await message.room.delete_message(message)
-                gifone = random.choice(await self.db.fetch_gif("bbb"))
-                giftwo = random.choice(await self.db.fetch_gif("bbb"))
-                await message.channel.send(gifone + " " + giftwo + " " + gifone)
+                gif_one = random.choice(await self.db.fetch_gif("bbb"))
+                gif_two = random.choice(await self.db.fetch_gif("bbb"))
+                await message.channel.send(gif_one + " " + gif_two + " " + gif_one)
 
             elif cmd in ["b2b2b", "bbbb", "b3b"]:
-                if message.room.name != '<PM>':
+                if message.room.name != "<PM>":
                     await message.room.delete_message(message)
-                gifone = random.choice(await self.db.fetch_gif("bbb"))
-                giftwo = random.choice(await self.db.fetch_gif("bbb"))
-                gifthree = random.choice(await self.db.fetch_gif("bbb"))
-                await message.channel.send(gifone + " " + giftwo + " " + gifthree)
+                gif_one = random.choice(await self.db.fetch_gif("bbb"))
+                gif_two = random.choice(await self.db.fetch_gif("bbb"))
+                gif_three = random.choice(await self.db.fetch_gif("bbb"))
+                await message.channel.send(gif_one + " " + gif_two + " " + gif_three)
 
             elif cmd == "goth":
-                if message.room.name != '<PM>':
+                if message.room.name != "<PM>":
                     await message.room.delete_message(message)
 
                 await message.channel.send("the gif of the hour is " + self.goth)
@@ -1447,11 +1328,8 @@ class MyBot(chatango.Client):
             # chuntfm command
 
             elif cmd == "chuntfm":
-                if message.room.name != '<PM>':
+                if message.room.name != "<PM>":
                     await message.room.delete_message(message)
-                # np = get_chubilee_np()
-                # if np is not None:
-                # await message.channel.send("live on https://fm.chunt.org/stream : "+ np)
 
                 # check cfm status
                 try:
@@ -1463,23 +1341,32 @@ class MyBot(chatango.Client):
                 if cfm_status is not None:
                     msg_status = "(" + cfm_status + ")"
 
-                
-                chuntfm_np = ''
+                chuntfm_np = ""
                 try:
                     async with ClientSession() as s:
-                            r = await s.get("https://chunt.org/restream.json")
-                            chu_json = await r.json()
-                            print(chu_json)
-                            if (chu_json['current']['show_title'] and chu_json['current']['show_date']):
-                                chuntfm_np = "chuntfm is now playing: " + chu_json['current']['show_title'] + " @ " + chu_json['current']['show_date']
-                            else:
-                                chuntfm_np = "chuntfm is now playing: " + chu_json['current']['show_title'] 
+                        r = await s.get("https://chunt.org/restream.json")
+                        chu_json = await r.json()
+                        print(chu_json)
+                        if (
+                            chu_json["current"]["show_title"]
+                            and chu_json["current"]["show_date"]
+                        ):
+                            chuntfm_np = (
+                                "chuntfm is now playing: "
+                                + chu_json["current"]["show_title"]
+                                + " @ "
+                                + chu_json["current"]["show_date"]
+                            )
+                        else:
+                            chuntfm_np = (
+                                "chuntfm is now playing: "
+                                + chu_json["current"]["show_title"]
+                            )
 
                 except Exception as e:
                     print(e)
 
                 if chuntfm_np:
-
                     await message.channel.send(
                         "live: https://fm.chunt.org/stream "
                         + msg_status
@@ -1490,59 +1377,57 @@ class MyBot(chatango.Client):
                     )
 
             elif cmd == "fortune":
-                if message.room.name != '<PM>':
+                if message.room.name != "<PM>":
                     await message.room.delete_message(message)
 
                 coinflip = random.choice([0, 1])
                 print(coinflip)
-                print('whatsgoingon')
 
                 if coinflip == 0:
                     await message.channel.send(
                         "your fortune, "
                         + message.user.showname
                         + " : "
-                        + (random.choice(fortunes.fortunecookie)).replace(".", "").lower()
+                        + (random.choice(fortunes.fortunecookie))
+                        .replace(".", "")
+                        .lower()
                     )
 
                 else:
-                
                     sentence = random.choice(fortunes.fortunecookie)
                     tokens = nltk.word_tokenize(sentence)
                     tagged = [[token, tag] for (token, tag) in nltk.pos_tag(tokens)]
                     nn_idx = []
                     nns_idx = []
                     for i, [token, tag] in enumerate(tagged):
-                        if tag == 'VBD':
-                            tagged[i][0] = 'chunted'
-                        elif tag == 'NN':
+                        if tag == "VBD":
+                            tagged[i][0] = "chunted"
+                        elif tag == "NN":
                             nn_idx.append(i)
-                        elif tag == 'NNS':
+                        elif tag == "NNS":
                             nns_idx.append(i)
                     try:
-                        tagged[random.choice(nn_idx)][0] = 'chunt'
+                        tagged[random.choice(nn_idx)][0] = "chunt"
                     except IndexError:
                         pass
                     try:
-                        tagged[random.choice(nns_idx)][0] = 'chunts'
+                        tagged[random.choice(nns_idx)][0] = "chunts"
                     except IndexError:
                         pass
-                    cfortune = ' '.join([token[0] for token in tagged])
+                    cfortune = " ".join([token[0] for token in tagged])
                     await message.channel.send(
                         "your chunted fortune, "
                         + message.user.showname
                         + " : "
-                        + cfortune
-                        .replace(".", "")
-                        .lower()
+                        + cfortune.replace(".", "").lower()
                     )
 
             elif cmd == "say":
-                if message.room.name != '<PM>':
+                if message.room.name != "<PM>":
                     await message.room.delete_message(message)
                 await message.channel.send(args)
             elif cmd == "bg":
-                if message.room.name != '<PM>':
+                if message.room.name != "<PM>":
                     await message.room.delete_message(message)
                 if args:
                     print(args)
@@ -1551,10 +1436,10 @@ class MyBot(chatango.Client):
                     for arg in splitargs:
                         if arg.startswith("@"):
                             print(arg)
-                            await message.channel.send("You are a bg, " + (arg) + "!")
+                            await message.channel.send("You are a bg, " + arg + "!")
 
             elif cmd == "kiss":
-                if message.room.name != '<PM>':
+                if message.room.name != "<PM>":
                     await message.room.delete_message(message)
                 if args:
                     print(args)
@@ -1563,33 +1448,35 @@ class MyBot(chatango.Client):
                     for arg in splitargs:
                         if arg.startswith("@"):
                             print(arg)
-                            await message.channel.send("😘 " + (arg))
+                            await message.channel.send("😘 " + arg)
                 else:
-                    await message.channel.send("😘 " + ("@" + user.name))
+                    await message.channel.send("😘 " + ("@" + message.user.name))
 
             elif cmd == "chunt":
-                if message.room.name != '<PM>':
+                if message.room.name != "<PM>":
                     await message.room.delete_message(message)
                 await message.channel.send("I'm chuntin")
 
             elif cmd == "8ball":
-                if message.room.name != '<PM>':
+                if message.room.name != "<PM>":
                     await message.room.delete_message(message)
 
                 if args:
                     await message.channel.send(
-                            "@"+
-                            message.user.showname + 
-                            " asked: " +
-                            args +
-                            " - 8 ball says: " + (random.choice(eightball)))
+                        "@"
+                        + message.user.showname
+                        + " asked: "
+                        + args
+                        + " - 8 ball says: "
+                        + (random.choice(eightball))
+                    )
                 else:
-
                     await message.channel.send(
-                            "8 ball says: " + (random.choice(eightball)))
+                        "8 ball says: " + (random.choice(eightball))
+                    )
 
             elif cmd in ["heart", "hearts"]:
-                if message.room.name != '<PM>':
+                if message.room.name != "<PM>":
                     await message.room.delete_message(message)
                 a = random.randint(1, 10)
                 heart = ""
@@ -1600,7 +1487,7 @@ class MyBot(chatango.Client):
 
                 await message.channel.send(heart)
             elif cmd in ["shoutout", "shout", "out"]:
-                if message.room.name != '<PM>':
+                if message.room.name != "<PM>":
                     await message.room.delete_message(message)
                 if args:
                     # print(args)
@@ -1611,29 +1498,29 @@ class MyBot(chatango.Client):
                             print("arg ", arg)
                             if arg.startswith("@"):
                                 await message.channel.send(
-                                    random.choice(shoutstart)
+                                    random.choice(shout_start)
                                     + " "
-                                    + (arg)
+                                    + arg
                                     + " ! "
-                                    + random.choice(shoutend)
+                                    + random.choice(shout_end)
                                 )
 
                     else:
                         await message.channel.send(
-                            random.choice(shoutstart)
+                            random.choice(shout_start)
                             + " "
-                            + (args)
+                            + args
                             + " ! "
-                            + random.choice(shoutend)
+                            + random.choice(shout_end)
                         )
 
                 else:
                     await message.channel.send(
-                        random.choice(shoutstart)
+                        random.choice(shout_start)
                         + " "
-                        + random.choice(room.usernames)
+                        + random.choice(message.room.usernames)
                         + "! "
-                        + random.choice(shoutend)
+                        + random.choice(shout_end)
                     )
 
             else:
@@ -1641,21 +1528,22 @@ class MyBot(chatango.Client):
                 print(cmd.startswith("raid"))
                 print(cmd.startswith("id") or cmd.startswith("raid"))
                 try:
-                    gifres = await self.db.fetch_gif(cmd)
+                    gif_res = await self.db.fetch_gif(cmd)
                 except Exception as e:
+                    gif_res = None
                     print(e)
-                if gifres:
-                    if message.room.name != '<PM>':
+                if gif_res:
+                    if message.room.name != "<PM>":
                         await message.room.delete_message(message)
-                    print(gifres)
-                    await message.channel.send(random.choice(gifres))
+                    print(gif_res)
+                    await message.channel.send(random.choice(gif_res))
                 else:
                     print("no result for gif search")
 
         else:
             # very crude way to catch posted gifs and add them to allgif_set and allgif_file
-            splitmsg = message.body.split(" ")
-            for word in splitmsg:
+            split_message = message.body.split(" ")
+            for word in split_message:
                 if (word.endswith(".gif") or word.endswith(".gifv")) and (
                     len(word) < 75
                 ):
@@ -1667,8 +1555,8 @@ class MyBot(chatango.Client):
                     else:
                         print("not in set")
                         allgif_set.add(word)
-                        with open(allgif_file, "a") as file:
-                            file.write(word + "\n")
+                        with open(allgif_file, "a") as gif_file:
+                            gif_file.write(word + "\n")
 
 
 async def get_db_cur():
@@ -1686,28 +1574,28 @@ if __name__ == "__main__":
 
     loop = asyncio.get_event_loop()
     bot = MyBot()
-    bot.default_user(config.botuser[0], config.botuser[1])  # easy_start
+    bot.default_user(Config.bot_user[0], Config.bot_user[1])  # easy_start
 
     #    or_accounts = [["user1","passwd1"], ["user2","passwd2"]]
     #    bot.default_user(accounts=or_accounts, pm=False) #True if passwd was input.
     ListBots = [bot.start()]  # Multiple instances
     task = asyncio.gather(*ListBots, return_exceptions=True)
     mpd = MopidyClient(host="139.177.181.183")
-    mpdtask = asyncio.gather(mpd_context_manager(mpd))
-    giftask = schedule_gif_of_the_hour()
-    #cfm_task = schedule_chuntfm_livecheck()
+    mpd_task = asyncio.gather(mpd_context_manager(mpd))
+    gif_task = schedule_gif_of_the_hour()
+    # cfm_task = schedule_chuntfm_livecheck()
 
-    tasks = asyncio.gather(task, giftask, mpdtask)
-    logging.debug('init asyncio tasks started')
+    tasks = asyncio.gather(task, gif_task, mpd_task)
+    logging.debug("init asyncio tasks started")
 
-    allgif_file = os.path.join(basepath, "allgif.txt")
+    allgif_file = os.path.join(base_path, "allgif.txt")
     if not os.path.exists(allgif_file):
         with open(allgif_file, "a") as file:
             pass
         allgif_set = set()
     else:
         with open(allgif_file) as file:
-            allgif_set = set(line.strip() for line in file if line.startswith('http'))
+            allgif_set = set(line.strip() for line in file if line.startswith("http"))
 
     try:
         loop.run_until_complete(tasks)

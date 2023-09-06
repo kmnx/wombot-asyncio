@@ -11,6 +11,9 @@ async def get_station_list():
             html = await r.read()
 
     decoded = html.decode("ISO-8859-1")
-    ra_stations = json.loads(re.split("<[/]{0,1}script.*?>", decoded)[1])
+    if "<html" in decoded:
+        ra_stations = json.loads(re.split("<[/]{0,1}script.*?>", decoded)[1])
+    else:
+        ra_stations = json.loads(decoded)
 
     return ra_stations
