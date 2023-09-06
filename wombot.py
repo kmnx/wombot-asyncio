@@ -17,6 +17,7 @@ import logging
 from urllib.parse import urlparse
 import bs4
 import nltk
+import sqlite_create_idhistory_db
 
 try:
     nltk.data.find("tokenizers/punkt")
@@ -32,6 +33,7 @@ import search_google
 import get_id_doyou
 import shazam
 import aiosqliteclass
+import aiosqliteclass_id
 import data_pics_wombat
 import data_pics_capybara
 import data_pics_otter
@@ -491,6 +493,38 @@ async def shazam_station(message, station):
         artist = result["track"]["subtitle"]
         title = result["track"]["title"]
         bandcamp_result_msg = await bandcamp_search(artist, title)
+        data_package = [
+            london_now,
+            message.user.showname,
+            message.room.name,
+            message.body,
+            station,
+            None,
+            str(result),
+            artist,
+            title,
+            bandcamp_result_msg,
+            None,
+        ]
+        print(data_package)
+
+        await bot.db_id.insert_id_request(
+            str(london_now),
+            message.user.showname,
+            message.room.name,
+            message.body,
+            str(station),
+            None,
+            result,
+            artist,
+            title,
+            bandcamp_result_msg,
+            None,
+        )
+
+        whole_db = await bot.db_id.query_history_all()
+        for result in whole_db:
+            print(result)
 
         await message.channel.send(
             "ID "
@@ -507,6 +541,22 @@ async def shazam_station(message, station):
         await message.channel.send(
             "ID " + station_name + ": " + hours_minutes + " - " + "shazam found nothing"
         )
+        await bot.db_id.insert_id_request(
+            str(london_now),
+            message.user.showname,
+            message.room.name,
+            message.body,
+            station,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        )
+        whole_db = await bot.db_id.query_history_all()
+        for result in whole_db:
+            print(result)
 
 
 async def bandcamp_search(artist, title):
@@ -544,6 +594,7 @@ class MyBot(chatango.Client):
     async def on_init(self):
         print("Bot initialized")
         self.db = await aiosqliteclass.create_conn()
+        self.db_id = await aiosqliteclass_id.create_conn()
         self.goth = random.choice(await bot.db.fetch_gif("bbb"))
         self._room = None
         print("seriously")
@@ -582,6 +633,11 @@ class MyBot(chatango.Client):
         else:
             await room.user.get_profile()
             await room.enable_bg()
+
+    async def db_idhistory_insert(
+        self,
+    ):
+        pass
 
     async def on_message(self, message):
         print(
