@@ -253,6 +253,7 @@ async def now_playing(returntype):
     except Exception as e:
         print(e)
     # get currently scheduled show
+    chu1_scheduled = None
     try:
         async with ClientSession() as s:
             r = await s.get("https://chunt.org/schedule.json")
