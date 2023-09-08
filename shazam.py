@@ -42,7 +42,7 @@ class ShazamApi:
                     while asyncio.get_event_loop().time() < (start_time + 4):
                         chunk = await response.content.read(1024)
                         chunk_count += 1
-                        print("written chunk ", chunk_count)
+                        # print("written chunk ", chunk_count)
                         if not chunk:
                             break
 

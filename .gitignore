@@ -7,6 +7,7 @@ example.log
 # sqlite db
 pythonsqlite.db
 trackids.db
+db_idhistory.db
 
 allgif.txt
 mysecrets.py

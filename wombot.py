@@ -12,7 +12,6 @@ import os.path
 from pathlib import Path
 import time
 import pytz
-import re
 import logging
 from urllib.parse import urlparse
 import bs4
@@ -39,12 +38,7 @@ import data_pics_capybara
 import data_pics_otter
 import data_pics_quokka
 import data_txt_fortunes as fortunes
-import asynctelnet
-
-# fake change
-# import raid
 import aiosqlite
-
 import schedule
 import chuntfm
 import telnet
@@ -169,53 +163,6 @@ else:
 print("init variables done")
 
 
-async def shell(tcp):
-    async with asynctelnet.TelnetClient(tcp, client=True) as stream:
-        while True:
-            # read stream until '?' mark is found
-            output = await stream.receive(1024)
-            if not output:
-                # End of File
-                break
-            elif "?" in output:
-                # reply all questions with 'y'.
-                await stream.send("y")
-
-            # display all server output
-            print(output, flush=True)
-
-    # EOF
-    print()
-
-
-async def get_now(stream_url, session):
-    logging.debug("get_now")
-    headers = {"Icy-MetaData": "1"}
-    async with session.get(stream_url, headers=headers) as resp:
-        for _ in range(10):
-            data = await resp.content.read(8192)
-            m = re.search(rb"StreamTitle='([^']*)';", data.rstrip(b"\0"))
-            if m:
-                title = m.group(1)
-                if title:
-                    return title.decode("utf8", errors="replace")
-                else:
-                    return "Unknown"
-    return "Unknown"
-
-
-async def get_track():
-    logging.debug("get_track")
-
-    session = ClientSession()
-    stream_url = "https://fm.chunt.org/stream"
-    result = await get_now(stream_url, session)
-    print(f"result: {result}")
-    await session.close()
-    print("get_track result: ", result)
-    return result
-
-
 async def post_gif_of_the_hour(param):
     logging.debug("post_gif_of_the_hour")
 
@@ -293,6 +240,109 @@ async def schedule_chuntfm_livecheck():
 
     while True:
         await asyncio.sleep(5)
+
+
+async def now_playing(returntype):
+    # check if someone is connected to stream
+    liquidsoap_harbor_status = ""
+    chuntfm_np = ""
+    chu_two_msg = ""
+    chu1_actually_np, url = None, None
+    try:
+        liquidsoap_harbor_status = await telnet.main()
+    except Exception as e:
+        print(e)
+    # get currently scheduled show
+    try:
+        async with ClientSession() as s:
+            r = await s.get("https://chunt.org/schedule.json")
+            schedule_json = await r.json()
+            # print(chu_json)
+            time_now = datetime.now(timezone.utc)
+            print("time_now: ", time_now)
+            for show in schedule_json:
+                start_time = datetime.fromisoformat(show["startTimestamp"])
+                end_time = datetime.fromisoformat(show["endTimestamp"])
+                print("start_time: ", start_time)
+                if start_time < time_now:
+                    if end_time > time_now:
+                        print(show)
+                        chu1_scheduled = show["title"]
+    except Exception as e:
+        print(e)
+
+    # someone is definitely live
+    if liquidsoap_harbor_status.startswith("source"):
+        if chu1_scheduled:
+            chuntfm_np = "LIVE NOW: " + chu1_scheduled
+            chu1_actually_np = chu1_scheduled
+        else:
+            chuntfm_np = "LIVE NOW: unscheduled livestream w/ anon1111"
+            chu1_actually_np = "unscheduled livestream w/ anon1111"
+
+    # no one is connected to stream
+    else:
+        # either just a disconnect or scheduled show
+        if chu1_scheduled:
+            chuntfm_np = "scheduled but offline: " + chu1_scheduled
+            # I don't know if it is a prerec
+            # prerecord goes into calendar, so we have np
+            # live indicator will be off
+
+        else:
+            try:
+                async with ClientSession() as s:
+                    r = await s.get("https://chunt.org/restream.json")
+                    chu_json = await r.json()
+                    # print(chu_json)
+                    if (
+                        chu_json["current"]["show_title"]
+                        and chu_json["current"]["show_date"]
+                    ):
+                        chuntfm_np = (
+                            "RESTREAM: "
+                            + chu_json["current"]["show_title"]
+                            + " @ "
+                            + chu_json["current"]["show_date"]
+                        )
+                        chu1_actually_np = chu_json["current"]["show_title"]
+                    else:
+                        chuntfm_np = "RESTREAM: " + chu_json["current"]["show_title"]
+                        chu1_actually_np = chu_json["current"]["show_title"]
+            except Exception as e:
+                print("exception in np")
+                print(e)
+
+    data = await mpd.playback.get_current_track()
+    # print(data)
+    if data is not None:
+        if "__model__" in data:
+            if data["uri"].startswith("mixcloud"):
+                uri = data["uri"]
+                url = uri.replace("mixcloud:track:", "https://www.mixcloud.com")
+
+            elif data["uri"].startswith("soundcloud"):
+                url = data["comment"]
+            elif data["uri"].startswith("bandcamp"):
+                comment = data["comment"]
+                url = comment.replace("URL: ", "")
+            else:
+                url = ""
+            chu_two_msg = " https://fm.chunt.org/stream2 jukebox now playing: " + url
+
+    else:
+        print("no mpd data")
+        url = ""
+        chu_two_msg = ""
+    if chuntfm_np:
+        print("cfm_np is:", chuntfm_np)
+        if chu_two_msg:
+            chuntfm_np = chuntfm_np + " | " + chu_two_msg
+
+    if returntype == "formatted":
+        return chuntfm_np
+    elif returntype == "raw":
+        return chu1_actually_np, url
 
 
 # mopidy logic
@@ -433,7 +483,11 @@ async def raid(message, station_query):
                 if "track" in result:
                     artist = result["track"]["subtitle"]
                     title = result["track"]["title"]
-                    bandcamp_result_msg = await bandcamp_search(artist, title)
+                    bandcamp_result = await bandcamp_search(artist, title)
+                    if bandcamp_result is not None:
+                        bandcamp_result_msg = " | maybe it's: " + bandcamp_result + " "
+                    else:
+                        bandcamp_result_msg = "  | no bandcamp found"
                     await message.channel.send(
                         "ID "
                         + station_name
@@ -447,6 +501,20 @@ async def raid(message, station_query):
                         + title
                         + bandcamp_result_msg
                     )
+                    # bandcamp search found something, insert into db
+                    await bot.db_id.insert_id_request(
+                        str(london_now),
+                        message.user.showname,
+                        message.room.name,
+                        message.body,
+                        stream_name,
+                        None,
+                        result,
+                        artist,
+                        title,
+                        bandcamp_result,
+                        None,
+                    )
                 else:
                     await message.channel.send(
                         "ID "
@@ -457,6 +525,20 @@ async def raid(message, station_query):
                         + hours_minutes
                         + " - "
                         + "shazam found nothing"
+                    )
+                    # shazam found nothing, insert into db anyway
+                    await bot.db_id.insert_id_request(
+                        str(london_now),
+                        message.user.showname,
+                        message.room.name,
+                        message.body,
+                        stream_name,
+                        None,
+                        None,
+                        None,
+                        None,
+                        None,
+                        None,
                     )
             except Exception as e:
                 print(str(e))
@@ -478,8 +560,6 @@ async def shazam_station(message, station):
         audio_source = "https://fm.chunt.org/stream2"
     elif station == "soho":
         audio_source = "https://sohoradiomusic.doughunt.co.uk:8010/128mp3"
-    elif station == "sharedfrequencies":
-        audio_source = "https://5.9.106.131/sharedfrequencies_a"
 
     station_name = station
     shazamapi = shazam.ShazamApi(loop, api_key=shazam_api_key)
@@ -495,21 +575,23 @@ async def shazam_station(message, station):
     if "track" in result:
         artist = result["track"]["subtitle"]
         title = result["track"]["title"]
-        bandcamp_result_msg = await bandcamp_search(artist, title)
-        data_package = [
-            london_now,
-            message.user.showname,
-            message.room.name,
-            message.body,
-            station,
-            None,
-            str(result),
-            artist,
-            title,
-            bandcamp_result_msg,
-            None,
-        ]
-        print(data_package)
+        bandcamp_result = await bandcamp_search(artist, title)
+        if bandcamp_result is not None:
+            bandcamp_result_msg = " | maybe it's: " + bandcamp_result + " "
+        else:
+            bandcamp_result_msg = "  | no bandcamp found"
+        # bandcamp search found something, insert into db
+        shown_name = None
+        if station == "chunt1":
+            try:
+                show_name, url = await now_playing("raw")
+            except Exception as e:
+                print(e)
+        elif station == "chunt2":
+            try:
+                whocares, show_name = await now_playing("raw")
+            except Exception as e:
+                print(e)
 
         await bot.db_id.insert_id_request(
             str(london_now),
@@ -517,11 +599,11 @@ async def shazam_station(message, station):
             message.room.name,
             message.body,
             str(station),
-            None,
+            shown_name,
             result,
             artist,
             title,
-            bandcamp_result_msg,
+            bandcamp_result,
             None,
         )
 
@@ -544,6 +626,7 @@ async def shazam_station(message, station):
         await message.channel.send(
             "ID " + station_name + ": " + hours_minutes + " - " + "shazam found nothing"
         )
+        # shazam found nothing, insert into db anyway
         await bot.db_id.insert_id_request(
             str(london_now),
             message.user.showname,
@@ -577,14 +660,14 @@ async def bandcamp_search(artist, title):
         split_path = parsed.path.split("/")
         bc_page_type = split_path[1]
         if any(word in bc_page_type for word in filters):
-            bandcamp_result_msg = " | maybe it's: " + bc_link
+            bandcamp_result = bc_link
         else:
-            bandcamp_result_msg = " | no bandcamp found. "
+            bandcamp_result = None
 
     else:
-        bandcamp_result_msg = " | no bandcamp found. "
+        bandcamp_result = None
 
-    return bandcamp_result_msg
+    return bandcamp_result
 
 
 class Config:
@@ -637,11 +720,6 @@ class MyBot(chatango.Client):
             await room.user.get_profile()
             await room.enable_bg()
 
-    async def db_idhistory_insert(
-        self,
-    ):
-        pass
-
     async def on_message(self, message):
         print(
             time.strftime("%b/%d-%H:%M:%S", time.localtime(message.time)),
@@ -679,26 +757,22 @@ class MyBot(chatango.Client):
                 await message.channel.send(help_message)
                 await message.room.client.pm.send_message(message.user, help_message)
 
-            elif cmd in ["idch1", "idnts1", "nts1"]:
+            elif cmd in ["idnts1"]:
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
 
                 asyncio.ensure_future(shazam_station(message, "nts1"))
 
-            elif cmd in ["idch2", "idnts2"]:
+            elif cmd in ["idnts2"]:
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
 
                 asyncio.ensure_future(shazam_station(message, "nts2"))
+
             elif cmd in ["idsoho"]:
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
                 asyncio.ensure_future(shazam_station(message, "soho"))
-
-            elif cmd in ["idsharedfrequencies", "idsharedfreq"]:
-                if message.room.name != "<PM>":
-                    await message.room.delete_message(message)
-                asyncio.ensure_future(shazam_station(message, "sharedfrequencies"))
 
             elif cmd in ["iddy", "iddoyou"]:
                 if message.room.name != "<PM>":
@@ -838,106 +912,14 @@ class MyBot(chatango.Client):
             # jukebox controls
 
             elif cmd.startswith("np"):
-                chuntfm_np = ""
-
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
-                liquidsoap_harbor_status = ""
-                try:
-                    liquidsoap_harbor_status = await telnet.main()
-                except Exception as e:
-                    print(e)
+                chuntfm_np = await now_playing("formatted")
+                print("whaddup")
+                print(chuntfm_np)
 
-                try:
-                    async with ClientSession() as s:
-                        r = await s.get("https://chunt.org/schedule.json")
-                        schedule_json = await r.json()
-                        # print(chu_json)
-                        time_now = datetime.now(timezone.utc)
-                        print("time_now: ", time_now)
-                        for show in schedule_json:
-                            start_time = datetime.fromisoformat(show["startTimestamp"])
-                            end_time = datetime.fromisoformat(show["endTimestamp"])
-                            print("start_time: ", start_time)
-                            if start_time < time_now:
-                                if end_time > time_now:
-                                    print(show)
-                                    chuntfm_np = show["title"]
-                except Exception as e:
-                    print(e)
-
-                # someone is definitely live
-                if liquidsoap_harbor_status.startswith("source"):
-                    if chuntfm_np:
-                        chuntfm_np = "LIVE NOW: " + chuntfm_np
-                    else:
-                        chuntfm_np = "LIVE NOW: unscheduled livestream w/ anon1111"
-                # no one is connected to stream
-                #
-                else:
-                    # either just a disconnect or scheduled show
-                    if chuntfm_np:
-                        chuntfm_np = "scheduled but offline: " + chuntfm_np
-                        # I don't know if it is a prerec
-                        # prerecord goes into calendar, so we have np
-                        # live indicator will be off
-                    else:
-                        try:
-                            async with ClientSession() as s:
-                                r = await s.get("https://chunt.org/restream.json")
-                                chu_json = await r.json()
-                                # print(chu_json)
-                                if (
-                                    chu_json["current"]["show_title"]
-                                    and chu_json["current"]["show_date"]
-                                ):
-                                    chuntfm_np = (
-                                        "RESTREAM: "
-                                        + chu_json["current"]["show_title"]
-                                        + " @ "
-                                        + chu_json["current"]["show_date"]
-                                    )
-                                else:
-                                    chuntfm_np = (
-                                        "RESTREAM: " + chu_json["current"]["show_title"]
-                                    )
-                        except Exception as e:
-                            print("exception in np")
-                            print(e)
-
-                data = await mpd.playback.get_current_track()
-                print(data)
-                if data is not None:
-                    if "__model__" in data:
-                        if data["uri"].startswith("mixcloud"):
-                            uri = data["uri"]
-                            url = uri.replace(
-                                "mixcloud:track:", "https://www.mixcloud.com"
-                            )
-
-                        elif data["uri"].startswith("soundcloud"):
-                            url = data["comment"]
-                        elif data["uri"].startswith("bandcamp"):
-                            comment = data["comment"]
-                            url = comment.replace("URL: ", "")
-                        else:
-                            url = ""
-                        # await message.channel.send(
-                        chu_two_msg = (
-                            " https://fm.chunt.org/stream2 jukebox now playing: " + url
-                        )
-
-                else:
-                    print("no mpd data")
-                    # await message.channel.send(
-                    chu_two_msg = ""
-
-                if chuntfm_np:
-                    print("cfm_np is", chuntfm_np)
-                    if chu_two_msg:
-                        await message.channel.send(chuntfm_np + " | " + chu_two_msg)
-                    else:
-                        await message.channel.send(chuntfm_np)
+                if chuntfm_np is not None:
+                    await message.channel.send(chuntfm_np)
 
             elif cmd.startswith("jukebox"):
                 if message.room.name != "<PM>":
