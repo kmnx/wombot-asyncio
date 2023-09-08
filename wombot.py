@@ -479,7 +479,7 @@ async def shazam_station(message, station):
     elif station == "soho":
         audio_source = "https://sohoradiomusic.doughunt.co.uk:8010/128mp3"
     elif station == "sharedfrequencies":
-        audio_source = "https://sharedfrequencies.out.airtime.pro/sharedfrequencies_a"
+        audio_source = "https://5.9.106.131/sharedfrequencies_a"
 
     station_name = station
     shazamapi = shazam.ShazamApi(loop, api_key=shazam_api_key)
