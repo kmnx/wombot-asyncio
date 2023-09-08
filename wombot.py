@@ -313,7 +313,6 @@ async def now_playing(return_type):
             print(e)
 
     # anything on chu2?
-    chu2_np_formatted = ""
     data = await mpd.playback.get_current_track()
     # print(data)
     if data is not None:

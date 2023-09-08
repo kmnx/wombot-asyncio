@@ -1,6 +1,5 @@
 import asyncio
 import aiosqlite
-import logging as LOGGER
 
 
 async def create_conn():
