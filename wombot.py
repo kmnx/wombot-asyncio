@@ -910,7 +910,6 @@ class MyBot(chatango.Client):
                     await message.channel.send(chuntfm_upnext)
 
             # jukebox controls
-
             elif cmd.startswith("np"):
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
