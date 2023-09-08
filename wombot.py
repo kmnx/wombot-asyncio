@@ -29,7 +29,8 @@ except LookupError:
 
 import radioactivity
 import search_google
-import get_id_doyou
+
+# import get_id_doyou
 import shazam
 import aiosqliteclass
 import aiosqliteclass_id
