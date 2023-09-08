@@ -599,7 +599,7 @@ async def shazam_station(message, station):
             message.room.name,
             message.body,
             str(station),
-            shown_name,
+            show_name,
             result,
             artist,
             title,
