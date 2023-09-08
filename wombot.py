@@ -582,7 +582,7 @@ async def shazam_station(message, station):
         else:
             bandcamp_result_msg = "  | no bandcamp found"
         # bandcamp search found something, insert into db
-
+        """
         if station == "chunt1":
             try:
                 show_name, url = await now_playing("raw")
@@ -593,6 +593,7 @@ async def shazam_station(message, station):
                 whocares, show_name = await now_playing("raw")
             except Exception as e:
                 print(e)
+        """
         data_package = [
             str(london_now),
             message.user.showname,

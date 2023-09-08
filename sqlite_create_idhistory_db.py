@@ -21,7 +21,7 @@ def run():
     cursor_obj = conn_obj.cursor()
     cursor_obj.execute("DROP TABLE IF EXISTS chuntfm")
     cursor_obj.execute(
-        "CREATE TABLE IF NOT EXISTS chuntfm (id INTEGER PRIMARY KEY, timestamp_utc, username, request_source, request_command, station, show_name, shazam_full, artist, title, bandcamp, verified);"
+        "CREATE TABLE IF NOT EXISTS chuntfm (id INTEGER PRIMARY KEY, timestamp_utc, username, request_source, request_command, station, show_name, artist, title, bandcamp, shazam_result, verified);"
     )
 
     conn_obj.commit()
