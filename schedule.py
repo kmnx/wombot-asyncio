@@ -1,11 +1,44 @@
 import aiohttp
-import datetime
+from datetime import datetime, timezone
+
 import json
+import pytz
+from dateutil import parser
 
 apis = {
     "nts1": "https://www.nts.live/api/v2/radio/schedule/1",
     "nts2": "https://www.nts.live/api/v2/radio/schedule/2",
 }
+
+
+async def get_now_playing(station):
+    today = datetime.now().date()
+    print(today)
+    time_now = datetime.now(timezone.utc)
+    api_url = apis.get(station)
+    session = aiohttp.ClientSession()
+    async with session as s:
+        async with s.get(api_url) as resp:
+            data = await resp.json()
+
+    if "nts.live/api" in api_url:
+        data = data["results"]
+        sched = []
+        tz = pytz.timezone("Europe/London")
+        now_playing = ""
+        for result in data:
+            if result.get("date") == str(today):
+                sched = result.get("broadcasts")
+                for broadcast in sched:
+                    start_time = parser.parse(broadcast.get("start_timestamp"))
+                    if start_time <= time_now:
+                        end_time = parser.parse(broadcast.get("end_timestamp"))
+                        if end_time >= time_now:
+                            now_playing = broadcast.get("broadcast_title").strip()
+                            break
+                break
+        print(now_playing)
+        return now_playing
 
 
 async def get_schedule(api_url):
@@ -53,7 +86,6 @@ async def get_schedule(api_url):
 
 
 async def subset_schedule(sched, time, future_hours=12):
-
     """
     Function to subset a schedule
     time must be supplied as a datetime object
@@ -79,7 +111,6 @@ async def subset_schedule(sched, time, future_hours=12):
 
 
 async def pprint_schedule(sched, string=True):
-
     """
     Pretty print a schedule by date
     """
@@ -89,7 +120,6 @@ async def pprint_schedule(sched, string=True):
     date = None
 
     for show in sched:
-
         if date is None or date != show["start"].date():
             add_date = True
         else:
@@ -98,7 +128,6 @@ async def pprint_schedule(sched, string=True):
         date = show["start"].date()
 
         if add_date:
-
             pretty_schedule += "\n" + str(date) + "\n\n"
 
         pretty_schedule += (
@@ -114,3 +143,16 @@ async def pprint_schedule(sched, string=True):
         return pretty_schedule
     else:
         print(pretty_schedule)
+
+
+if __name__ == "__main__":
+    import asyncio
+    import sys
+
+    loop = asyncio.get_event_loop()
+    if len(sys.argv) > 1:
+        station = sys.argv[1]
+    else:
+        station = "nts1"
+    loop.run_until_complete(get_now_playing("nts1"))
+    loop.run_until_complete(get_now_playing("nts2"))
