@@ -478,6 +478,9 @@ async def shazam_station(message, station):
         audio_source = "https://fm.chunt.org/stream2"
     elif station == "soho":
         audio_source = "https://sohoradiomusic.doughunt.co.uk:8010/128mp3"
+    elif station == "sharedfrequencies":
+        audio_source = "https://sharedfrequencies.out.airtime.pro/sharedfrequencies_a"
+
     station_name = station
     shazamapi = shazam.ShazamApi(loop, api_key=shazam_api_key)
     # session = ClientSession(trust_env=True)
@@ -692,10 +695,15 @@ class MyBot(chatango.Client):
                     await message.room.delete_message(message)
                 asyncio.ensure_future(shazam_station(message, "soho"))
 
+            elif cmd in ["sharedfrequencies", "sharedfreq"]:
+                if message.room.name != "<PM>":
+                    await message.room.delete_message(message)
+                asyncio.ensure_future(shazam_station(message, "sharedfrequencies"))
+
             elif cmd in ["iddy", "iddoyou"]:
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
-
+                """
                 london_time, artist, title = await get_id_doyou.get()
                 hours_minutes = london_time
 
@@ -714,9 +722,11 @@ class MyBot(chatango.Client):
                     asyncio.ensure_future(shazam_station(message, "doyou"))
 
                 else:
+                
                     print("no id from doyou")
                     await message.channel.send("No ID on doyou website, trying shazam")
-                    asyncio.ensure_future(shazam_station(message, "doyou"))
+                    """
+                asyncio.ensure_future(shazam_station(message, "doyou"))
 
             elif cmd in ["id1", "idchunt1", "idchu1"]:
                 if message.room.name != "<PM>":
