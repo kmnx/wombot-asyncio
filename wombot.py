@@ -503,6 +503,7 @@ async def raid(message, station_query):
                         + bandcamp_result_msg
                     )
                     # bandcamp search found something, insert into db
+                    """
                     await bot.db_id.insert_id_request(
                         str(london_now),
                         message.user.showname,
@@ -516,6 +517,7 @@ async def raid(message, station_query):
                         shazam_result,
                         None,
                     )
+                    """
                 else:
                     await message.channel.send(
                         "ID "
@@ -528,6 +530,7 @@ async def raid(message, station_query):
                         + "shazam found nothing"
                     )
                     # shazam found nothing, insert into db anyway
+                    """
                     await bot.db_id.insert_id_request(
                         str(london_now),
                         message.user.showname,
@@ -541,6 +544,7 @@ async def raid(message, station_query):
                         None,
                         None,
                     )
+                    """
             except Exception as e:
                 print(str(e))
         # print(artist + " - " + track)
@@ -571,7 +575,7 @@ async def shazam_station(message, station):
     ""
     ""
     shazam_result = await shazamapi._get(audio_source)
-    print(shazam_result)
+    # print(shazam_result)
     show_name = None
     if "track" in shazam_result:
         artist = shazam_result["track"]["subtitle"]
@@ -593,6 +597,7 @@ async def shazam_station(message, station):
                 whocares, show_name = await now_playing("raw")
             except Exception as e:
                 print(e)
+        """
         """
         data_package = [
             str(london_now),
@@ -626,6 +631,7 @@ async def shazam_station(message, station):
         whole_db = await bot.db_id.query_history_all()
         for shazam_result in whole_db:
             print(shazam_result)
+        """
 
         await message.channel.send(
             "ID "
@@ -643,6 +649,7 @@ async def shazam_station(message, station):
             "ID " + station_name + ": " + hours_minutes + " - " + "shazam found nothing"
         )
         # shazam found nothing, insert into db anyway
+        """
         await bot.db_id.insert_id_request(
             str(london_now),
             message.user.showname,
@@ -659,6 +666,7 @@ async def shazam_station(message, station):
         whole_db = await bot.db_id.query_history_all()
         for shazam_result in whole_db:
             print(shazam_result)
+        """
 
 
 async def bandcamp_search(artist, title):
