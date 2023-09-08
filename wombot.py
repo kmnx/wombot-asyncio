@@ -466,6 +466,7 @@ async def raid(message, station_query):
             if stream_name == "station":
                 stream_name = ""
             stream_url = stream[1]
+            station_name = stream_name
 
             # shazam it
             ""
@@ -479,10 +480,10 @@ async def raid(message, station_query):
             stream_sep = "" if stream_name == "" else " "
 
             try:
-                result = await shazamapi._get(stream_url)
-                if "track" in result:
-                    artist = result["track"]["subtitle"]
-                    title = result["track"]["title"]
+                shazam_result = await shazamapi._get(stream_url)
+                if "track" in shazam_result:
+                    artist = shazam_result["track"]["subtitle"]
+                    title = shazam_result["track"]["title"]
                     bandcamp_result = await bandcamp_search(artist, title)
                     if bandcamp_result is not None:
                         bandcamp_result_msg = " | maybe it's: " + bandcamp_result + " "
@@ -509,10 +510,10 @@ async def raid(message, station_query):
                         message.body,
                         stream_name,
                         None,
-                        result,
                         artist,
                         title,
                         bandcamp_result,
+                        shazam_result,
                         None,
                     )
                 else:
@@ -569,19 +570,19 @@ async def shazam_station(message, station):
     hours_minutes = london_now.strftime("%H:%M")
     ""
     ""
-    result = await shazamapi._get(audio_source)
-    print(result)
-
-    if "track" in result:
-        artist = result["track"]["subtitle"]
-        title = result["track"]["title"]
+    shazam_result = await shazamapi._get(audio_source)
+    print(shazam_result)
+    show_name = None
+    if "track" in shazam_result:
+        artist = shazam_result["track"]["subtitle"]
+        title = shazam_result["track"]["title"]
         bandcamp_result = await bandcamp_search(artist, title)
         if bandcamp_result is not None:
             bandcamp_result_msg = " | maybe it's: " + bandcamp_result + " "
         else:
             bandcamp_result_msg = "  | no bandcamp found"
         # bandcamp search found something, insert into db
-        shown_name = None
+
         if station == "chunt1":
             try:
                 show_name, url = await now_playing("raw")
@@ -599,10 +600,10 @@ async def shazam_station(message, station):
             message.body,
             station,
             show_name,
-            result,
             artist,
             title,
             bandcamp_result,
+            shazam_result,
             None,
         ]
         print("should get a data pack:")
@@ -614,16 +615,16 @@ async def shazam_station(message, station):
             message.body,
             str(station),
             show_name,
-            result,
             artist,
             title,
             bandcamp_result,
+            shazam_result,
             None,
         )
 
         whole_db = await bot.db_id.query_history_all()
-        for result in whole_db:
-            print(result)
+        for shazam_result in whole_db:
+            print(shazam_result)
 
         await message.channel.send(
             "ID "
@@ -647,7 +648,7 @@ async def shazam_station(message, station):
             message.room.name,
             message.body,
             station,
-            None,
+            show_name,
             None,
             None,
             None,
@@ -655,8 +656,8 @@ async def shazam_station(message, station):
             None,
         )
         whole_db = await bot.db_id.query_history_all()
-        for result in whole_db:
-            print(result)
+        for shazam_result in whole_db:
+            print(shazam_result)
 
 
 async def bandcamp_search(artist, title):
