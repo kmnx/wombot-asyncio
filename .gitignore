@@ -3,6 +3,8 @@ example.log
 # macOS 
 .DS_Store
 
+# IDE
+.idea/
 
 # sqlite db
 pythonsqlite.db
