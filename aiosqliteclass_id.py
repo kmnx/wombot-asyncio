@@ -23,7 +23,7 @@ class Sqlite3Class:
         self.cursor = await self.conn.cursor()
         print("init aiosqliteclass done ")
 
-    async def _close():
+    async def _close(self):
         await self.conn.close()
 
     async def insert_id_request(
@@ -34,14 +34,14 @@ class Sqlite3Class:
         request_command,
         station,
         show_name,
-        shazam_full,
         artist,
         title,
         bandcamp,
+        shazam_result,
         verified,
     ):
         await self.cursor.execute(
-            "INSERT INTO chuntfm (timestamp_utc, username, request_source, request_command, station, show_name, shazam_full, artist, title, bandcamp, verified) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+            "INSERT INTO chuntfm (timestamp_utc, username, request_source, request_command, station, show_name, artist, title, bandcamp, shazam_result, verified) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
             [
                 str(timestamp_utc),
                 username,
@@ -49,10 +49,10 @@ class Sqlite3Class:
                 request_command,
                 station,
                 show_name,
-                str(shazam_full),
                 artist,
                 title,
                 bandcamp,
+                str(shazam_result),
                 verified,
             ],
         )
@@ -110,10 +110,10 @@ if __name__ == "__main__":
         "id1",
         "chuntfm",
         "anon livestream",
-        "shazam says bla",
         "unknown artists",
         "good music",
         "http://bla",
+        "shazam says bla",
         None,
     ]
     # task = asyncio.gather(run())
