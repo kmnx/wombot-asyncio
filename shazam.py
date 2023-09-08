@@ -2,18 +2,14 @@ import asyncio
 import aiohttp
 from io import BytesIO
 from pydub import AudioSegment
-
-from aiohttp import ClientSession
 import base64
 import mysecrets
-import sys
 
 shazam_api_key = mysecrets.shazam_api_key
 
 
 class ShazamApi:
     def __init__(self, loop, api_key):
-
         self.api_url = "https://shazam.p.rapidapi.com/"
         self.api_host = "shazam.p.rapidapi.com"
         self.headers = {
@@ -22,28 +18,28 @@ class ShazamApi:
             "x-rapidapi-key": shazam_api_key,
         }
 
-    async def _get(self, streamsource, session=None):
+    async def _get(self, stream_source, session=None):
         """
         get from shazam api
-        :param query
+        :param stream_source
         :return: API response
         """
-        starttime = asyncio.get_event_loop().time()
+        print("running shazam api _get()")
+        start_time = asyncio.get_event_loop().time()
         recording = BytesIO()
 
-        audio_source = streamsource
+        audio_source = stream_source
         sound = ""
         out = ""
-        if session == None:
+        if session is None:
             session = aiohttp.ClientSession()
         async with session as session:
             try:
-                async with session.get(streamsource) as response:
+                async with session.get(stream_source) as response:
                     print("started recording")
                     # added chunk_count to counter initial data burst of some stations
                     chunk_count = 0
-                    while asyncio.get_event_loop().time() < (starttime + 4):
-
+                    while asyncio.get_event_loop().time() < (start_time + 4):
                         chunk = await response.content.read(1024)
                         chunk_count += 1
                         print("written chunk ", chunk_count)
@@ -52,7 +48,7 @@ class ShazamApi:
 
                         recording.write(chunk)
                         # some stations send lots of buffered audio on connect which might already be too much for shazam
-                        # so we break at 250 chunks. 4s of 256kbit stream are about 213 chunks
+                        # so we break at 250 chunks. 4s of 256 KBit stream are about 213 chunks
                         if chunk_count > 250:
                             break
 
@@ -75,6 +71,7 @@ class ShazamApi:
                     try:
                         out = await response.json()
                     except Exception as e:
+                        print(e)
                         print(out)
             else:
                 out = ""
@@ -91,7 +88,6 @@ async def loopy(loop):
 
 
 async def main(loop):
-
     # audio_source = 'https://stream-relay-geo.ntslive.net/stream'
     # audio_source = 'https://fm.chunt.org/stream'
     audio_source = "https://doyouworld.out.airtime.pro/doyouworld_a"

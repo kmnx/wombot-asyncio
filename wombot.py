@@ -695,7 +695,7 @@ class MyBot(chatango.Client):
                     await message.room.delete_message(message)
                 asyncio.ensure_future(shazam_station(message, "soho"))
 
-            elif cmd in ["sharedfrequencies", "sharedfreq"]:
+            elif cmd in ["idsharedfrequencies", "idsharedfreq"]:
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
                 asyncio.ensure_future(shazam_station(message, "sharedfrequencies"))
