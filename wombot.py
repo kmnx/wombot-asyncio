@@ -592,7 +592,21 @@ async def shazam_station(message, station):
                 whocares, show_name = await now_playing("raw")
             except Exception as e:
                 print(e)
-
+        data_package = [
+            str(london_now),
+            message.user.showname,
+            message.room.name,
+            message.body,
+            station,
+            show_name,
+            result,
+            artist,
+            title,
+            bandcamp_result,
+            None,
+        ]
+        print("should get a data pack:")
+        print(data_package)
         await bot.db_id.insert_id_request(
             str(london_now),
             message.user.showname,
