@@ -1,6 +1,8 @@
 import aiohttp
-from datetime import datetime, timezone
-import datetime
+
+from datetime import datetime, timezone, timedelta
+
+# import datetime
 import json
 import pytz
 from dateutil import parser
@@ -69,10 +71,10 @@ async def get_schedule(api_url):
             for show in day.get("broadcasts", []):
                 sched.append(
                     {
-                        "start": datetime.datetime.strptime(
+                        "start": datetime.strptime(
                             show.get("start_timestamp"), "%Y-%m-%dT%H:%M:%S%z"
                         ),
-                        "end": datetime.datetime.strptime(
+                        "end": datetime.strptime(
                             show.get("end_timestamp"), "%Y-%m-%dT%H:%M:%S%z"
                         ),
                         "title": show.get("broadcast_title").strip(),
@@ -103,8 +105,7 @@ async def subset_schedule(sched, time, future_hours=12):
     schedule_subset = [
         show
         for show in sched
-        if show["start"] > time
-        and show["start"] < time + datetime.timedelta(hours=future_hours)
+        if show["start"] > time and show["start"] < time + timedelta(hours=future_hours)
     ]
 
     return schedule_subset
@@ -132,8 +133,8 @@ async def pprint_schedule(sched, string=True):
 
         pretty_schedule += (
             "{} - {} {}".format(
-                datetime.datetime.strftime(show["start"], "%H:%M"),
-                datetime.datetime.strftime(show["end"], "%H:%M"),
+                datetime.strftime(show["start"], "%H:%M"),
+                datetime.strftime(show["end"], "%H:%M"),
                 show["title"],
             )
             + "\n"
