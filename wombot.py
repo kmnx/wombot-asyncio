@@ -5,6 +5,7 @@ import asyncio
 from aiohttp import ClientSession
 from datetime import datetime, timezone
 import aiocron
+import collections
 import random
 import typing
 from os import environ
@@ -1304,6 +1305,22 @@ class MyBot(chatango.Client):
 
             # gif management
 
+            elif cmd == "stats":
+                if message.room.name != "<PM>":
+                    await message.room.delete_message(message)
+                await self.db_id.cursor.execute(
+                    "SELECT username FROM chuntfm ORDER BY username DESC"
+                )
+                all_users = await self.db_id.cursor.fetchall()
+                toprequesters = collections.Counter(all_users).most_common()
+                print(toprequesters)
+                await message.channel.send(
+                    "total id attempts: "
+                    + str(len(all_users))
+                    + " |  "
+                    + str(toprequesters[0:3])
+                )
+
             elif cmd == "tags":
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
@@ -1688,7 +1705,7 @@ class MyBot(chatango.Client):
                             gif_file.write(word + "\n")
 
 
-async def get_db_cur():
+async def get_db_idhistory_cur():
     logging.debug("get_db_cur")
 
     conn = await aiosqlite.connect("/db/trackids.db")

@@ -71,6 +71,16 @@ class Sqlite3Class:
         else:
             return None
 
+    async def query_usernames(self):
+        #  returns all history
+        await self.cursor.execute("SELECT username FROM chuntfm ORDER BY username DESC")
+        result = await self.cursor.fetchall()
+        if result:
+            return result
+
+        else:
+            return None
+
     async def query_history_user(self, username):
         #  returns all history
         await self.cursor.execute("SELECT * FROM chuntfm WHERE username=? ", [username])
