@@ -1318,7 +1318,7 @@ class MyBot(chatango.Client):
                     "total id attempts: "
                     + str(len(all_users))
                     + " |  "
-                    + str(toprequesters[0:3])
+                    + str(toprequesters[0:10])
                 )
 
             elif cmd == "tags":
