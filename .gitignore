@@ -4,7 +4,7 @@ example.log
 .DS_Store
 
 # IDE
-.idea/
+.idea/*
 
 # sqlite db
 pythonsqlite.db
