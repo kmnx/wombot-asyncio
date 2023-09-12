@@ -667,32 +667,14 @@ async def shazam_station(message, station):
         )
     except Exception as e:
         print(e)
+    """
     try:
         whole_db = await bot.db_id.query_history_all()
         for shazam_result in whole_db:
             print(shazam_result)
     except Exception as e:
         print(e)
-
-        try:
-            await bot.db_id.insert_id_request(
-                str(london_now),
-                message.user.showname,
-                message.room.name,
-                message.body,
-                station,
-                show_name,
-                None,
-                None,
-                None,
-                None,
-                None,
-            )
-        except Exception as e:
-            print(e)
-        whole_db = await bot.db_id.query_history_all()
-        for entry in whole_db:
-            print(entry)
+    """
 
 
 async def bandcamp_search(artist, title):
@@ -701,10 +683,10 @@ async def bandcamp_search(artist, title):
     google_query = artist + " " + title
     ""
     res = await search_google.search(google_query)
-    print(res)
+    # print(res)
     if res is not None:
         bc_link = res[0]["link"]
-        print(bc_link)
+        # print(bc_link)
         filters = ["track", "album"]
         parsed = urlparse(bc_link)
         split_path = parsed.path.split("/")
@@ -983,11 +965,7 @@ class MyBot(chatango.Client):
 
             elif cmd in ["play", "add"]:
                 await message.room.delete_message(message)
-                mpd.tracklist.add(
-                    uris=[
-                        "mixcloud:track:/NTSRadio/siren-w-dj-fart-in-the-club-14th-may-2020/"
-                    ]
-                )
+                # await mpd.tracklist.add(uris=['mixcloud:track:/NTSRadio/siren-w-dj-fart-in-the-club-14th-may-2020/'])
                 # await mpd.tracklist.add(uris=['sc:https://soundcloud.com/sirenldn/nts-dj-fart-in-the-club'])
                 playback_state = await mpd.playback.get_state()
                 schemes = await mpd.core.get_uri_schemes()
@@ -1324,7 +1302,7 @@ class MyBot(chatango.Client):
                 )
                 all_users = await self.db_id.cursor.fetchall()
                 toprequesters = collections.Counter(all_users).most_common()
-                print(toprequesters)
+                # print(toprequesters)
                 await message.channel.send(
                     "total id attempts: "
                     + str(len(all_users))
