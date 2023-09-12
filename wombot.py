@@ -983,11 +983,15 @@ class MyBot(chatango.Client):
 
             elif cmd in ["play", "add"]:
                 await message.room.delete_message(message)
-                # await mpd.tracklist.add(uris=['mixcloud:track:/NTSRadio/siren-w-dj-fart-in-the-club-14th-may-2020/'])
+                mpd.tracklist.add(
+                    uris=[
+                        "mixcloud:track:/NTSRadio/siren-w-dj-fart-in-the-club-14th-may-2020/"
+                    ]
+                )
                 # await mpd.tracklist.add(uris=['sc:https://soundcloud.com/sirenldn/nts-dj-fart-in-the-club'])
                 playback_state = await mpd.playback.get_state()
                 schemes = await mpd.core.get_uri_schemes()
-                print(schemes)
+                # print(schemes)
                 if args:
                     # print(args)
                     splitargs = args.split(" ")
