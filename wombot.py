@@ -1067,9 +1067,11 @@ class MyBot(chatango.Client):
                     if playback_state != "playing":
                         print("it's not playing")
                         top_slice = await mpd.tracklist.slice(0, 1)
+                        print("the top slice is: ", top_slice)
 
                         if top_slice is not None:
                             tlid = top_slice[0]["tlid"]
+                            print("the tlid is: ", tlid)
                             await mpd.playback.play(tlid=tlid)
                     else:
                         print("should be playing")
