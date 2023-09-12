@@ -1016,20 +1016,24 @@ class MyBot(chatango.Client):
 
                     if url.startswith("https://www.mixcloud.com"):
                         uri = "mixcloud:track:" + mypath
-                        search_uri = [uri]
+                        search_uri = []
+                        search_uri.append(uri)
                         added = await mpd.tracklist.add(uris=search_uri)
                     elif url.startswith("https://m.mixcloud.com"):
                         uri = "mixcloud:track:" + mypath
-                        search_uri = [uri]
+                        search_uri = []
+                        search_uri.append(uri)
                         added = await mpd.tracklist.add(uris=search_uri)
                     elif url.startswith("https://soundcloud.com/"):
                         uri = "sc:" + url
-                        search_uri = [uri]
+                        search_uri = []
+                        search_uri.append(uri)
                         added = await mpd.tracklist.add(uris=search_uri)
 
                     elif "bandcamp" in url:
                         uri = "bandcamp:" + url
-                        search_uri = [uri]
+                        search_uri = []
+                        search_uri.append(uri)
                         added = await mpd.tracklist.add(uris=search_uri)
 
                     if url.startswith("https://www.youtube.com/watch"):
@@ -1063,9 +1067,10 @@ class MyBot(chatango.Client):
                     if playback_state != "playing":
                         print("it's not playing")
                         top_slice = await mpd.tracklist.slice(0, 1)
+
                         if top_slice is not None:
-                            tl_id = top_slice[0]["tl_id"]
-                            await mpd.playback.play(tlid=tl_id)
+                            tlid = top_slice[0]["tlid"]
+                            await mpd.playback.play(tlid=tlid)
                     else:
                         print("should be playing")
 
