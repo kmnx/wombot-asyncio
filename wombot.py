@@ -969,7 +969,7 @@ class MyBot(chatango.Client):
                 # await mpd.tracklist.add(uris=['sc:https://soundcloud.com/sirenldn/nts-dj-fart-in-the-club'])
                 playback_state = await mpd.playback.get_state()
                 schemes = await mpd.core.get_uri_schemes()
-                print(schemes)
+                # print(schemes)
                 if args:
                     # print(args)
                     splitargs = args.split(" ")
@@ -977,10 +977,10 @@ class MyBot(chatango.Client):
                     url = splitargs[0]
 
                     # print(mypath)
-                    print(url)
+                    # print(url)
                     stripped_url = url.strip().lstrip().rstrip()
                     url = stripped_url
-                    print(url)
+                    # print(url)
                     results = ""
                     added = ""
 
@@ -997,13 +997,13 @@ class MyBot(chatango.Client):
                     mypath = parsed.path
 
                     if url.startswith("https://www.mixcloud.com"):
-                        uri = "mixcloud:" + mypath
+                        uri = "mixcloud:track:" + mypath
                         search_uri = []
                         search_uri.append(uri)
                         print("search_uri", search_uri)
                         added = await mpd.tracklist.add(uris=search_uri)
                     elif url.startswith("https://m.mixcloud.com"):
-                        uri = "mixcloud:" + mypath
+                        uri = "mixcloud:track:" + mypath
                         search_uri = []
                         search_uri.append(uri)
                         added = await mpd.tracklist.add(uris=search_uri)
