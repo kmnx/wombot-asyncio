@@ -1000,6 +1000,7 @@ class MyBot(chatango.Client):
                         uri = "mixcloud:track:" + mypath
                         search_uri = []
                         search_uri.append(uri)
+                        print("search_uri", search_uri)
                         added = await mpd.tracklist.add(uris=search_uri)
                     elif url.startswith("https://m.mixcloud.com"):
                         uri = "mixcloud:track:" + mypath
