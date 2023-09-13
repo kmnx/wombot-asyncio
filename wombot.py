@@ -17,6 +17,7 @@ import logging
 from urllib.parse import urlparse
 import bs4
 import nltk
+import edamam
 
 try:
     nltk.data.find("tokenizers/punkt")
@@ -1230,7 +1231,18 @@ class MyBot(chatango.Client):
                     + " : "
                     + cfortune.replace(".", "").lower()
                 )
-
+            elif cmd in ["scran", "recipe", "hungry"]:
+                if message.room.name != "<PM>":
+                    await message.room.delete_message(message)
+                if args:
+                    q = args
+                else:
+                    q = "vegetarian"
+                title, url = await edamam.scran(q)
+                if title:
+                    await message.channel.send(
+                        "hungry? how about: " + title + " | " + url
+                    )
             # gif/image/snippets spam commands
 
             elif cmd in [
