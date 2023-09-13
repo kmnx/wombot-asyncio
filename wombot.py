@@ -997,13 +997,13 @@ class MyBot(chatango.Client):
                     mypath = parsed.path
 
                     if url.startswith("https://www.mixcloud.com"):
-                        uri = "mixcloud:track:" + mypath
+                        uri = "mixcloud:" + mypath
                         search_uri = []
                         search_uri.append(uri)
                         print("search_uri", search_uri)
                         added = await mpd.tracklist.add(uris=search_uri)
                     elif url.startswith("https://m.mixcloud.com"):
-                        uri = "mixcloud:track:" + mypath
+                        uri = "mixcloud:" + mypath
                         search_uri = []
                         search_uri.append(uri)
                         added = await mpd.tracklist.add(uris=search_uri)
