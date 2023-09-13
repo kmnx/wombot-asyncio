@@ -969,7 +969,7 @@ class MyBot(chatango.Client):
                 # await mpd.tracklist.add(uris=['sc:https://soundcloud.com/sirenldn/nts-dj-fart-in-the-club'])
                 playback_state = await mpd.playback.get_state()
                 schemes = await mpd.core.get_uri_schemes()
-                # print(schemes)
+                print(schemes)
                 if args:
                     # print(args)
                     splitargs = args.split(" ")
