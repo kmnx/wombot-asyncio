@@ -471,7 +471,6 @@ async def raid(message, station_query):
             if stream_name == "station":
                 stream_name = ""
             stream_url = stream[1]
-            station_name = stream_name
 
             # shazam it
 
