@@ -1569,6 +1569,16 @@ class MyBot(chatango.Client):
                         + cfortune.replace(".", "").lower()
                     )
 
+            elif cmd == "coinflip":
+                if message.room.name != "<PM>":
+                    await message.room.delete_message(message)
+
+                coinflipresult = "Heads" if random.choice([0, 1])==1 else "Tails"
+                await message.channel.send(
+                        "The coin flip result is: "
+                        + coinflipresult
+                        )
+
             elif cmd == "say":
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
