@@ -1574,10 +1574,43 @@ class MyBot(chatango.Client):
                     await message.room.delete_message(message)
 
                 coinflipresult = "Heads" if random.choice([0, 1])==1 else "Tails"
-                await message.channel.send(
-                        "The coin flip result is: "
-                        + coinflipresult
-                        )
+
+                if args:
+                    await message.channel.send(
+                        "@"
+                        + message.user.showname
+                        + " asked: "
+                        + args
+                        + " - coin flip result is: "
+                        + (random.choice(coinflipresult))
+                    )
+                else:
+                    await message.channel.send(
+                            "coin flip result is: " + (random.choice(coinflipresult))
+                    )
+
+            elif cmd == "rollcall":
+                if message.room.name != "<PM>":
+                    await message.room.delete_message(message)
+
+                if not args or not (args[0].isnumeric() and int(args[0]) < 9):
+                    await message.channel.send(
+                        "@"
+                        + message.user.showname
+                        + ", please add a number between 1 and 8 after the command next time to have the chance of hitting a roll call"
+                    )
+
+                elif int(args[0][0]) == random.choice([1,8]):
+                    await message.channel.send(
+                            " ".join(["@" + item.name for item in message.room.alluserlist])
+                    )
+
+                else:
+                    await message.channel.send(
+                       "Unsuccessful rollcall attempt "
+                       + "@" + message.user.showname
+                       + ", better luck next time!"
+                       )
 
             elif cmd == "say":
                 if message.room.name != "<PM>":
