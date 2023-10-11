@@ -1360,7 +1360,7 @@ class MyBot(chatango.Client):
                 for c in chunks:
                     print(c)
                     await message.room.client.pm.send_message(message.user, str(c))
-            elif cmd == "recent":
+            elif cmd == "last":
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
                 await self.db.cursor.execute("SELECT tag_name FROM tag_table ORDER BY id DESC LIMIT 10")
@@ -1377,10 +1377,10 @@ class MyBot(chatango.Client):
                     the_longest_string[i: i + n]
                     for i in range(0, len(the_longest_string), n)
                 ]
-                for c in chunks:
-                    print(c)
-                    await message.room.client.pm.send_message(message.user, str(c))
-
+                #for c in chunks:
+                #    print(c)
+                #    await message.room.client.pm.send_message(message.user, str(c))
+                await message.channel.send(chunks)
             elif cmd == "tag":
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
