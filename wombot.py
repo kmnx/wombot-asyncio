@@ -32,7 +32,11 @@ import radioactivity
 import search_google
 
 # import get_id_doyou
-import shazam
+try:
+    import shazam
+except Exception:
+    print("Please add shazam_api_key to mysecrets.py for rapidapi shazam functionality ")
+
 import aiosqliteclass
 import aiosqliteclass_id
 import data_pics_wombat
@@ -45,9 +49,21 @@ import schedule
 import chuntfm
 import telnet
 
-import mysecrets
-
-shazam_api_key = mysecrets.shazam_api_key
+try:
+    import mysecrets
+except ImportError:
+    print("mysecrets.py not found. it will now be created")
+    chatango_user = input("Please enter Chatango Username:")
+    chatango_pass = input("Please enter Chatango Password:")
+    with open("mysecrets.py", 'a') as f:
+        f.write('chatango_user = ' + '\'' + chatango_user +
+                '\'' + '\n' + 'chatango_pass = ' + '\'' + chatango_pass + '\'' + '\n')
+    import mysecrets
+try:
+    shazam_api_key = mysecrets.shazam_api_key
+except Exception:
+    shazam_api_key = ''
+    print('Please add shazam_api_key for rapidapi shazam functionality to mysecrets.py')
 
 from mopidy_asyncio_client import MopidyClient
 
@@ -90,13 +106,13 @@ command_list = [
 ]
 
 help_message = (
-    "commands: \r \r "
-    + "!id1 to shazam chunt1 \r!idnts1 for NTS1 \r!idnts2 for NTS1 \r!iddy for DoYou \r!idyourfavoritestation for your favorite station \r \r"
-    + "!fortune (your daily fortune)  \r \r "
-    + "!shoutout [username]  \r "
-    + "!b2b for some random random gifs \r !rnd for even more random gifs \r"
-    + "gifs curated by bigbunnybrer, oscmal, and others \r \r"
-    + "keep chuntin!"
+        "commands: \r \r "
+        + "!id1 to shazam chunt1 \r!idnts1 for NTS1 \r!idnts2 for NTS1 \r!iddy for DoYou \r!idyourfavoritestation for your favorite station \r \r"
+        + "!fortune (your daily fortune)  \r \r "
+        + "!shoutout [username]  \r "
+        + "!b2b for some random random gifs \r !rnd for even more random gifs \r"
+        + "gifs curated by bigbunnybrer, oscmal, and others \r \r"
+        + "keep chuntin!"
 )
 
 shout_start = [
@@ -219,7 +235,7 @@ async def post_chuntfm_status():
     print("last_posted_status", (bot.chuntfm.get("last_posted_status")))
     print("bot.chuntfm.get(status) ==", bot.chuntfm.get("status"))
     if (bot.chuntfm.get("last_posted_status") is None) or (
-        bot.chuntfm.get("status") != bot.chuntfm.get("last_posted_status")
+            bot.chuntfm.get("status") != bot.chuntfm.get("last_posted_status")
     ):
         msg = "ChuntFM status: " + bot.chuntfm.get("status") + "!"
         print("the msg is:", msg)
@@ -294,20 +310,20 @@ async def now_playing(return_type):
                 # is someone supposed to be live?
                 if chu1_scheduled is not None:
                     chu1_np_formatted = (
-                        "scheduled but offline: "
-                        + chu1_scheduled
-                        + " | "
-                        + "RESTREAM: "
-                        + chu_json["current"]["show_title"]
-                        + " @ "
-                        + chu_json["current"]["show_date"]
+                            "scheduled but offline: "
+                            + chu1_scheduled
+                            + " | "
+                            + "RESTREAM: "
+                            + chu_json["current"]["show_title"]
+                            + " @ "
+                            + chu_json["current"]["show_date"]
                     )
                 else:
                     chu1_np_formatted = (
-                        "RESTREAM: "
-                        + chu_json["current"]["show_title"]
-                        + " @ "
-                        + chu_json["current"]["show_date"]
+                            "RESTREAM: "
+                            + chu_json["current"]["show_title"]
+                            + " @ "
+                            + chu_json["current"]["show_date"]
                     )
                 chu1_np_raw = chu_json["current"]["show_title"]
         except Exception as e:
@@ -332,7 +348,7 @@ async def now_playing(return_type):
                 url = ""
             chu2_np_raw = url
             chu2_np_formatted = (
-                " https://fm.chunt.org/stream2 jukebox now playing: " + url
+                    " https://fm.chunt.org/stream2 jukebox now playing: " + url
             )
 
     else:
@@ -863,10 +879,10 @@ class MyBot(chatango.Client):
                 for station in ra_stations.values():
                     if station.get("stream_url"):
                         if any(
-                            [
-                                stream[2] == "online"
-                                for stream in station.get("stream_url")
-                            ]
+                                [
+                                    stream[2] == "online"
+                                    for stream in station.get("stream_url")
+                                ]
                         ):
                             online_stations.append(station)
 
@@ -917,21 +933,21 @@ class MyBot(chatango.Client):
                                     .replace("<br>", " - "),
                                 )
                                 chuntfm_upnext = (
-                                    "UP NEXT: "
-                                    + (show["title"])
-                                    + " | "
-                                    + show["description"]
-                                    .replace("\n", " ")
-                                    .replace("\r", "")
-                                    .replace("<br>", "")
-                                    + " | "
-                                    + show["dateUK"]
-                                    + " "
-                                    + show["startTimeUK"]
-                                    + " GMT"
-                                    + " (in "
-                                    + when
-                                    + ")"
+                                        "UP NEXT: "
+                                        + (show["title"])
+                                        + " | "
+                                        + show["description"]
+                                        .replace("\n", " ")
+                                        .replace("\r", "")
+                                        .replace("<br>", "")
+                                        + " | "
+                                        + show["dateUK"]
+                                        + " "
+                                        + show["startTimeUK"]
+                                        + " GMT"
+                                        + " (in "
+                                        + when
+                                        + ")"
                                 )
                                 break
 
@@ -946,7 +962,6 @@ class MyBot(chatango.Client):
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
                 chuntfm_np = await now_playing("formatted")
-                print("whaddup")
                 print(chuntfm_np)
 
                 if chuntfm_np is not None:
@@ -1020,12 +1035,16 @@ class MyBot(chatango.Client):
                         added = await mpd.tracklist.add(uris=search_uri)
 
                     if url.startswith("https://www.youtube.com/watch"):
-                        added = ""
+                        '''added = ""
                         # uri = "yt:" + url
                         # yt seems very broken, causes "wrong stream type" somewhere in liquidsoap/icecast/mopidy chain
                         await message.channel.send(
                             "jukebox can currently add links from mixcloud,soundcloud,bandcamp,nts"
-                        )
+                        )'''
+                        uri = "bandcamp:" + url
+                        search_uri = []
+                        search_uri.append(uri)
+                        added = await mpd.tracklist.add(uris=search_uri)
                     print("added:", added)
                     if added:
                         if "__model__" in added[0]:
@@ -1313,13 +1332,12 @@ class MyBot(chatango.Client):
                     "SELECT username FROM chuntfm ORDER BY username DESC"
                 )
                 all_users = await self.db_id.cursor.fetchall()
-                toprequesters = collections.Counter(all_users).most_common()
-                # print(toprequesters)
+                top_requesters = collections.Counter(all_users).most_common()
                 await message.channel.send(
                     "total id attempts: "
                     + str(len(all_users))
                     + " |  "
-                    + str(toprequesters[0:10])
+                    + str(top_requesters[0:10])
                 )
 
             elif cmd == "tags":
@@ -1336,7 +1354,7 @@ class MyBot(chatango.Client):
                 # print(the_longest_string)
                 n = 4000  # chunk length
                 chunks = [
-                    the_longest_string[i : i + n]
+                    the_longest_string[i: i + n]
                     for i in range(0, len(the_longest_string), n)
                 ]
                 for c in chunks:
@@ -1495,19 +1513,19 @@ class MyBot(chatango.Client):
                         chu_json = await r.json()
                         print(chu_json)
                         if (
-                            chu_json["current"]["show_title"]
-                            and chu_json["current"]["show_date"]
+                                chu_json["current"]["show_title"]
+                                and chu_json["current"]["show_date"]
                         ):
                             chuntfm_np = (
-                                "chuntfm is now playing: "
-                                + chu_json["current"]["show_title"]
-                                + " @ "
-                                + chu_json["current"]["show_date"]
+                                    "chuntfm is now playing: "
+                                    + chu_json["current"]["show_title"]
+                                    + " @ "
+                                    + chu_json["current"]["show_date"]
                             )
                         else:
                             chuntfm_np = (
-                                "chuntfm is now playing: "
-                                + chu_json["current"]["show_title"]
+                                    "chuntfm is now playing: "
+                                    + chu_json["current"]["show_title"]
                             )
 
                 except Exception as e:
@@ -1573,7 +1591,7 @@ class MyBot(chatango.Client):
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
 
-                coinflipresult = "Heads" if random.choice([0, 1])==1 else "Tails"
+                coinflip_result = "Heads" if random.choice([0, 1]) == 1 else "Tails"
 
                 if args:
                     await message.channel.send(
@@ -1582,11 +1600,11 @@ class MyBot(chatango.Client):
                         + " asked: "
                         + args
                         + " - coin flip result is: "
-                        + (random.choice(coinflipresult))
+                        + (random.choice(coinflip_result))
                     )
                 else:
                     await message.channel.send(
-                            "coin flip result is: " + (random.choice(coinflipresult))
+                        "coin flip result is: " + (random.choice(coinflip_result))
                     )
 
             elif cmd == "rollcall":
@@ -1600,17 +1618,17 @@ class MyBot(chatango.Client):
                         + ", please add a number between 1 and 8 after the command next time to have the chance of hitting a roll call"
                     )
 
-                elif int(args[0][0]) == random.choice([1,8]):
+                elif int(args[0][0]) == random.choice([1, 8]):
                     await message.channel.send(
-                            " ".join(["@" + item.name for item in message.room.alluserlist])
+                        " ".join(["@" + item.name for item in message.room.alluserlist])
                     )
 
                 else:
                     await message.channel.send(
-                       "Unsuccessful rollcall attempt "
-                       + "@" + message.user.showname
-                       + ", better luck next time!"
-                       )
+                        "Unsuccessful rollcall attempt "
+                        + "@" + message.user.showname
+                        + ", better luck next time!"
+                    )
 
             elif cmd == "say":
                 if message.room.name != "<PM>":
@@ -1735,7 +1753,7 @@ class MyBot(chatango.Client):
             split_message = message.body.split(" ")
             for word in split_message:
                 if (word.endswith(".gif") or word.endswith(".gifv")) and (
-                    len(word) < 75
+                        len(word) < 75
                 ):
                     print("might be gif")
                     if word in allgif_set:
