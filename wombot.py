@@ -1041,7 +1041,7 @@ class MyBot(chatango.Client):
                         await message.channel.send(
                             "jukebox can currently add links from mixcloud,soundcloud,bandcamp,nts"
                         )'''
-                        uri = "bandcamp:" + url
+                        uri = "yt:" + url
                         search_uri = []
                         search_uri.append(uri)
                         added = await mpd.tracklist.add(uris=search_uri)
