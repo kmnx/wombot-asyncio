@@ -3,7 +3,7 @@
 import chatango
 import asyncio
 from aiohttp import ClientSession
-from datetime import datetime, timezone
+from datetime import datetime, timezone, date
 import aiocron
 import collections
 import random
@@ -1650,6 +1650,17 @@ class MyBot(chatango.Client):
                         + ", better luck next time!"
                     )
 
+            elif cmd == "whom":
+                if message.room.name != "<PM>":
+                    await message.room.delete_message(message)
+
+                random_user = (random.choice(message.room.alluserlist)).name
+                profile_pic_url = f"https://ust.chatango.com/profileimg/{random_user[0]}/{random_user[1]}/{random_user}/full.jpg"
+         
+                await message.channel.send(
+                        profile_pic_url
+                )
+
             elif cmd == "say":
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
@@ -1742,14 +1753,16 @@ class MyBot(chatango.Client):
                             + random.choice(shout_end)
                         )
 
-                else:
-                    await message.channel.send(
-                        random.choice(shout_start)
-                        + " "
-                        + random.choice(message.room.usernames)
-                        + "! "
-                        + random.choice(shout_end)
-                    )
+            elif cmd == "ronfret":
+                if message.room.name != "<PM>":
+                    await message.room.delete_message(message)
+                ronfret_date = date(2024, 4, 13) 
+                days_left = str((ronfret_date - date.today()).days)
+                await message.channel.send(
+                    "13/14 April 2024 weekend for Ronfret 2024 in Lisboa. Only " 
+                    + days_left
+                    + " days left, act fast"
+                )
 
             else:
                 print(cmd)
