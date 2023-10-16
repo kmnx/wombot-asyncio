@@ -1395,7 +1395,7 @@ class MyBot(chatango.Client):
                     await self.db.cursor.execute(f"SELECT tag_name FROM tag_table WHERE tag_name LIKE '%{args}%' ORDER BY RANDOM() LIMIT 10")
                     tag_list_unsorted = await self.db.cursor.fetchall()
                     if len(tag_list_unsorted) == 0:
-                        await message.channel.send("No tags found, sorry")
+                        await message.channel.send(f"No tags found containing {args}, sorry")
                     else:
                         tag_list = sorted(tag_list_unsorted)
                         print(tag_list)
@@ -1679,13 +1679,6 @@ class MyBot(chatango.Client):
                 elif int(args[0]) == random.randint(1, 8):
                     await message.channel.send(
                         " ".join(["@" + item.name for item in message.room.alluserlist])
-                    )
-
-                else:
-                    await message.channel.send(
-                        "Unsuccessful rollcall attempt "
-                        + "@" + message.user.showname
-                        + ", better luck next time!"
                     )
 
             elif cmd == "whom":
