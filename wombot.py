@@ -1360,6 +1360,7 @@ class MyBot(chatango.Client):
                 for c in chunks:
                     print(c)
                     await message.room.client.pm.send_message(message.user, str(c))
+
             elif cmd == "last":
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
@@ -1381,6 +1382,17 @@ class MyBot(chatango.Client):
                 #    print(c)
                 #    await message.room.client.pm.send_message(message.user, str(c))
                 await message.channel.send(chunks)
+            
+            elif cmd == "rndtag":
+                if message.room.name != "<PM>":
+                    await message.room.delete_message(message)
+                await self.db.cursor.execute("SELECT tag_name FROM tag_table ORDER BY RANDOM() LIMIT 1")
+                random_tag = await self.db.cursor.fetchall()
+                await message.channel.send(
+                        "Enjoy this random tag: !"
+                        + random_tag[0]
+                        )
+            
             elif cmd == "tag":
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
