@@ -1383,6 +1383,32 @@ class MyBot(chatango.Client):
                 #    await message.room.client.pm.send_message(message.user, str(c))
                 await message.channel.send(chunks)
             
+            elif cmd == "tagged":
+                if message.room.name != "<PM>":
+                    await message.room.delete_message(message)
+                if not args:
+                    await message.channel.send(
+                            "Enter a query after !tagged"
+                            )
+
+                else:
+                    await self.db.cursor.execute(f"SELECT tag_name FROM tag_table WHERE tag_name LIKE '%{args}%' ORDER BY RANDOM() LIMIT 10")
+                    tag_list_unsorted = await self.db.cursor.fetchall()
+                    if len(tag_list_unsorted) == 0:
+                        await message.channel.send("No tags found, sorry")
+                    else:
+                        tag_list = sorted(tag_list_unsorted)
+                        print(tag_list)
+                        the_longest_string = f"Tags with {args} in: "
+                        for key in tag_list:
+                            the_longest_string += "!" + key + " "
+                        # print(the_longest_string)
+                        n = 4000  # chunk length
+                        #for c in chunks:
+                        #    print(c)
+                        #    await message.room.client.pm.send_message(message.user, str(c))
+                        await message.channel.send(the_longest_string[:n])
+
             elif cmd == "rndtag":
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
