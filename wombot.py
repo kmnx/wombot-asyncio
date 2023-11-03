@@ -1678,7 +1678,13 @@ class MyBot(chatango.Client):
 
                 elif int(args[0]) == random.randint(1, 8):
                     await message.channel.send(
-                        " ".join(["@" + item.name for item in message.room.alluserlist])
+                            "Congratulations "
+                            +
+                            message.user.showname
+                            +
+                            "! \n"
+                            +
+                            " ".join(["@" + item.name for item in message.room.alluserlist])
                     )
 
             elif cmd == "whom":
