@@ -269,6 +269,7 @@ async def now_playing(return_type):
     try:
         liquidsoap_harbor_status = await telnet.main()
     except Exception as e:
+        print("Error Connecting to Liquidsoap Telnet")
         print(e)
     # is someone scheduled to be live?
     chu1_scheduled = None
