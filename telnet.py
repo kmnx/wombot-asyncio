@@ -26,10 +26,14 @@ async def shell(tcp):
 
 
 async def main():
-    async with await connect_tcp("localhost", 1234) as client:
-        status = await shell(client)
-        print(status)
-        return status
+    try:
+        async with await connect_tcp("localhost", 1234) as client:
+            status = await shell(client)
+            print(status)
+            return status
+    except:
+        print("Failed to connect to server")
+        return None
 
 
 # anyio.run(main)
