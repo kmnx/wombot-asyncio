@@ -273,6 +273,7 @@ async def now_playing(return_type):
         print("Error Connecting to Liquidsoap Telnet")
         print(e)
     # is someone scheduled to be live?
+    print("made it past telnet connection attempt")
     chu1_scheduled = None
     try:
         print("trying to get schedule.json")
