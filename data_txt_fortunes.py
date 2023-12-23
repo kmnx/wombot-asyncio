@@ -519,7 +519,7 @@ fortunecookie = [
     "Hard words break no bones, fine words butter no parsnips.",
     "Hard work pays off in the future, laziness pays off now.",
     "He who climbs a ladder must begin at the first step.",
-    "Help is always needed but not always appreciated. Stay true to your heart and help those in need weather they appreciate it or not.",
+    "Help is always needed but not always appreciated. Stay true to your heart and help those in need whether they appreciate it or not.",
     "Hidden in a valley beside an open stream- This will be the type of place where you will find your dream.",
     "Hold on to the past but eventually, let the times go and keep the memories into the present.",
     "Hone your competitive instincts.",

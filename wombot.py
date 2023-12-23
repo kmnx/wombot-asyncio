@@ -3,7 +3,7 @@
 import chatango
 import asyncio
 from aiohttp import ClientSession
-from datetime import datetime, timezone
+from datetime import datetime, timezone, date
 import aiocron
 import collections
 import random
@@ -1361,6 +1361,7 @@ class MyBot(chatango.Client):
                 for c in chunks:
                     print(c)
                     await message.room.client.pm.send_message(message.user, str(c))
+
             elif cmd == "last":
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
@@ -1382,6 +1383,43 @@ class MyBot(chatango.Client):
                 #    print(c)
                 #    await message.room.client.pm.send_message(message.user, str(c))
                 await message.channel.send(chunks)
+            
+            elif cmd == "tagged":
+                if message.room.name != "<PM>":
+                    await message.room.delete_message(message)
+                if not args:
+                    await message.channel.send(
+                            "Enter a query after !tagged"
+                            )
+
+                else:
+                    await self.db.cursor.execute(f"SELECT tag_name FROM tag_table WHERE tag_name LIKE '%{args}%' ORDER BY RANDOM() LIMIT 10")
+                    tag_list_unsorted = await self.db.cursor.fetchall()
+                    if len(tag_list_unsorted) == 0:
+                        await message.channel.send(f"No tags found containing {args}, sorry")
+                    else:
+                        tag_list = sorted(tag_list_unsorted)
+                        print(tag_list)
+                        the_longest_string = f"Tags with {args} in: "
+                        for key in tag_list:
+                            the_longest_string += "!" + key + " "
+                        # print(the_longest_string)
+                        n = 4000  # chunk length
+                        #for c in chunks:
+                        #    print(c)
+                        #    await message.room.client.pm.send_message(message.user, str(c))
+                        await message.channel.send(the_longest_string[:n])
+
+            elif cmd == "rndtag":
+                if message.room.name != "<PM>":
+                    await message.room.delete_message(message)
+                await self.db.cursor.execute("SELECT tag_name FROM tag_table ORDER BY RANDOM() LIMIT 1")
+                random_tag = await self.db.cursor.fetchall()
+                await message.channel.send(
+                        "Enjoy this random tag: !"
+                        + random_tag[0]
+                        )
+            
             elif cmd == "tag":
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
@@ -1632,24 +1670,34 @@ class MyBot(chatango.Client):
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
 
-                if not args or not (args[0].isnumeric() and int(args[0]) < 9):
+                if not args or not args[0].isnumeric():
                     await message.channel.send(
                         "@"
                         + message.user.showname
                         + ", please add a number between 1 and 8 after the command next time to have the chance of hitting a roll call"
                     )
 
-                elif int(args[0][0]) == random.choice([1, 8]):
+                elif int(args[0]) == random.randint(1, 8):
                     await message.channel.send(
-                        " ".join(["@" + item.name for item in message.room.alluserlist])
+                            "Congratulations "
+                            +
+                            message.user.showname
+                            +
+                            "! \n"
+                            +
+                            " ".join(["@" + item.name for item in message.room.alluserlist])
                     )
 
-                else:
-                    await message.channel.send(
-                        "Unsuccessful rollcall attempt "
-                        + "@" + message.user.showname
-                        + ", better luck next time!"
-                    )
+            elif cmd == "whom":
+                if message.room.name != "<PM>":
+                    await message.room.delete_message(message)
+
+                random_user = (random.choice(message.room.alluserlist)).name
+                profile_pic_url = f"https://ust.chatango.com/profileimg/{random_user[0]}/{random_user[1]}/{random_user}/full.jpg"
+         
+                await message.channel.send(
+                        profile_pic_url
+                )
 
             elif cmd == "say":
                 if message.room.name != "<PM>":
@@ -1743,14 +1791,16 @@ class MyBot(chatango.Client):
                             + random.choice(shout_end)
                         )
 
-                else:
-                    await message.channel.send(
-                        random.choice(shout_start)
-                        + " "
-                        + random.choice(message.room.usernames)
-                        + "! "
-                        + random.choice(shout_end)
-                    )
+            elif cmd == "ronfret":
+                if message.room.name != "<PM>":
+                    await message.room.delete_message(message)
+                ronfret_date = date(2024, 4, 13) 
+                days_left = str((ronfret_date - date.today()).days)
+                await message.channel.send(
+                    "13/14 April 2024 weekend for Ronfret 2024 in Lisboa. Only " 
+                    + days_left
+                    + " days left, act fast"
+                )
 
             else:
                 print(cmd)
