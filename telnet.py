@@ -6,7 +6,7 @@ async def shell(tcp):
     async with asynctelnet.TelnetClient(tcp, client=True) as stream:
         gotstatus = False
         while gotstatus is False:
-            statusreq = bytearray("input.harbor_0.status\n", "utf-8")
+            statusreq = bytearray("input.harbor.status\n", "utf-8")
             await stream.send(statusreq)
             outp = await stream.receive(1024)
             if not outp:
