@@ -26,10 +26,11 @@ async def shell(tcp):
 
 
 async def main():
+    print("Connecting to telnet server...")
     try:
         async with await connect_tcp("localhost", 1234) as client:
             status = await shell(client)
-            print(status)
+            print("telnet status:", status)
             return status
     except:
         print("Failed to connect to server")
