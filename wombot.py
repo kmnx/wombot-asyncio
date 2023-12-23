@@ -266,6 +266,7 @@ async def now_playing(return_type):
     chu1_np_formatted = ""
     chu2_np_formatted = ""
     chu1_np_raw, chu2_np_raw = None, None
+    print("trying to get liquidsoap_harbor_status")
     try:
         liquidsoap_harbor_status = await telnet.main()
     except Exception as e:
@@ -274,6 +275,7 @@ async def now_playing(return_type):
     # is someone scheduled to be live?
     chu1_scheduled = None
     try:
+        print("trying to get schedule.json")
         async with ClientSession() as s:
             r = await s.get("https://chunt.org/schedule.json")
             schedule_json = await r.json()
@@ -303,6 +305,7 @@ async def now_playing(return_type):
     # no one is connected
     else:
         # get current restream info
+        print("trying to get restream info")
         try:
             async with ClientSession() as s:
                 r = await s.get("https://chunt.org/restream.json")
@@ -332,8 +335,16 @@ async def now_playing(return_type):
             print(e)
 
     # anything on chu2?
-    data = await mpd.playback.get_current_track()
+    data = None
+    print("trying to get mpd data")
+    try:
+        data = await mpd.playback.get_current_track()
+    except Exception as e:
+        print("exception in np")
+        print(e)
+
     # print(data)
+
     if data is not None:
         if "__model__" in data:
             if data["uri"].startswith("mixcloud"):
