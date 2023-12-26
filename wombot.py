@@ -1,5 +1,6 @@
 # /usr/bin/env python
 # -*- coding: utf-8 -*-
+import unicodedata
 import chatango
 import asyncio
 from aiohttp import ClientSession
@@ -18,6 +19,7 @@ from urllib.parse import urlparse
 import bs4
 import nltk
 import edamam
+import re
 
 try:
     nltk.data.find("tokenizers/punkt")
@@ -968,8 +970,20 @@ class MyBot(chatango.Client):
                     print(e)
 
                 if chuntfm_upnext:
+                    #chuntfm_upnext = chuntfm_upnext.encode("ascii", "ignore")
+                    #chuntfm_upnext = chuntfm_upnext.decode("utf-8")
+                    #await message.channel.send("UP NEXT: Brazillian Correspondence w/ Pedro | Pedro from Brazil, Author of Vivas Caf, graces the ChuntFM airwaves once a month | 2023-12-28 16:00 GMT (in 2 days, 2:19:57 hours)")
+                    #pe = "UP NEXT: Brazillian Correspondence w/ Pedro | Pedro from Brazil, Author of Vivas Caf, graces the ChuntFM airwaves once a month | 2023-12-28 16:00 GMT (in 2 days, 2:19:57 hours)"
+                    #chuntfm_cleaned = chuntfm_upnext
+                    #if pe == chuntfm_cleaned:
+                    #    print('strings are equal')
+                    #else:
+                    #    print(pe)
+                    #    print(chuntfm_upnext)
+                    clean = re.compile('<.*?>')
+                    chuntfm_upnext = re.sub(clean, '', chuntfm_upnext) 
                     await message.channel.send(chuntfm_upnext)
-
+                    
             # jukebox controls
             elif cmd.startswith("np"):
                 if message.room.name != "<PM>":
