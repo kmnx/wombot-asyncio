@@ -1054,6 +1054,13 @@ class MyBot(chatango.Client):
                         search_uri = []
                         search_uri.append(uri)
                         added = await mpd.tracklist.add(uris=search_uri)
+                    
+                    elif url.startswith("https://m.soundcloud.com/"):
+                        nurl = url.replace("https://m.","https://")
+                        uri = "sc:" + nurl
+                        search_uri = []
+                        search_uri.append(uri)
+                        added = await mpd.tracklist.add(uris=search_uri)
 
                     elif "bandcamp" in url:
                         uri = "bandcamp:" + url
