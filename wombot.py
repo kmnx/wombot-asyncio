@@ -4,7 +4,7 @@ import unicodedata
 import chatango
 import asyncio
 from aiohttp import ClientSession
-from datetime import datetime, timezone, date
+from datetime import datetime, timezone, date, timedelta
 import aiocron
 import collections
 import random
@@ -20,6 +20,7 @@ import bs4
 import nltk
 import edamam
 import re
+import aiosqlite
 
 try:
     nltk.data.find("tokenizers/punkt")
@@ -379,6 +380,53 @@ async def now_playing(return_type):
         return chu1_np_formatted
     elif return_type == "raw":
         return chu1_np_raw, chu2_np_raw
+async def create_connection_pool():
+    return await aiosqlite.connect('chatbot_database.db')
+
+# Function to create the commands table if not exists
+async def create_commands_table(connection):
+    cursor = await connection.cursor()
+    await cursor.execute('''
+        CREATE TABLE IF NOT EXISTS commands (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            command TEXT,
+            time TEXT,
+            date TEXT,
+            username TEXT,
+            channel TEXT
+        )
+    ''')
+    await connection.commit()
+
+async def insert_command(connection, command, username, channel):
+    current_time = datetime.now().strftime('%H:%M:%S')
+    current_date = datetime.now().strftime('%Y-%m-%d')
+
+    cursor = await connection.cursor()
+    await cursor.execute('''
+        INSERT INTO commands (command, time, date, username, channel)
+        VALUES (?, ?, ?, ?, ?)
+    ''', (command, current_time, current_date, username, channel))
+    await connection.commit()
+
+async def get_most_used_commands(connection):
+    # Calculate the date 7 days ago from today
+    seven_days_ago = (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d')
+
+    cursor = await connection.cursor()
+    await cursor.execute('''
+        SELECT command, COUNT(*) as command_count
+        FROM commands
+        WHERE date >= ?
+        GROUP BY command
+        ORDER BY command_count DESC
+        LIMIT 10
+    ''', (seven_days_ago,))
+
+    rows = await cursor.fetchall()
+
+    return rows
+
 
 
 # mopidy logic
@@ -744,6 +792,13 @@ class MyBot(chatango.Client):
         print("Bot initialized")
         self.db = await aiosqliteclass.create_conn()
         self.db_id = await aiosqliteclass_id.create_conn()
+        #self.top_tags = await aiosqliteclass_top_tags.create_conn()
+        connection_pool = await create_connection_pool()
+
+
+    # Create the commands table if not exists
+        await create_commands_table(connection_pool)
+        await connection_pool.close()
         self.goth = random.choice(await bot.db.fetch_gif("bbb"))
         self._room = None
         print("seriously")
@@ -1834,11 +1889,32 @@ class MyBot(chatango.Client):
                     + days_left
                     + " days left, act fast!"
                 )
+            elif cmd == "top":
+                if message.room.name != "<PM>":
+                    await message.room.delete_message(message)
+                connection_pool = await aiosqlite.connect('chatbot_database.db')
+
+                # Retrieve most used commands in the last 7 days
+                most_used_commands = await get_most_used_commands(connection_pool)
+
+                # Print the results
+                
+                most_used = "top tags over the last 7 days: "
+                
+                for command, count in most_used_commands:
+
+                    most_used = most_used + command + " : " + str(count) + " "
+                    
+                    print(f"{command}: {count} times") 
+                await message.channel.send(most_used)
 
             else:
                 print(cmd)
                 print(cmd.startswith("raid"))
                 print(cmd.startswith("id") or cmd.startswith("raid"))
+                connection_pool = await create_connection_pool()
+                await insert_command(connection_pool, cmd, message.user.showname, message.room.name)
+                await connection_pool.close()
                 try:
                     gif_res = await self.db.fetch_gif(cmd)
                 except Exception as e:

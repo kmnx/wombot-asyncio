@@ -10,6 +10,7 @@ example.log
 pythonsqlite.db
 trackids.db
 db_idhistory.db
+chatbot_database.db
 
 allgif.txt
 mysecrets.py
