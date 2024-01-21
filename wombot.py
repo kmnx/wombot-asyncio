@@ -21,6 +21,7 @@ import nltk
 import edamam
 import re
 import aiosqlite
+import json
 
 try:
     nltk.data.find("tokenizers/punkt")
