@@ -1122,7 +1122,7 @@ class MyBot(chatango.Client):
                             res = soup.find_all("script", type="application/json")
                             jo = json.loads(res[0].string)
                             url = jo["props"]["pageProps"]["entry"]["fileUrl"]
-                            print("rinse_url:",url)
+                            print("rinse_url:", url)
 
                     parsed = urlparse(url)
                     mypath = parsed.path
@@ -1151,13 +1151,13 @@ class MyBot(chatango.Client):
                         search_uri.append(uri)
                         added = await mpd.tracklist.add(uris=search_uri)
 
-                    elif (url.endswith(".mp3") and url.startswith("https")):
+                    elif url.endswith(".mp3") and url.startswith("https"):
                         uri = "https:" + url
                         search_uri = []
                         search_uri.append(uri)
                         added = await mpd.tracklist.add(uris=search_uri)
 
-                    elif (url.endswith(".mp3") and url.startswith("http")):
+                    elif url.endswith(".mp3") and url.startswith("http"):
                         uri = "http:" + url
                         search_uri = []
                         search_uri.append(uri)
