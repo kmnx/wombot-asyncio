@@ -1154,7 +1154,9 @@ class MyBot(chatango.Client):
                         added = await mpd.tracklist.add(uris=search_uri)
 
                     elif url.endswith(".mp3") and url.startswith("https"):
-                        uri = url
+                        parsed = urlparse(url)
+                        mypath = parsed.path
+                        uri = "https:" + mypath
                         search_uri = []
                         search_uri.append(uri)
                         added = await mpd.tracklist.add(uris=search_uri)
