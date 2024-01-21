@@ -1090,7 +1090,7 @@ class MyBot(chatango.Client):
                 # await mpd.tracklist.add(uris=['sc:https://soundcloud.com/sirenldn/nts-dj-fart-in-the-club'])
                 playback_state = await mpd.playback.get_state()
                 schemes = await mpd.core.get_uri_schemes()
-                # print(schemes)
+                print(schemes)
                 if args:
                     # print(args)
                     splitargs = args.split(" ")
@@ -1122,6 +1122,7 @@ class MyBot(chatango.Client):
                             res = soup.find_all("script", type="application/json")
                             jo = json.loads(res[0].string)
                             url = jo["props"]["pageProps"]["entry"]["fileUrl"]
+                            print("rinse_url:",url)
 
                     parsed = urlparse(url)
                     mypath = parsed.path
@@ -1149,6 +1150,8 @@ class MyBot(chatango.Client):
                         search_uri = []
                         search_uri.append(uri)
                         added = await mpd.tracklist.add(uris=search_uri)
+
+                    elif url.endswith(".mp3")
 
                     elif "bandcamp" in url:
                         uri = "bandcamp:" + url
@@ -1194,6 +1197,7 @@ class MyBot(chatango.Client):
                         print("the top slice is: ", top_slice)
 
                         if top_slice is not None:
+                            print(top_slice)
                             tlid = top_slice[0]["tlid"]
                             print("the tlid is: ", tlid)
                             await mpd.playback.play(tlid=tlid)
