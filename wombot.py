@@ -1133,11 +1133,13 @@ class MyBot(chatango.Client):
                         search_uri.append(uri)
                         print("search_uri", search_uri)
                         added = await mpd.tracklist.add(uris=search_uri)
+
                     elif url.startswith("https://m.mixcloud.com"):
                         uri = "mixcloud:track:" + mypath
                         search_uri = []
                         search_uri.append(uri)
                         added = await mpd.tracklist.add(uris=search_uri)
+
                     elif url.startswith("https://soundcloud.com/"):
                         uri = "sc:" + url
                         search_uri = []
@@ -1233,6 +1235,7 @@ class MyBot(chatango.Client):
                 small_list = []
 
                 for item in tracklist:
+                    print("queue mpd tracklist item",item)
                     i += 1
                     track_name = item["track"]["name"]
                     small_list.append(track_name)
