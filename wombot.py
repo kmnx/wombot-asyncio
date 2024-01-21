@@ -1237,7 +1237,10 @@ class MyBot(chatango.Client):
                 for item in tracklist:
                     print("queue mpd tracklist item",item)
                     i += 1
-                    track_name = item["track"]["name"]
+                    if "name" in item["track"]:
+                        track_name = item["track"]["name"]
+                    else:
+                        track_name = item["track"]["uri"]
                     small_list.append(track_name)
                 print("i", i)
                 if len(small_list) > 3:
