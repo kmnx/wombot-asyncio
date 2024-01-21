@@ -1216,7 +1216,7 @@ class MyBot(chatango.Client):
 
                         if top_slice is not None:
                             print(top_slice)
-                            tlid = top_slice[0]["tlid"]
+                            tlid = (top_slice[0]["tlid"]).strip()
                             print("the tlid is: ", tlid)
                             await mpd.playback.play(tlid=tlid)
                     else:
