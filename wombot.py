@@ -1151,7 +1151,8 @@ class MyBot(chatango.Client):
                         search_uri.append(uri)
                         added = await mpd.tracklist.add(uris=search_uri)
 
-                    elif url.endswith(".mp3")
+                    elif url.endswith(".mp3"):
+                        pass
 
                     elif "bandcamp" in url:
                         uri = "bandcamp:" + url
