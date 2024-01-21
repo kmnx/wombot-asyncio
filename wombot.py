@@ -1152,27 +1152,7 @@ class MyBot(chatango.Client):
                         search_uri = []
                         search_uri.append(uri)
                         added = await mpd.tracklist.add(uris=search_uri)
-                    '''
-                    elif url.endswith(".mp3") and url.startswith("https"):
-                        parsed = urlparse(url)
-                        mypath = parsed.path
-                        uri = "https:" + mypath
-                        search_uri = []
-                        search_uri.append(uri)
-                        added = await mpd.tracklist.add(uris=search_uri)
 
-                    elif url.endswith(".mp3") and url.startswith("http"):
-                        uri = url
-                        search_uri = []
-                        search_uri.append(uri)
-                        added = await mpd.tracklist.add(uris=search_uri)
-
-                    elif url.endswith(".m3u"):
-                        uri = "m3u:" + url
-                        search_uri = []
-                        search_uri.append(uri)
-                        added = await mpd.tracklist.add(uris=search_uri)
-                    '''
                     elif "bandcamp" in url:
                         uri = "bandcamp:" + url
                         search_uri = []
@@ -1218,7 +1198,7 @@ class MyBot(chatango.Client):
 
                         if top_slice is not None:
                             print(top_slice)
-                            tlid = (top_slice[0]["tlid"])
+                            tlid = top_slice[0]["tlid"]
                             print("the tlid is: ", tlid)
                             await mpd.playback.play()
                     else:
@@ -1237,7 +1217,7 @@ class MyBot(chatango.Client):
                 small_list = []
 
                 for item in tracklist:
-                    print("queue mpd tracklist item",item)
+                    print("queue mpd tracklist item", item)
                     i += 1
                     if "name" in item["track"]:
                         track_name = item["track"]["name"]
