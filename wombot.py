@@ -1152,7 +1152,7 @@ class MyBot(chatango.Client):
                         search_uri = []
                         search_uri.append(uri)
                         added = await mpd.tracklist.add(uris=search_uri)
-
+'''
                     elif url.endswith(".mp3") and url.startswith("https"):
                         parsed = urlparse(url)
                         mypath = parsed.path
@@ -1172,7 +1172,7 @@ class MyBot(chatango.Client):
                         search_uri = []
                         search_uri.append(uri)
                         added = await mpd.tracklist.add(uris=search_uri)
-
+'''
                     elif "bandcamp" in url:
                         uri = "bandcamp:" + url
                         search_uri = []
