@@ -1947,6 +1947,12 @@ class MyBot(chatango.Client):
 
                     print(f"{command}: {count} times")
                 await message.channel.send(most_used)
+            elif cmd == "bcg":
+                if message.room.name != "<PM>":
+                    await message.room.delete_message(message)
+                await message.channel.send(
+                    "the Bandcamp Game: Click on what's playing, click a buyer, click something they bought that you like the look of and !add the track to queue"
+                )
 
             else:
                 print(cmd)
