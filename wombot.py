@@ -1216,9 +1216,9 @@ class MyBot(chatango.Client):
 
                         if top_slice is not None:
                             print(top_slice)
-                            tlid = (top_slice[0]["tlid"]).strip()
+                            tlid = (top_slice[0]["tlid"])
                             print("the tlid is: ", tlid)
-                            await mpd.playback.play(tlid=tlid)
+                            await mpd.playback.play()
                     else:
                         print("should be playing")
 
@@ -1242,7 +1242,7 @@ class MyBot(chatango.Client):
                     else:
                         track_name = item["track"]["uri"]
                     small_list.append(track_name)
-                print("i", i)
+                    print("i", i)
                 if len(small_list) > 3:
                     tiny_list = small_list[0:3]
                 else:
