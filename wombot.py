@@ -1989,8 +1989,10 @@ class MyBot(chatango.Client):
             # very crude way to catch posted gifs and add them to allgif_set and allgif_file
             split_message = message.body.split(" ")
             for word in split_message:
-                if (word.endswith(".gif") or word.endswith(".gifv")) and (
-                    len(word) < 75
+                if (
+                    word.startswith("http")
+                    and (word.endswith(".gif") or word.endswith(".gifv"))
+                    and (len(word) < 75)
                 ):
                     print("might be gif")
                     if word in allgif_set:
