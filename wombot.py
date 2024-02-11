@@ -1075,6 +1075,13 @@ class MyBot(chatango.Client):
                     chuntfm_upnext = re.sub(clean, "", chuntfm_upnext)
                     await message.channel.send(chuntfm_upnext)
 
+                    cleaner = htmlmod.escape(chuntfm_upnext)
++                    print("upnext cleaned is: ", chuntfm_upnext)
++                    cleaner.encode()
++                    cleaner = htmlmod.escape(cleaner)
++
++                    await message.channel.send(cleaner)
+
             # jukebox controls
             elif cmd.startswith("np"):
                 if message.room.name != "<PM>":
@@ -1852,7 +1859,13 @@ class MyBot(chatango.Client):
             elif cmd == "say":
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
-                await message.channel.send(args)
+
+
+                clean = re.compile("<.*?>")
+                cleaned_args = re.sub(clean, "", args)
+                cleaned_args.encode()
+                cleaner_args = htmlmod.escape(cleaned_args)
+                await message.channel.send(cleaner_args)
             elif cmd == "bg":
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
