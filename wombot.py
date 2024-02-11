@@ -2032,6 +2032,7 @@ class MyBot(chatango.Client):
 
 
 async def get_db_idhistory_cur():
+    # ugh
     logging.debug("get_db_cur")
 
     conn = await aiosqlite.connect("/db/trackids.db")
