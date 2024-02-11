@@ -283,11 +283,23 @@ async def now_playing(return_type):
     chu2_np_formatted = ""
     chu1_np_raw, chu2_np_raw = None, None
     print("trying to get liquidsoap_harbor_status")
+    # disabled because liquidsoap telnet seems crashhappy
+    '''
     try:
         liquidsoap_harbor_status = await telnet.main()
     except Exception as e:
         print("Error Connecting to Liquidsoap Telnet")
         print(e)
+    '''
+    try:
+        async with ClientSession() as s:
+            r = await s.get("https://chunt.org/live.json")
+            schedule_json = await r.json()
+        if schedule_json:
+            if schedule_json[live] == true:
+                liquidsoap_harbor_status = "source"
+            else:
+                print(schedule_json)
     # is someone scheduled to be live?
     print("made it past telnet connection attempt")
     chu1_scheduled = None
