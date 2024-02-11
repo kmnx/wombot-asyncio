@@ -294,15 +294,20 @@ async def now_playing(return_type):
     try:
         async with ClientSession() as s:
             r = await s.get("https://chunt.org/live.json")
-            schedule_json = await r.json()
-        if schedule_json:
-            if schedule_json[live] == true:
+            live_json = await r.json()
+        if live_json:
+            if live_json["live"] == True:
                 liquidsoap_harbor_status = "source"
             else:
-                print(schedule_json)
+                print(live_json)
+        print('live_json',live_json)
+    except Exception as e:
+        print("Error fetching live.json from chunt.org")
+        print(e)
     # is someone scheduled to be live?
     print("made it past telnet connection attempt")
     chu1_scheduled = None
+    print('harbor_status',liquidsoap_harbor_status)
     try:
         print("trying to get schedule.json")
         async with ClientSession() as s:
@@ -1076,11 +1081,11 @@ class MyBot(chatango.Client):
                     await message.channel.send(chuntfm_upnext)
 
                     cleaner = htmlmod.escape(chuntfm_upnext)
-+                    print("upnext cleaned is: ", chuntfm_upnext)
-+                    cleaner.encode()
-+                    cleaner = htmlmod.escape(cleaner)
-+
-+                    await message.channel.send(cleaner)
+                    print("upnext cleaned is: ", chuntfm_upnext)
+                    cleaner.encode()
+                    cleaner = htmlmod.escape(cleaner)
+
+                    await message.channel.send(cleaner)
 
             # jukebox controls
             elif cmd.startswith("np"):
