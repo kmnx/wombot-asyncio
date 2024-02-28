@@ -22,6 +22,7 @@ import edamam
 import re
 import aiosqlite
 import json
+import html as htmlmod
 
 try:
     nltk.data.find("tokenizers/punkt")
@@ -344,9 +345,16 @@ async def now_playing(return_type):
             async with ClientSession() as s:
                 r = await s.get("https://chunt.org/restream.json")
                 chu_json = await r.json()
-                # print(chu_json)
+                print(chu_json)
                 # is someone supposed to be live?
+                print('received restream.json')
+                print(chu1_scheduled)
                 if chu1_scheduled is not None:
+                    print("chu1_scheduled is not none")
+                    print('chu1_scheduled',chu1_scheduled)
+                    print('chu_json',chu_json)
+                    if chu_json["current"]["show_date"] is None:
+                        chu_json["current"]["show_date"] = ''
                     chu1_np_formatted = (
                         "scheduled but offline: "
                         + chu1_scheduled
@@ -357,6 +365,10 @@ async def now_playing(return_type):
                         + chu_json["current"]["show_date"]
                     )
                 else:
+                    print('chu1_scheduled is none')
+                    print(chu1_np_formatted)
+                    if chu_json["current"]["show_date"] is None:
+                        chu_json["current"]["show_date"] = ''
                     chu1_np_formatted = (
                         "RESTREAM: "
                         + chu_json["current"]["show_title"]
@@ -367,6 +379,7 @@ async def now_playing(return_type):
         except Exception as e:
             print("exception in np")
             print(e)
+            print('this was the np exception')
 
     # anything on chu2?
     data = None
@@ -691,6 +704,8 @@ async def shazam_station(message, station):
         audio_source = "https://fm.chunt.org/stream2"
     elif station == "soho":
         audio_source = "https://sohoradiomusic.doughunt.co.uk:8010/128mp3"
+    elif station == "alhara":
+        audio_source = "https://n13.radiojar.com/78cxy6wkxtzuv?1708984512=&rj-tok=AAABjedzXYAAkdrS5yt-8kMFEA&rj-ttl=5"
 
     station_name = station
     show_name = None
@@ -970,6 +985,10 @@ class MyBot(chatango.Client):
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
                 asyncio.ensure_future(shazam_station(message, "chunt2"))
+            elif cmd in ["idalhara","idalh","idalha","idalhar"]:
+                if message.room.name != "<PM>":
+                    await message.room.delete_message(message)
+                asyncio.ensure_future(shazam_station(message, "alhara"))
 
             elif cmd.startswith("id") or cmd.startswith("raid"):
                 if cmd.startswith("raid"):
@@ -1078,7 +1097,7 @@ class MyBot(chatango.Client):
                     #    print(chuntfm_upnext)
                     clean = re.compile("<.*?>")
                     chuntfm_upnext = re.sub(clean, "", chuntfm_upnext)
-                    await message.channel.send(chuntfm_upnext)
+                    #await message.channel.send(chuntfm_upnext)
 
                     cleaner = htmlmod.escape(chuntfm_upnext)
                     print("upnext cleaned is: ", chuntfm_upnext)
@@ -1301,8 +1320,9 @@ class MyBot(chatango.Client):
 
                 coinflip = random.choice([0, 1])
                 print(coinflip)
-
-                if coinflip == 0:
+                if message.user.showname == "yumgdale":
+                    pass
+                if (coinflip == 0) or (message.user.showname=="yungdale"):
                     await message.channel.send(
                         "your fortune, "
                         + message.user.showname
