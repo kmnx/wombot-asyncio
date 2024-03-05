@@ -4,9 +4,13 @@ from io import BytesIO
 from pydub import AudioSegment
 import base64
 import mysecrets
+import logging
 
 shazam_api_key = mysecrets.shazam_api_key
 
+
+async def on_request_start(session, context, params):
+    logging.getLogger('aiohttp.client').debug(f'Starting request <{params}>')
 
 class ShazamApi:
     def __init__(self, loop, api_key):
@@ -32,11 +36,17 @@ class ShazamApi:
         sound = ""
         out = ""
         if session is None:
+            #logging.basicConfig(level=logging.DEBUG)
+            #trace_config = aiohttp.TraceConfig()
+            #trace_config.on_request_start.append(on_request_start)
             session = aiohttp.ClientSession()
         async with session as session:
             try:
+                print('attempting connection')
                 async with session.get(stream_source) as response:
+                    
                     print("started recording")
+
                     # added chunk_count to counter initial data burst of some stations
                     chunk_count = 0
                     while asyncio.get_event_loop().time() < (start_time + 4):
@@ -58,8 +68,11 @@ class ShazamApi:
                     sound = sound.set_channels(1)
                     sound = sound.set_sample_width(2)
                     sound = sound.set_frame_rate(44100)
-            except aiohttp.client_exceptions.ClientConnectorError as e:
-                print("there was a ClientConnectorError")
+                 #except aiohttp.client_exceptions.ClientConnectorError as e:
+                 #    print("there was a ClientConnectorError")
+                 #    print(e)
+            except Exception as e:
+                print("Error in shazam.py _get")
                 print(e)
             if sound:
                 payload = base64.b64encode(sound.raw_data)
@@ -90,9 +103,13 @@ async def loopy(loop):
 async def main(loop):
     # audio_source = 'https://stream-relay-geo.ntslive.net/stream'
     # audio_source = 'https://fm.chunt.org/stream'
-    audio_source = "https://doyouworld.out.airtime.pro/doyouworld_a"
-    # audio_source = "https://kioskradiobxl.out.airtime.pro/kioskradiobxl_a"
+    #audio_source = "https://doyouworld.out.airtime.pro/doyouworld_a"
+    audio_source = "https://kioskradiobxl.out.airtime.pro/kioskradiobxl_a"
+    #audio_source = "https://sharedfrequencies.out.airtime.pro/sharedfrequencies_a"
     asyncio.ensure_future(loopy(loop))
+    #logging.basicConfig(level=logging.DEBUG)
+    #trace_config = aiohttp.TraceConfig()
+    #trace_config.on_request_start.append(on_request_start)
     api = ShazamApi(loop, shazam_api_key)
     out = await api._get(audio_source)
     print(out)

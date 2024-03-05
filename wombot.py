@@ -706,7 +706,8 @@ async def shazam_station(message, station):
         audio_source = "https://sohoradiomusic.doughunt.co.uk:8010/128mp3"
     elif station == "alhara":
         audio_source = "https://n13.radiojar.com/78cxy6wkxtzuv?1708984512=&rj-tok=AAABjedzXYAAkdrS5yt-8kMFEA&rj-ttl=5"
-
+    elif station == "sharedfrequencies":
+        audio_source = "https://sharedfrequencies.out.airtime.pro/sharedfrequencies_a"
     station_name = station
     show_name = None
     artist = None
@@ -989,6 +990,10 @@ class MyBot(chatango.Client):
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
                 asyncio.ensure_future(shazam_station(message, "alhara"))
+            elif cmd in ["idsha","idshared","idsharedfreq","idsharedfrequencies"]:
+                if message.room.name != "<PM>":
+                    await message.room.delete_message(message)
+                asyncio.ensure_future(shazam_station(message, "sharedfrequencies"))
 
             elif cmd.startswith("id") or cmd.startswith("raid"):
                 if cmd.startswith("raid"):
