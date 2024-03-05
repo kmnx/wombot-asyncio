@@ -1306,7 +1306,7 @@ class MyBot(chatango.Client):
                     msg = msg + " | " + item
                 await message.channel.send(msg)
 
-            elif cmd in ["skip", "next"]:
+            elif cmd in ["skip"]:
                 await message.room.delete_message(message)
                 print("consume mode ", await mpd.tracklist.get_consume())
                 await mpd.playback.next()
