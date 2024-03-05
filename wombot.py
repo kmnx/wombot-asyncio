@@ -386,6 +386,8 @@ async def now_playing(return_type):
     print("trying to get mpd data")
     try:
         data = await mpd.playback.get_current_track()
+    if data:
+        print(data)
     except Exception as e:
         print("exception in np")
         print(e)
