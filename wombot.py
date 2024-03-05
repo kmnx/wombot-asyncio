@@ -275,7 +275,24 @@ async def schedule_chuntfm_livecheck():
 
     while True:
         await asyncio.sleep(5)
+# juke helper functions
+def convert_to_time(milliseconds):
+    seconds = milliseconds // 1000
+    minutes, seconds = divmod(seconds, 60)
+    hours, minutes = divmod(minutes, 60)
+    return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
 
+def display_progress(track_position, track_length):
+    position_str = convert_to_time(track_position)
+    length_str = convert_to_time(track_length)
+    
+    percentage = int((track_position / track_length) * 100)
+    progress_bar_length = 10
+    progress_bar = "#" * (percentage // (100 // progress_bar_length))
+    remaining_space = "." * (progress_bar_length - len(progress_bar))
+    
+    print(f"at [{position_str}] of [{length_str}] [{progress_bar}{remaining_space}] {percentage}%")
+    return f"at [{position_str}] of [{length_str}] [{progress_bar}{remaining_space}] {percentage}%"
 
 async def now_playing(return_type):
     # check if someone is connected to stream
@@ -386,8 +403,7 @@ async def now_playing(return_type):
     print("trying to get mpd data")
     try:
         data = await mpd.playback.get_current_track()
-    if data:
-        print(data)
+        track_position = await mpd.playback.get_time_position()
     except Exception as e:
         print("exception in np")
         print(e)
@@ -395,6 +411,9 @@ async def now_playing(return_type):
     # print(data)
 
     if data is not None:
+        print(data)
+        track_length = data["length"]
+        progress_bar = display_progress(track_position, track_length)
         if "__model__" in data:
             if data["uri"].startswith("mixcloud"):
                 uri = data["uri"]
@@ -409,7 +428,7 @@ async def now_playing(return_type):
                 url = ""
             chu2_np_raw = url
             chu2_np_formatted = (
-                " https://fm.chunt.org/stream2 jukebox now playing: " + url
+                " https://fm.chunt.org/stream2 jukebox now playing: " + url + " " + progress_bar
             )
 
     else:
