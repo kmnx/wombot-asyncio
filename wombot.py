@@ -23,6 +23,7 @@ import re
 import aiosqlite
 import json
 import html as htmlmod
+import validators
 
 try:
     nltk.data.find("tokenizers/punkt")
@@ -44,7 +45,7 @@ except Exception:
         "Please add shazam_api_key to mysecrets.py for rapidapi shazam functionality "
     )
 
-import aiosqliteclass
+from aiosqliteclass import Sqlite3Class
 import aiosqliteclass_id
 import data_pics_wombat
 import data_pics_capybara
@@ -207,10 +208,10 @@ async def post_gif_of_the_hour(param):
     bots.append(bot.get_room(main_room))
     bots.append(bot.get_room(test_room))
     # print(datetime.now().time(), param)
-    goth = random.choice(await bot.db.fetch_gif("bbb"))
-    bot.goth = goth
+    tempgoth = random.choice(await bot.db.get_objects_by_tag_name("bbb"))
+    bot.goth = tempgoth[0]
     for roombot in bots:
-        await roombot.send_message("the gif of the hour is: " + goth)
+        await roombot.send_message("the gif of the hour is: " + tempgoth[0])
 
 
 async def schedule_gif_of_the_hour():
@@ -869,7 +870,10 @@ class Config:
 class MyBot(chatango.Client):
     async def on_init(self):
         print("Bot initialized")
-        self.db = await aiosqliteclass.create_conn()
+        #self.db = await aiosqliteclass.create_conn()
+        self.db = Sqlite3Class()
+        await self.db._init()
+        print('trying to start id_db')
         self.db_id = await aiosqliteclass_id.create_conn()
         # self.top_tags = await aiosqliteclass_top_tags.create_conn()
         connection_pool = await create_connection_pool()
@@ -877,7 +881,9 @@ class MyBot(chatango.Client):
         # Create the commands table if not exists
         await create_commands_table(connection_pool)
         await connection_pool.close()
-        self.goth = random.choice(await bot.db.fetch_gif("bbb"))
+        init_goth = random.choice(await bot.db.get_objects_by_tag_name("bbb"))
+        self.goth = init_goth[0]
+        print(self.goth)
         self._room = None
         print("seriously")
 
@@ -1487,7 +1493,7 @@ class MyBot(chatango.Client):
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
                 await message.channel.send(
-                    random.choice(await self.db.fetch_gif("bbb"))
+                    (random.choice(await self.db.get_objects_by_tag_name("bbb")))[0]
                     + " "
                     + "https://media.giphy.com/media/VeGFReghsvt05wD341/giphy.gif"
                 )
@@ -1499,7 +1505,7 @@ class MyBot(chatango.Client):
                 await message.channel.send(
                     toast
                     + " "
-                    + random.choice(await self.db.fetch_gif("bbb"))
+                    + (random.choice(await self.db.get_objects_by_tag_name("bbb")))[0]
                     + " "
                     + toast
                 )
@@ -1604,7 +1610,10 @@ class MyBot(chatango.Client):
                     await self.db.cursor.execute(
                         f"SELECT tag_name FROM tag_table WHERE tag_name LIKE '%{args}%' ORDER BY RANDOM() LIMIT 10"
                     )
-                    tag_list_unsorted = await self.db.cursor.fetchall()
+                    tag_list_temp = await self.db.cursor.fetchall()
+                    tag_list_unsorted = []
+                    for tag in tag_list_temp:
+                        tag_list_unsorted.append(tag[0])
                     if len(tag_list_unsorted) == 0:
                         await message.channel.send(
                             f"No tags found containing {args}, sorry"
@@ -1640,14 +1649,26 @@ class MyBot(chatango.Client):
                     splitargs = args.split(" ")
                     in_url = splitargs[0]
                     in_tags = splitargs[1:]
-                    if not in_url.startswith("http"):
+                    url_tagged = False
+                    for tag in in_tags:
+                        if validators.url(tag):
+                            url_tagged = True
+                    if url_tagged:
                         await message.channel.send(
-                            "to tag a gif: !tag url-to-gif tag1 tag2 tag3"
-                        )
+                                "to tag a gif: !tag url-to-gif tag1 tag2 tag3"
+                            )
                     else:
-                        for in_tag in in_tags:
-                            in_tag = in_tag.strip()
-                            await self.db.tag(in_url, in_tag)
+
+                        if not in_url.startswith("http"):
+                            await message.channel.send(
+                                "to tag a gif: !tag url-to-gif tag1 tag2 tag3"
+                            )
+                        else:
+                            for in_tag in in_tags:
+                                in_tag = in_tag.strip()
+                                
+
+                                await self.db.tag(in_url, in_tag)
 
             elif cmd == "untag":
                 if message.room.name != "<PM>":
@@ -1655,9 +1676,19 @@ class MyBot(chatango.Client):
                 if message.room.get_level(message.user) > 0:
                     if args:
                         splitargs = args.split(" ")
-                        in_url = splitargs[0]
-                        in_tag = splitargs[1]
-                        await self.db.untag(in_url, in_tag)
+                        if len(splitargs) == 2:
+                            in_url = splitargs[0]
+                            in_tag = splitargs[1]
+                            await self.db.untag(in_url, in_tag)
+                        elif len(splitargs) == 1:
+                            in_string = splitargs[0]
+                            success = await self.db.untag_simple(in_string)
+                            if success is None:
+                                await message.channel.send(
+                                    "sorry, ambigious input, please use !untag url tagname"
+                                )
+                            else:
+                                pass
 
             elif cmd == "info":
                 if message.room.name != "<PM>":
@@ -1720,36 +1751,35 @@ class MyBot(chatango.Client):
             elif cmd in ["random", "rnd", "rand"]:
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
-
-                gif_one = random.sample(allgif_set, 1)[0]
-                gif_two = random.sample(allgif_set, 1)[0]
+                gif_one = random.choice(list(allgif_set))
+                gif_two = random.choice(list(allgif_set))
                 await message.channel.send(gif_one + " " + gif_two + " " + gif_one)
 
             elif cmd in ["gif", "gift", "dance"]:
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
-                gif_one = random.choice(await self.db.fetch_gif("dance"))
+                gif_one = (random.choice(await self.db.get_objects_by_tag_name("dance")))[0]
                 await message.channel.send(gif_one + " " + gif_one + " " + gif_one)
 
             elif cmd in ["bbb", "bigb"]:
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
-                gif_one = random.choice(await self.db.fetch_gif("bbb"))
+                gif_one = (random.choice(await self.db.get_objects_by_tag_name("bbb")))[0]
                 await message.channel.send(gif_one + " " + gif_one + " " + gif_one)
 
             elif cmd == "b2b":
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
-                gif_one = random.choice(await self.db.fetch_gif("bbb"))
-                gif_two = random.choice(await self.db.fetch_gif("bbb"))
+                gif_one = (random.choice(await self.db.get_objects_by_tag_name("bbb")))[0]
+                gif_two = (random.choice(await self.db.get_objects_by_tag_name("bbb")))[0]
                 await message.channel.send(gif_one + " " + gif_two + " " + gif_one)
 
             elif cmd in ["b2b2b", "bbbb", "b3b"]:
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
-                gif_one = random.choice(await self.db.fetch_gif("bbb"))
-                gif_two = random.choice(await self.db.fetch_gif("bbb"))
-                gif_three = random.choice(await self.db.fetch_gif("bbb"))
+                gif_one = (random.choice(await self.db.get_objects_by_tag_name("bbb")))[0]
+                gif_two = (random.choice(await self.db.get_objects_by_tag_name("bbb")))[0]
+                gif_three = (random.choice(await self.db.get_objects_by_tag_name("bbb")))[0]
                 await message.channel.send(gif_one + " " + gif_two + " " + gif_three)
 
             elif cmd == "goth":
@@ -2049,7 +2079,7 @@ class MyBot(chatango.Client):
                 )
                 await connection_pool.close()
                 try:
-                    gif_res = await self.db.fetch_gif(cmd)
+                    gif_res = await self.db.get_objects_by_tag_name(cmd)
                 except Exception as e:
                     gif_res = None
                     print(e)
@@ -2057,7 +2087,7 @@ class MyBot(chatango.Client):
                     if message.room.name != "<PM>":
                         await message.room.delete_message(message)
                     print(gif_res)
-                    await message.channel.send(random.choice(gif_res))
+                    await message.channel.send((random.choice(gif_res))[0])
                 else:
                     print("no result for gif search")
 

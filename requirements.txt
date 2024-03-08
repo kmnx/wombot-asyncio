@@ -17,3 +17,4 @@ anyio
 matplotlib
 scipy
 PyWavelets
+validators
