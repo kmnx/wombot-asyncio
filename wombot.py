@@ -1638,7 +1638,7 @@ class MyBot(chatango.Client):
                     "SELECT tag_name FROM tag_table ORDER BY RANDOM() LIMIT 1"
                 )
                 random_tag = await self.db.cursor.fetchall()
-                await message.channel.send("Enjoy this random tag: !" + random_tag[0])
+                await message.channel.send("Enjoy this random tag: !" + random_tag[0][0])
 
             elif cmd == "tag":
                 if message.room.name != "<PM>":
