@@ -1590,15 +1590,17 @@ class MyBot(chatango.Client):
                 for tuple in tag_list:
                     the_longest_string += "!" + tuple[0] + " "
                 # print(the_longest_string)
+                '''
                 n = 4000  # chunk length
                 chunks = [
                     the_longest_string[i : i + n]
                     for i in range(0, len(the_longest_string), n)
                 ]
+                '''
                 # for c in chunks:
                 #    print(c)
                 #    await message.room.client.pm.send_message(message.user, str(c))
-                await message.channel.send(chunks)
+                await message.channel.send(the_longest_string)
 
             elif cmd == "tagged":
                 if message.room.name != "<PM>":
