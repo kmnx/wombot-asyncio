@@ -1586,7 +1586,7 @@ class MyBot(chatango.Client):
 
                 tag_list = sorted(tag_list_unsorted)
 
-                the_longest_string = "last 10 tags: \r "
+                the_longest_string = "last 10 tags: \n "
                 for tuple in tag_list:
                     the_longest_string += "!" + tuple[0] + " "
                 # print(the_longest_string)
