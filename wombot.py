@@ -1,11 +1,14 @@
 # /usr/bin/env python
 # -*- coding: utf-8 -*-
-import unicodedata
-import chatango
 import asyncio
+import aiosqlite
+
+import aiocron
+import chatango
+
 from aiohttp import ClientSession
 from datetime import datetime, timezone, date, timedelta
-import aiocron
+
 import collections
 import random
 import typing
@@ -20,7 +23,7 @@ import bs4
 import nltk
 import edamam
 import re
-import aiosqlite
+
 import json
 import html as htmlmod
 import validators
@@ -37,7 +40,6 @@ except LookupError:
 import radioactivity
 import search_google
 
-# import get_id_doyou
 try:
     import shazam
 except Exception:
@@ -52,7 +54,6 @@ import data_pics_capybara
 import data_pics_otter
 import data_pics_quokka
 import data_txt_fortunes as fortunes
-import aiosqlite
 import schedule
 import chuntfm
 import telnet
@@ -979,29 +980,7 @@ class MyBot(chatango.Client):
             elif cmd in ["iddy", "iddoyou"]:
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
-                """
-                london_time, artist, title = await get_id_doyou.get()
-                hours_minutes = london_time
-
-                if title is not None:
-                    bandcamp_result_msg = await bandcamp_search(artist, title)
-
-                    await message.channel.send(
-                        "ID DOYOU (from doyou): "
-                        + hours_minutes
-                        + " - "
-                        + artist
-                        + " - "
-                        + title
-                        + bandcamp_result_msg
-                    )
-                    asyncio.ensure_future(shazam_station(message, "doyou"))
-
-                else:
                 
-                    print("no id from doyou")
-                    await message.channel.send("No ID on doyou website, trying shazam")
-                    """
                 asyncio.ensure_future(shazam_station(message, "doyou"))
 
             elif cmd in ["id1", "idchunt1", "idchu1"]:
