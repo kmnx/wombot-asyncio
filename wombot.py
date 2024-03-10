@@ -57,6 +57,7 @@ import data_txt_fortunes as fortunes
 import schedule
 import chuntfm
 import telnet
+from jukebox_manager import JukeboxManager
 
 try:
     import mysecrets
@@ -84,10 +85,7 @@ except Exception:
     shazam_api_key = ""
     print("Please add shazam_api_key for rapidapi shazam functionality to mysecrets.py")
 
-from mopidy_asyncio_client import MopidyClient
 
-# logging.basicConfig()
-# logging.getLogger("mopidy_asyncio_client").setLevel(logging.DEBUG)
 
 logging.basicConfig(filename="example.log", encoding="utf-8", level=logging.DEBUG)
 logging.debug("This message should go to the log file")
@@ -404,8 +402,8 @@ async def now_playing(return_type):
     data = None
     print("trying to get mpd data")
     try:
-        data = await mpd.playback.get_current_track()
-        track_position = await mpd.playback.get_time_position()
+        data = await jukebox_manager.mpd.playback.get_current_track()
+        track_position = await jukebox_manager.mpd.playback.get_time_position()
     except Exception as e:
         print("exception in np")
         print(e)
@@ -505,52 +503,6 @@ async def get_most_used_commands(connection):
     rows = await cursor.fetchall()
 
     return rows
-
-
-# mopidy logic
-
-
-async def playback_started_handler(data):
-    logging.debug("playback_started_handler")
-
-    """Callback function, called when the playback started."""
-    print(data)
-    print(bot.rooms)  # ok
-    main_room = environ["wombotmainroom"]
-    my_room = bot.get_room(main_room)
-    # print(my_room) # ok
-    if data["tl_track"]["track"]["uri"].startswith("soundcloud"):
-        url = data["tl_track"]["track"]["comment"]
-    elif data["tl_track"]["track"]["uri"].startswith("mixcloud"):
-        uri = data["tl_track"]["track"]["uri"]
-        url = uri.replace("mixcloud:track:", "https://www.mixcloud.com")
-    else:
-        url = data["tl_track"]["track"]["name"]
-    msg = "https://fm.chunt.org/stream2 jukebox now playing: " + url
-    await my_room.send_message(msg)
-
-
-async def all_events_handler(event, data):
-    logging.debug("all_events_handler")
-
-    """Callback function; catch-all function."""
-    print(event, data)
-    if event == "tracklist_changed":
-        print(data)
-
-
-async def mpd_context_manager(mpd):
-    logging.debug("mpd_context_manager")
-
-    async with mpd as mopidy:
-        mopidy.bind("track_playback_started", playback_started_handler)
-        mopidy.bind("*", all_events_handler)
-        await mpd.tracklist.set_consume(True)
-
-        # Your program's logic:
-        # await mopidy.playback.play()
-        while True:
-            await asyncio.sleep(1)
 
 
 # convert utc to London time
@@ -1136,14 +1088,14 @@ class MyBot(chatango.Client):
 
             elif cmd == "clear":
                 await message.room.delete_message(message)
-                await mpd.tracklist.clear()
+                await jukebox_manager.mpd.tracklist.clear()
 
             elif cmd in ["play", "add"]:
                 await message.room.delete_message(message)
                 # await mpd.tracklist.add(uris=['mixcloud:track:/NTSRadio/siren-w-dj-fart-in-the-club-14th-may-2020/'])
                 # await mpd.tracklist.add(uris=['sc:https://soundcloud.com/sirenldn/nts-dj-fart-in-the-club'])
-                playback_state = await mpd.playback.get_state()
-                schemes = await mpd.core.get_uri_schemes()
+                playback_state = await jukebox_manager.mpd.playback.get_state()
+                schemes = await jukebox_manager.mpd.core.get_uri_schemes()
                 print(schemes)
                 if args:
                     # print(args)
@@ -1186,44 +1138,38 @@ class MyBot(chatango.Client):
                         search_uri = []
                         search_uri.append(uri)
                         print("search_uri", search_uri)
-                        added = await mpd.tracklist.add(uris=search_uri)
+                        added = await jukebox_manager.mpd.tracklist.add(uris=search_uri)
 
                     elif url.startswith("https://m.mixcloud.com"):
                         uri = "mixcloud:track:" + mypath
                         search_uri = []
                         search_uri.append(uri)
-                        added = await mpd.tracklist.add(uris=search_uri)
+                        added = await jukebox_manager.mpd.tracklist.add(uris=search_uri)
 
                     elif url.startswith("https://soundcloud.com/"):
                         uri = "sc:" + url
                         search_uri = []
                         search_uri.append(uri)
-                        added = await mpd.tracklist.add(uris=search_uri)
+                        added = await jukebox_manager.mpd.tracklist.add(uris=search_uri)
 
                     elif url.startswith("https://m.soundcloud.com/"):
                         nurl = url.replace("https://m.", "https://")
                         uri = "sc:" + nurl
                         search_uri = []
                         search_uri.append(uri)
-                        added = await mpd.tracklist.add(uris=search_uri)
+                        added = await jukebox_manager.mpd.tracklist.add(uris=search_uri)
 
                     elif "bandcamp" in url:
                         uri = "bandcamp:" + url
                         search_uri = []
                         search_uri.append(uri)
-                        added = await mpd.tracklist.add(uris=search_uri)
+                        added = await jukebox_manager.mpd.tracklist.add(uris=search_uri)
 
                     if url.startswith("https://www.youtube.com/watch"):
-                        """added = ""
-                        # uri = "yt:" + url
-                        # yt seems very broken, causes "wrong stream type" somewhere in liquidsoap/icecast/mopidy chain
-                        await message.channel.send(
-                            "jukebox can currently add links from mixcloud,soundcloud,bandcamp,nts"
-                        )"""
                         uri = "yt:" + url
                         search_uri = []
                         search_uri.append(uri)
-                        added = await mpd.tracklist.add(uris=search_uri)
+                        added = await jukebox_manager.mpd.tracklist.add(uris=search_uri)
                     print("added:", added)
                     if added:
                         if "__model__" in added[0]:
@@ -1247,14 +1193,14 @@ class MyBot(chatango.Client):
 
                     if playback_state != "playing":
                         print("it's not playing")
-                        top_slice = await mpd.tracklist.slice(0, 1)
+                        top_slice = await jukebox_manager.mpd.tracklist.slice(0, 1)
                         print("the top slice is: ", top_slice)
 
                         if top_slice is not None:
                             print(top_slice)
                             tlid = top_slice[0]["tlid"]
                             print("the tlid is: ", tlid)
-                            await mpd.playback.play()
+                            await jukebox_manager.mpd.playback.play()
                     else:
                         print("should be playing")
 
@@ -1265,7 +1211,7 @@ class MyBot(chatango.Client):
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
                 tracklist = ""
-                tracklist = await mpd.tracklist.get_tl_tracks()
+                tracklist = await jukebox_manager.mpd.tracklist.get_tl_tracks()
                 print(tracklist)
                 i = 0
                 small_list = []
@@ -1293,8 +1239,8 @@ class MyBot(chatango.Client):
 
             elif cmd in ["skip"]:
                 await message.room.delete_message(message)
-                print("consume mode ", await mpd.tracklist.get_consume())
-                await mpd.playback.next()
+                print("consume mode ", await jukebox_manager.mpd.tracklist.get_consume())
+                await jukebox_manager.mpd.playback.next()
 
             # radio schedule commands
             elif cmd.startswith("sched"):
@@ -2115,12 +2061,11 @@ if __name__ == "__main__":
     #    bot.default_user(accounts=or_accounts, pm=False) #True if passwd was input.
     ListBots = [bot.start()]  # Multiple instances
     task = asyncio.gather(*ListBots, return_exceptions=True)
-    mpd = MopidyClient(host="139.177.181.183")
-    mpd_task = asyncio.gather(mpd_context_manager(mpd))
+
     gif_task = schedule_gif_of_the_hour()
     # cfm_task = schedule_chuntfm_livecheck()
-
-    tasks = asyncio.gather(task, gif_task, mpd_task)
+    jukebox_manager = JukeboxManager(bot)
+    tasks = asyncio.gather(task, gif_task,jukebox_manager.mpd_task)
     logging.debug("init asyncio tasks started")
 
     allgif_file = os.path.join(base_path, "allgif.txt")
