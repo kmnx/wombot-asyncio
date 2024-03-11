@@ -296,6 +296,7 @@ def display_progress(track_position, track_length):
     print(f"at [{position_str}] of [{length_str}] [{progress_bar}{remaining_space}] {percentage}%")
     return f"at [{position_str}] of [{length_str}] [{progress_bar}{remaining_space}] {percentage}%"
 
+'''
 async def now_playing(return_type):
     # check if someone is connected to stream
     liquidsoap_harbor_status = ""
@@ -304,13 +305,13 @@ async def now_playing(return_type):
     chu1_np_raw, chu2_np_raw = None, None
     print("trying to get liquidsoap_harbor_status")
     # disabled because liquidsoap telnet seems crashhappy
-    '''
-    try:
-        liquidsoap_harbor_status = await telnet.main()
-    except Exception as e:
-        print("Error Connecting to Liquidsoap Telnet")
-        print(e)
-    '''
+    
+    #try:
+    #    liquidsoap_harbor_status = await telnet.main()
+    #except Exception as e:
+    #    print("Error Connecting to Liquidsoap Telnet")
+    #    print(e)
+    
     try:
         async with ClientSession() as s:
             r = await s.get("https://chunt.org/live.json")
@@ -446,6 +447,193 @@ async def now_playing(return_type):
         return chu1_np_formatted
     elif return_type == "raw":
         return chu1_np_raw, chu2_np_raw
+'''
+
+# now_playing live only
+async def now_playing(return_type):
+    # check if someone is connected to stream
+    liquidsoap_harbor_status = ""
+    chu1_np_formatted = ""
+    chu2_np_formatted = ""
+    chu1_np_raw, chu2_np_raw = None, None
+    print("trying to get liquidsoap_harbor_status")
+    # disabled because liquidsoap telnet seems crashhappy
+    '''
+    try:
+        liquidsoap_harbor_status = await telnet.main()
+    except Exception as e:
+        print("Error Connecting to Liquidsoap Telnet")
+        print(e)
+    '''
+    try:
+        async with ClientSession() as s:
+            r = await s.get("https://chunt.org/live.json")
+            live_json = await r.json()
+        if live_json:
+            if live_json["live"] == True:
+                liquidsoap_harbor_status = "source"
+            else:
+                print(live_json)
+        print('live_json',live_json)
+    except Exception as e:
+        print("Error fetching live.json from chunt.org")
+        print(e)
+    # is someone scheduled to be live?
+    print("made it past telnet connection attempt")
+    chu1_scheduled = None
+    print('harbor_status',liquidsoap_harbor_status)
+    try:
+        print("trying to get schedule.json")
+        async with ClientSession() as s:
+            r = await s.get("https://chunt.org/schedule.json")
+            schedule_json = await r.json()
+            # print(chu_json)
+            time_now = datetime.now(timezone.utc)
+            print("time_now: ", time_now)
+            for show in schedule_json:
+                start_time = datetime.fromisoformat(show["startTimestamp"])
+                end_time = datetime.fromisoformat(show["endTimestamp"])
+                print("start_time: ", start_time)
+                if start_time < time_now:
+                    if end_time > time_now:
+                        print(show)
+                        chu1_scheduled = show["title"]
+    except Exception as e:
+        print(e)
+
+    # is someone connected?
+    if liquidsoap_harbor_status.startswith("source"):
+        if chu1_scheduled:
+            chu1_np_formatted = "LIVE NOW: " + chu1_scheduled
+            chu1_np_raw = chu1_scheduled
+        else:
+            chu1_np_formatted = "LIVE NOW: unscheduled livestream w/ anon1111"
+            chu1_np_raw = "unscheduled livestream w/ anon1111"
+
+    # no one is connected
+    else:
+        # get current restream info
+        print("trying to get restream info")
+        try:
+            async with ClientSession() as s:
+                r = await s.get("https://chunt.org/restream.json")
+                chu_json = await r.json()
+                print(chu_json)
+                # is someone supposed to be live?
+                print('received restream.json')
+                print(chu1_scheduled)
+                if chu1_scheduled is not None:
+                    print("chu1_scheduled is not none")
+                    print('chu1_scheduled',chu1_scheduled)
+                    print('chu_json',chu_json)
+                    if chu_json["current"]["show_date"] is None:
+                        chu_json["current"]["show_date"] = ''
+                    chu1_np_formatted = (
+                        "scheduled but offline: "
+                        + chu1_scheduled
+                        + " | "
+                        + "RESTREAM: "
+                        + chu_json["current"]["show_title"]
+                        + " @ "
+                        + chu_json["current"]["show_date"]
+                    )
+                else:
+                    print('chu1_scheduled is none')
+                    print(chu1_np_formatted)
+                    if chu_json["current"]["show_date"] is None:
+                        chu_json["current"]["show_date"] = ''
+                    chu1_np_formatted = (
+                        "RESTREAM: "
+                        + chu_json["current"]["show_title"]
+                        + " @ "
+                        + chu_json["current"]["show_date"]
+                    )
+                chu1_np_raw = chu_json["current"]["show_title"]
+        except Exception as e:
+            print("exception in np")
+            print(e)
+            print('this was the np exception')
+
+    # anything on chu2?
+    data = None
+    print("trying to get mpd data")
+    try:
+        data = await mpd.playback.get_current_track()
+    except Exception as e:
+        print("exception in np")
+        print(e)
+
+
+    if data is not None:
+        print(data)
+        chu2_np_formatted = (
+            " !juke is playing"
+            )
+
+    else:
+        print("no mpd data")
+        url = ""
+        chu2_np_formatted = ""
+    if chu1_np_formatted:
+        print("chu1_np_formatted is:", chu1_np_formatted)
+        if chu2_np_formatted:
+            chu1_np_formatted = chu1_np_formatted + " | " + chu2_np_formatted
+
+    if return_type == "formatted":
+        return chu1_np_formatted
+    elif return_type == "raw":
+        return chu1_np_raw, chu2_np_raw
+    
+# juke np
+async def now_playing_jukebox(return_type):
+    chu2_np_formatted = ""
+    chu2_np_raw = None
+    
+    # anything on chu2?
+    data = None
+    print("trying to get mpd data")
+    try:
+        data = await mpd.playback.get_current_track()
+        track_position = await mpd.playback.get_time_position()
+    except Exception as e:
+        print("exception in np")
+        print(e)
+
+    # print(data)
+
+    if data is not None:
+        print(data)
+        track_length = data["length"]
+        progress_bar = display_progress(track_position, track_length)
+        if "__model__" in data:
+            if data["uri"].startswith("mixcloud"):
+                uri = data["uri"]
+                url = uri.replace("mixcloud:track:", "https://www.mixcloud.com")
+
+            elif data["uri"].startswith("soundcloud"):
+                url = data["comment"]
+            elif data["uri"].startswith("bandcamp"):
+                comment = data["comment"]
+                url = comment.replace("URL: ", "")
+            else:
+                url = ""
+            chu2_np_raw = url
+            chu2_np_formatted = (
+                " https://fm.chunt.org/stream2 jukebox now playing: " + url + " " + progress_bar
+            )
+
+    else:
+        print("no mpd data")
+        url = ""
+        chu2_np_formatted = "jukebox is empty. !add a link from sc,mc,bc or nts!"
+
+   
+
+
+    if return_type == "formatted":
+        return chu2_np_formatted
+    elif return_type == "raw":
+        return chu2_np_raw
 
 
 async def create_connection_pool():
@@ -1126,6 +1314,14 @@ class MyBot(chatango.Client):
 
                 if chuntfm_np is not None:
                     await message.channel.send(chuntfm_np)
+            elif cmd == ("juke"):
+                if message.room.name != "<PM>":
+                    await message.room.delete_message(message)
+                chuntfm_np = await now_playing_jukebox("formatted")
+                print(chuntfm_np)
+
+                if chuntfm_np is not None:
+                    await message.channel.send(chuntfm_np)
 
             elif cmd.startswith("jukebox"):
                 if message.room.name != "<PM>":
@@ -1284,7 +1480,7 @@ class MyBot(chatango.Client):
                 else:
                     tiny_list = small_list
                 if i == 0:
-                    msg = "jukebox is not playing anything. add a link from sc,mc,bc or nts!"
+                    msg = "jukebox is not playing anything. !add a link from sc,mc,bc or nts!"
                 else:
                     msg = str(i) + " tracks in jukebox queue. "
                 for item in tiny_list:
