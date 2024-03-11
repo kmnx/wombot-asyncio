@@ -208,7 +208,7 @@ class Sqlite3Class:
                 print(test_object_has_tags)
 
                 if not test_object_has_tags:
-                    await remove_object_by_object_id(object_id)
+                    await self.remove_object_by_object_id(object_id)
 
     async def untag_by_tag_name(self, tag_name):
         tuples = await self.get_objects_by_tag_name(tag_name)
