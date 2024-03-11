@@ -199,6 +199,31 @@ else:
 
 print("init variables done")
 
+def validate_and_convert_to_milliseconds(seektime):
+    # Regular expression to match the format HH:MM:SS, HH:MM, or MM
+    pattern = r'^(\d{1,2}):(\d{1,2}):(\d{1,2})$|^(\d{1,2}):(\d{1,2})$|^(\d{1,2})$'
+    
+    # Check if the input matches the pattern
+    match = re.match(pattern, seektime)
+    
+    if match:
+        # Extract hours, minutes, and seconds from the matched groups
+        groups = match.groups()
+        hours = int(groups[0]) if groups[0] else int(groups[3]) if groups[3] else 0
+        minutes = int(groups[1]) if groups[1] else int(groups[4]) if groups[4] else int(groups [5]) if groups[5] else 0
+        seconds = int(groups[2]) if groups[2] else 0
+        
+        # If single digit, add leading zero
+        hours = str(hours).zfill(2)
+        minutes = str(minutes).zfill(2)
+        seconds = str(seconds).zfill(2)
+        
+        # Convert to milliseconds
+        total_milliseconds = (int(hours) * 3600 + int(minutes) * 60 + int(seconds)) * 1000
+        return total_milliseconds
+    else:
+        return None
+    
 
 async def post_gif_of_the_hour(param):
     logging.debug("post_gif_of_the_hour")
@@ -1151,7 +1176,7 @@ class MyBot(chatango.Client):
             message.user.showname,
             ascii(message.body)[1:-1],
         )
-
+        print(message.body)
         if message.body[0] == "!":
             delete_message = True
             print(message.room.name)
@@ -1524,7 +1549,46 @@ class MyBot(chatango.Client):
                 await message.room.delete_message(message)
                 print("consume mode ", await mpd.tracklist.get_consume())
                 await mpd.playback.next()
+            
 
+            elif cmd in ["seek"]:
+                if message.room.name != "<PM>":
+                    await message.room.delete_message(message)
+                if args:
+                    splitargs = args.split(" ")
+                    seektime = splitargs[0]
+                    milliseconds = int(validate_and_convert_to_milliseconds(seektime))
+                    if milliseconds is not None:
+                        data = await mpd.playback.get_current_track()
+                        if data:
+                            track_length = data["length"]
+                            if milliseconds < track_length:
+                                await mpd.playback.seek(int(milliseconds))
+                    
+            elif cmd in ["ff","fastforward"]:
+                if message.room.name != "<PM>":
+                    await message.room.delete_message(message)
+                data = await mpd.playback.get_current_track()
+                if data:
+                    track_length = data["length"]
+                    track_position = await mpd.playback.get_time_position()
+                    new_track_position = track_position + 60000
+                    if new_track_position < track_length:
+                        await mpd.playback.seek(int(new_track_position))
+            
+            elif cmd in ["rewind","rw"]:
+                if message.room.name != "<PM>":
+                    await message.room.delete_message(message)
+                data = await mpd.playback.get_current_track()
+                if data:
+                    track_length = data["length"]
+                    track_position = await mpd.playback.get_time_position()
+                    new_track_position = track_position - 60000
+                    if new_track_position < 0:
+                        await mpd.playback.seek(int(0))
+                    else:
+                        await mpd.playback.seek(int(new_track_position))
+            
             # radio schedule commands
             elif cmd.startswith("sched"):
                 if message.room.name != "<PM>":
@@ -2172,6 +2236,7 @@ class MyBot(chatango.Client):
                 cleaned_args = re.sub(clean, "", args)
                 cleaned_args.encode()
                 cleaner_args = htmlmod.escape(cleaned_args)
+                print(cleaner_args)
                 await message.channel.send(cleaner_args)
             elif cmd == "bg":
                 if message.room.name != "<PM>":
