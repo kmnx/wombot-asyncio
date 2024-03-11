@@ -1055,6 +1055,19 @@ class Config:
 
     bot_user = [mysecrets.chatango_user, mysecrets.chatango_pass]  # password
 
+class Timer:
+    def __init__(self, timeout, callback):
+        self._timeout = timeout
+        self._callback = callback
+        self._task = asyncio.ensure_future(self._job())
+
+    async def _job(self):
+        await asyncio.sleep(self._timeout)
+        self._task = asyncio.ensure_future(self._job())
+        await self._callback()
+
+    def cancel(self):
+        self._task.cancel()
 
 class MyBot(chatango.Client):
     async def on_init(self):
@@ -1111,6 +1124,26 @@ class MyBot(chatango.Client):
             await room.user.get_profile()
             await room.enable_bg()
 
+    async def spam(self,message, bpm):
+        frequency = 60/int(bpm)
+        bot.spam_mode = True
+        counter = 0
+        gif_one = random.choice(await bot.db.get_objects_by_tag_name("bbb"))
+        while bot.spam_mode == True:
+            print(counter)
+            if counter == 8:
+                counter = 0
+                gif_one = random.choice(await bot.db.get_objects_by_tag_name("bbb"))
+            await message.channel.send(gif_one + " " + gif_one + " " + gif_one)
+            counter += 1
+            await asyncio.sleep(frequency)
+
+    async def spam_mode_start(self, message, bpm):
+        self.spamtask = asyncio.create_task(self.spam(message,bpm))
+
+    async def spam_mode_stop(self):
+        bot.spam_mode = False
+        await self.spamtask
     async def on_message(self, message):
         print(
             time.strftime("%b/%d-%H:%M:%S", time.localtime(message.time)),
@@ -1527,8 +1560,7 @@ class MyBot(chatango.Client):
 
                 coinflip = random.choice([0, 1])
                 print(coinflip)
-                if message.user.showname == "yumgdale":
-                    pass
+                
                 if (coinflip == 0) or (message.user.showname=="yungdale"):
                     await message.channel.send(
                         "your fortune, "
@@ -1964,6 +1996,23 @@ class MyBot(chatango.Client):
                     await message.room.delete_message(message)
 
                 await message.channel.send("the gif of the hour is " + self.goth)
+
+            elif cmd == "spam":
+                if message.room.name != "<PM>":
+                    await message.room.delete_message(message)
+                
+                if message.user.showname=="knmx" and message.room.get_level(message.user) > 0:
+                    print("knmx spamstart")
+                    if args:
+                        splitargs = args.split(" ")
+                        bpm = splitargs[0]
+                        await self.spam_mode_start(message, bpm)
+                    
+            elif cmd == "stop":
+                if message.room.name != "<PM>":
+                    await message.room.delete_message(message)
+                await self.spam_mode_stop()
+            
 
             # text spam
 
