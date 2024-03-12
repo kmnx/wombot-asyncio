@@ -193,18 +193,9 @@ allgif_file = os.path.join(base_path, "allgif.txt")
 if not os.path.exists(allgif_file):
     with open(allgif_file, "a") as file:
         pass
-
-
-
 else:
     with open(allgif_file) as file:
         allgif_set = set(line.strip() for line in file if line.startswith("http://"))
-
-goth_file = os.path.join(base_path, "goth.txt")
-if not os.path.exists(allgif_file):
-    with open(allgif_file, "a") as file:
-        pass
-
 
 print("init variables done")
 
@@ -243,12 +234,12 @@ async def post_gif_of_the_hour(param):
     bots.append(bot.get_room(main_room))
     bots.append(bot.get_room(test_room))
     # print(datetime.now().time(), param)
-    goth = random.choice(await bot.db.get_objects_by_tag_name("bbb"))
-    with open(goth_file, "w") as gif_file:
-        gif_file.write(goth + "\n")
-    
+    bot.goth = random.choice(await bot.db.get_objects_by_tag_name("bbb"))
+    with open(goth_file, "w") as file:
+        file.write(bot.goth)
+
     for roombot in bots:
-        await roombot.send_message("the gif of the hour is: " + goth)
+        await roombot.send_message("the gif of the hour is: " + bot.goth)
 
 
 async def schedule_gif_of_the_hour():
@@ -1119,10 +1110,10 @@ class MyBot(chatango.Client):
         # Create the commands table if not exists
         await create_commands_table(connection_pool)
         await connection_pool.close()
-        with open(goth_file) as file:
+        with open(goth_file, "r") as file:
             self.goth = file.readline().strip()
         if not self.goth:
-            self.goth = random.choice(await self.db.get_objects_by_tag_name("bbb")) 
+            self.goth = random.choice(await bot.db.get_objects_by_tag_name("bbb"))
         
         print(self.goth)
         self._room = None
@@ -2455,6 +2446,11 @@ if __name__ == "__main__":
     else:
         with open(allgif_file) as file:
             allgif_set = set(line.strip() for line in file if line.startswith("http"))
+
+    goth_file = os.path.join(base_path, "goth.txt")
+    if not os.path.exists(goth_file):
+        with open(goth_file, "a") as file:
+            pass
 
     try:
         loop.run_until_complete(tasks)
