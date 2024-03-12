@@ -5,6 +5,7 @@ from pydub import AudioSegment
 import base64
 import mysecrets
 import logging
+import ssl
 
 shazam_api_key = mysecrets.shazam_api_key
 
@@ -35,11 +36,20 @@ class ShazamApi:
         audio_source = stream_source
         sound = ""
         out = ""
-        if session is None:
+        print("stream_source: ", stream_source)
+        if stream_source == "https://stream.p-node.org/pnode.mp3":
+            ssl_context = ssl.create_default_context()
+            ssl_context.check_hostname = False
+            ssl_context.verify_mode = ssl.CERT_NONE
+            session = aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=ssl_context))
+        else:
+     
+
             #logging.basicConfig(level=logging.DEBUG)
             #trace_config = aiohttp.TraceConfig()
             #trace_config.on_request_start.append(on_request_start)
             session = aiohttp.ClientSession()
+            
         async with session as session:
             try:
                 print('attempting connection')
