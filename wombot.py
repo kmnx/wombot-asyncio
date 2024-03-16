@@ -600,7 +600,7 @@ async def jukebox_status():
     data = None
     print("trying to get mpd data")
     try:
-        data = await mpd.playback.get_current_track()
+        data = await asyncio.waitfor(mpd.playback.get_current_track(), timeout=5)
     except Exception as e:
         print("exception in np")
         print(e)
