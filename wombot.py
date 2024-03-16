@@ -582,25 +582,9 @@ async def now_playing(return_type):
             print('this was the np exception')
 
     # anything on chu2?
-    data = None
-    print("trying to get mpd data")
-    try:
-        data = await mpd.playback.get_current_track()
-    except Exception as e:
-        print("exception in np")
-        print(e)
-
-
-    if data is not None:
-        print(data)
-        chu2_np_formatted = (
-            " !juke is playing"
-            )
-
-    else:
-        print("no mpd data")
-        url = ""
-        chu2_np_formatted = ""
+    
+    chu2_np_formatted = await jukebox_status()
+    
     if chu1_np_formatted:
         print("chu1_np_formatted is:", chu1_np_formatted)
         if chu2_np_formatted:
@@ -612,6 +596,28 @@ async def now_playing(return_type):
         return chu1_np_raw, chu2_np_raw
     
 # juke np
+async def jukebox_status():
+    data = None
+    print("trying to get mpd data")
+    try:
+        data = await mpd.playback.get_current_track()
+    except Exception as e:
+        print("exception in np")
+        print(e)
+
+
+    if data is not None:
+        print(data)
+        jukebox_status_msg = (
+            " !juke is playing"
+            )
+
+    else:
+        print("no mpd data")
+        url = ""
+        jukebox_status_msg = ""
+    return jukebox_status_msg
+
 async def now_playing_jukebox(return_type):
     chu2_np_formatted = ""
     chu2_np_raw = None
