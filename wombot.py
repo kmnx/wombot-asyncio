@@ -626,7 +626,7 @@ async def now_playing_jukebox(return_type):
     data = None
     print("trying to get mpd data")
     try:
-        data = await mpd.playback.get_current_track(), timeout=5.0)
+        data = await mpd.playback.get_current_track()
         track_position = await mpd.playback.get_time_position()
     except Exception as e:
         print("exception in np")
