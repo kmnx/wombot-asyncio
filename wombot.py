@@ -760,10 +760,10 @@ async def all_events_handler(event, data):
         print(data)
 
 
-async def mpd_context_manager(mpd):
+async def mpd_context_manager():
     logging.debug("mpd_context_manager")
 
-    async with mpd as mopidy:
+    async with MopidyClientWithTimeout(host="139.177.181.183") as mopidy:
         mopidy.bind("track_playback_started", playback_started_handler)
         mopidy.bind("*", all_events_handler)
         await mpd.tracklist.set_consume(True)
@@ -2449,8 +2449,8 @@ if __name__ == "__main__":
     #    bot.default_user(accounts=or_accounts, pm=False) #True if passwd was input.
     ListBots = [bot.start()]  # Multiple instances
     task = asyncio.gather(*ListBots, return_exceptions=True)
-    mpd = MopidyClientWithTimeout(host="139.177.181.183")
-    mpd_task = asyncio.gather(mpd_context_manager(mpd))
+    
+    mpd_task = asyncio.gather(mpd_context_manager())
     gif_task = schedule_gif_of_the_hour()
     # cfm_task = schedule_chuntfm_livecheck()
 
