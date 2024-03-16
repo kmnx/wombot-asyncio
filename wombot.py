@@ -626,8 +626,8 @@ async def now_playing_jukebox(return_type):
     data = None
     print("trying to get mpd data")
     try:
-        data = await mpd.playback.get_current_track()
-        track_position = await mpd.playback.get_time_position()
+        data = await asyncio.wait_for(mpd.playback.get_current_track(), timeout=5)
+        track_position = await asyncio.wait_for(mpd.playback.get_time_position(), timeout=5)
     except Exception as e:
         print("exception in np")
         print(e)
@@ -760,10 +760,10 @@ async def all_events_handler(event, data):
         print(data)
 
 
-async def mpd_context_manager():
+async def mpd_context_manager(mpd):
     logging.debug("mpd_context_manager")
 
-    async with MopidyClient(host="139.177.181.183") as mopidy:
+    async with mpd as mopidy:
         mopidy.bind("track_playback_started", playback_started_handler)
         mopidy.bind("*", all_events_handler)
         await mpd.tracklist.set_consume(True)
@@ -2424,19 +2424,6 @@ async def get_db_idhistory_cur():
     cursor = await conn.cursor()
     return cursor
 
-class MopidyClientWithTimeout:
-    def __init__(self, *args, timeout=5.0, **kwargs):
-        self._client = MopidyClient(*args, **kwargs)
-        self._timeout = timeout
-
-    def __getattr__(self, name):
-        attr = getattr(self._client, name)
-        if asyncio.iscoroutinefunction(attr):
-            async def func_with_timeout(*args, **kwargs):
-                return await asyncio.wait_for(attr(*args, **kwargs), self._timeout)
-            return func_with_timeout
-        else:
-            return attr
 
 if __name__ == "__main__":
     logging.debug("__main__")
@@ -2449,8 +2436,8 @@ if __name__ == "__main__":
     #    bot.default_user(accounts=or_accounts, pm=False) #True if passwd was input.
     ListBots = [bot.start()]  # Multiple instances
     task = asyncio.gather(*ListBots, return_exceptions=True)
-    
-    mpd_task = asyncio.gather(mpd_context_manager())
+    mpd = MopidyClient(host="139.177.181.183")
+    mpd_task = asyncio.gather(mpd_context_manager(mpd))
     gif_task = schedule_gif_of_the_hour()
     # cfm_task = schedule_chuntfm_livecheck()
 
