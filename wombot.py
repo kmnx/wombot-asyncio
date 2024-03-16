@@ -763,7 +763,7 @@ async def all_events_handler(event, data):
 async def mpd_context_manager():
     logging.debug("mpd_context_manager")
 
-    async with MopidyClientWithTimeout(host="139.177.181.183") as mopidy:
+    async with MopidyClient(host="139.177.181.183") as mopidy:
         mopidy.bind("track_playback_started", playback_started_handler)
         mopidy.bind("*", all_events_handler)
         await mpd.tracklist.set_consume(True)
