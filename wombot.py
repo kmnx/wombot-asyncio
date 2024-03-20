@@ -516,6 +516,7 @@ async def now_playing(return_type):
             schedule_json = await r.json()
             # print(chu_json)
             if schedule_json:
+                print("got schedule_json")
                 time_now = datetime.now(timezone.utc)
                 print("time_now: ", time_now)
                 for show in schedule_json:
@@ -566,18 +567,18 @@ async def now_playing(return_type):
                             + " @ "
                             + chu_restream_json["current"]["show_date"]
                         )
-                else:
-                    print('chu_restream is none')
-                    print(chu1_np_formatted)
-                    if chu_restream_json["current"]["show_date"] is None:
-                        chu_restream_json["current"]["show_date"] = ''
-                    chu1_np_formatted = (
-                        "RESTREAM: "
-                        + chu_restream_json["current"]["show_title"]
-                        + " @ "
-                        + chu_restream_json["current"]["show_date"]
-                    )
-                chu1_np_raw = chu_restream_json["current"]["show_title"]
+                    else:
+                        print('chu_restream is none')
+                        print(chu1_np_formatted)
+                        if chu_restream_json["current"]["show_date"] is None:
+                            chu_restream_json["current"]["show_date"] = ''
+                        chu1_np_formatted = (
+                            "RESTREAM: "
+                            + chu_restream_json["current"]["show_title"]
+                            + " @ "
+                            + chu_restream_json["current"]["show_date"]
+                        )
+                    chu1_np_raw = chu_restream_json["current"]["show_title"]
         except Exception as e:
             print("exception in np")
             print(e)
