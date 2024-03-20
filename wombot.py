@@ -494,7 +494,7 @@ async def now_playing(return_type):
     '''
     try:
         async with ClientSession() as s:
-            r = await s.get("https://chunt.org/live.json")
+            r = await s.get("https://chunt.org/live.json", timeout=5)
             live_json = await r.json()
         if live_json:
             if live_json["live"] == True:
@@ -512,19 +512,20 @@ async def now_playing(return_type):
     try:
         print("trying to get schedule.json")
         async with ClientSession() as s:
-            r = await s.get("https://chunt.org/schedule.json")
+            r = await s.get("https://chunt.org/schedule.json",timeout=5)
             schedule_json = await r.json()
             # print(chu_json)
-            time_now = datetime.now(timezone.utc)
-            print("time_now: ", time_now)
-            for show in schedule_json:
-                start_time = datetime.fromisoformat(show["startTimestamp"])
-                end_time = datetime.fromisoformat(show["endTimestamp"])
-                print("start_time: ", start_time)
-                if start_time < time_now:
-                    if end_time > time_now:
-                        print(show)
-                        chu1_scheduled = show["title"]
+            if schedule_json:
+                time_now = datetime.now(timezone.utc)
+                print("time_now: ", time_now)
+                for show in schedule_json:
+                    start_time = datetime.fromisoformat(show["startTimestamp"])
+                    end_time = datetime.fromisoformat(show["endTimestamp"])
+                    print("start_time: ", start_time)
+                    if start_time < time_now:
+                        if end_time > time_now:
+                            print(show)
+                            chu1_scheduled = show["title"]
     except Exception as e:
         print(e)
 
@@ -543,39 +544,40 @@ async def now_playing(return_type):
         print("trying to get restream info")
         try:
             async with ClientSession() as s:
-                r = await s.get("https://chunt.org/restream.json")
-                chu_json = await r.json()
-                print(chu_json)
-                # is someone supposed to be live?
-                print('received restream.json')
-                print(chu1_scheduled)
-                if chu1_scheduled is not None:
-                    print("chu1_scheduled is not none")
-                    print('chu1_scheduled',chu1_scheduled)
-                    print('chu_json',chu_json)
-                    if chu_json["current"]["show_date"] is None:
-                        chu_json["current"]["show_date"] = ''
-                    chu1_np_formatted = (
-                        "scheduled but offline: "
-                        + chu1_scheduled
-                        + " | "
-                        + "RESTREAM: "
-                        + chu_json["current"]["show_title"]
-                        + " @ "
-                        + chu_json["current"]["show_date"]
-                    )
+                r = await s.get("https://chunt.org/restream.json", timeout=5)
+                chu_restream_json = await r.json()
+                if chu_restream_json:
+                    print(chu_restream_json)
+                    # is someone supposed to be live?
+                    print('received restream.json')
+                    print(chu1_scheduled)
+                    if chu1_scheduled is not None:
+                        print("chu1_scheduled is not none")
+                        print('chu1_scheduled',chu1_scheduled)
+                        print('chu_json',chu_restream_json)
+                        if chu_restream_json["current"]["show_date"] is None:
+                            chu_restream_json["current"]["show_date"] = ''
+                        chu1_np_formatted = (
+                            "scheduled but offline: "
+                            + chu1_scheduled
+                            + " | "
+                            + "RESTREAM: "
+                            + chu_restream_json["current"]["show_title"]
+                            + " @ "
+                            + chu_restream_json["current"]["show_date"]
+                        )
                 else:
-                    print('chu1_scheduled is none')
+                    print('chu_restream is none')
                     print(chu1_np_formatted)
-                    if chu_json["current"]["show_date"] is None:
-                        chu_json["current"]["show_date"] = ''
+                    if chu_restream_json["current"]["show_date"] is None:
+                        chu_restream_json["current"]["show_date"] = ''
                     chu1_np_formatted = (
                         "RESTREAM: "
-                        + chu_json["current"]["show_title"]
+                        + chu_restream_json["current"]["show_title"]
                         + " @ "
-                        + chu_json["current"]["show_date"]
+                        + chu_restream_json["current"]["show_date"]
                     )
-                chu1_np_raw = chu_json["current"]["show_title"]
+                chu1_np_raw = chu_restream_json["current"]["show_title"]
         except Exception as e:
             print("exception in np")
             print(e)
@@ -591,6 +593,8 @@ async def now_playing(return_type):
             chu1_np_formatted = chu1_np_formatted + " | " + chu2_np_formatted
 
     if return_type == "formatted":
+        if chu1_np_formatted == "":
+            chu1_np_formatted = "error fetching schedule data from chunt.org"
         return chu1_np_formatted
     elif return_type == "raw":
         return chu1_np_raw, chu2_np_raw
@@ -1308,51 +1312,53 @@ class MyBot(chatango.Client):
                     await message.room.delete_message(message)
                 try:
                     async with ClientSession() as s:
-                        r = await s.get("https://chunt.org/schedule.json")
-                        schedule_json = await r.json()
-                        # print(chu_json)
-                        time_now = datetime.now(timezone.utc)
-                        print("time_now: ", time_now)
-                        for show in schedule_json:
-                            start_time = datetime.fromisoformat(show["startTimestamp"])
-                            datetime.fromisoformat(show["endTimestamp"])
-                            print("start_time: ", start_time)
-                            if start_time > time_now:
-                                print(show)
-                                timediff = start_time - time_now
-                                time_rem = str(timediff)
+                        r = await s.get("https://chunt.org/schedule.json", timeout=5)
+                        if r:
+                            schedule_json = await r.json()
+                            # print(chu_json)
+                            time_now = datetime.now(timezone.utc)
+                            #print("time_now: ", time_now)
+                            for show in schedule_json:
+                                start_time = datetime.fromisoformat(show["startTimestamp"])
+                                datetime.fromisoformat(show["endTimestamp"])
+                                #print("start_time: ", start_time)
+                                if start_time > time_now:
+                                    print(show)
+                                    timediff = start_time - time_now
+                                    time_rem = str(timediff)
 
-                                when = time_rem.split(".")[0] + " hours"
+                                    when = time_rem.split(".")[0] + " hours"
 
-                                print(
-                                    "stripped desc",
-                                    show["description"]
-                                    .replace("\n", " ")
-                                    .replace("\r", "")
-                                    .replace("<br>", " - "),
-                                )
-                                chuntfm_upnext = (
-                                    "UP NEXT: "
-                                    + (show["title"])
-                                    + " | "
-                                    + show["description"]
-                                    .replace("\n", " ")
-                                    .replace("\r", "")
-                                    .replace("<br>", "")
-                                    + " | "
-                                    + show["dateUK"]
-                                    + " "
-                                    + show["startTimeUK"]
-                                    + " GMT"
-                                    + " (in "
-                                    + when
-                                    + ")"
-                                )
-                                break
-
+                                    print(
+                                        "stripped desc",
+                                        show["description"]
+                                        .replace("\n", " ")
+                                        .replace("\r", "")
+                                        .replace("<br>", " - "),
+                                    )
+                                    chuntfm_upnext = (
+                                        "UP NEXT: "
+                                        + (show["title"])
+                                        + " | "
+                                        + show["description"]
+                                        .replace("\n", " ")
+                                        .replace("\r", "")
+                                        .replace("<br>", "")
+                                        + " | "
+                                        + show["dateUK"]
+                                        + " "
+                                        + show["startTimeUK"]
+                                        + " GMT"
+                                        + " (in "
+                                        + when
+                                        + ")"
+                                    )
+                                    break
+                        else:
+                            chuntfm_upnext = "error fetching schedule data from chunt.org"
                 except Exception as e:
                     print(e)
-
+                    chuntfm_upnext = "error fetching schedule data from chunt.org"
                 if chuntfm_upnext:
                     # chuntfm_upnext = chuntfm_upnext.encode("ascii", "ignore")
                     # chuntfm_upnext = chuntfm_upnext.decode("utf-8")
@@ -2111,24 +2117,25 @@ class MyBot(chatango.Client):
                 chuntfm_np = ""
                 try:
                     async with ClientSession() as s:
-                        r = await s.get("https://chunt.org/restream.json")
-                        chu_json = await r.json()
-                        print(chu_json)
-                        if (
-                            chu_json["current"]["show_title"]
-                            and chu_json["current"]["show_date"]
-                        ):
-                            chuntfm_np = (
-                                "chuntfm is now playing: "
-                                + chu_json["current"]["show_title"]
-                                + " @ "
-                                + chu_json["current"]["show_date"]
-                            )
-                        else:
-                            chuntfm_np = (
-                                "chuntfm is now playing: "
-                                + chu_json["current"]["show_title"]
-                            )
+                        with s.get("https://chunt.org/restream.json", timeout=5) as r:
+                            chu_json = await r.json()
+                        if chu_json:
+                            #print(chu_json)
+                            if (
+                                chu_json["current"]["show_title"]
+                                and chu_json["current"]["show_date"]
+                            ):
+                                chuntfm_np = (
+                                    "chuntfm is now playing: "
+                                    + chu_json["current"]["show_title"]
+                                    + " @ "
+                                    + chu_json["current"]["show_date"]
+                                )
+                            else:
+                                chuntfm_np = (
+                                    "chuntfm is now playing: "
+                                    + chu_json["current"]["show_title"]
+                                )
 
                 except Exception as e:
                     print(e)
