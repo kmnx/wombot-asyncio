@@ -594,7 +594,7 @@ async def now_playing(return_type):
 
     if return_type == "formatted":
         if chu1_np_formatted == "":
-            chu1_np_formatted = "error fetching schedule data from chunt.org"
+            chu1_np_formatted = "i think chunt.org might be broken"
         return chu1_np_formatted
     elif return_type == "raw":
         return chu1_np_raw, chu2_np_raw
@@ -1355,10 +1355,10 @@ class MyBot(chatango.Client):
                                     )
                                     break
                         else:
-                            chuntfm_upnext = "error fetching schedule data from chunt.org"
+                            chuntfm_upnext = "i think chunt.org might be broken"
                 except Exception as e:
                     print(e)
-                    chuntfm_upnext = "error fetching schedule data from chunt.org"
+                    chuntfm_upnext = "i think chunt.org might be broken"
                 if chuntfm_upnext:
                     # chuntfm_upnext = chuntfm_upnext.encode("ascii", "ignore")
                     # chuntfm_upnext = chuntfm_upnext.decode("utf-8")
