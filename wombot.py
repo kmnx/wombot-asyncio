@@ -586,13 +586,12 @@ async def now_playing(return_type):
     # anything on chu2?
     
     chu2_np_formatted = await jukebox_status()
-
-    if chu1_np_formatted:
-        print("chu1_np_formatted is:", chu1_np_formatted)
-        if chu2_np_formatted:
-            if chu1_np_formatted == "":
+    if chu1_np_formatted == "":
                 chu1_np_formatted = "i think chunt.org might be broken"
-            chu1_np_formatted = chu1_np_formatted + " | " + chu2_np_formatted
+
+    if chu2_np_formatted:
+        
+        chu1_np_formatted = chu1_np_formatted + " | " + chu2_np_formatted
 
     if return_type == "formatted":
         
