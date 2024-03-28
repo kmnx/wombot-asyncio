@@ -2354,7 +2354,7 @@ class MyBot(chatango.Client):
                 await message.channel.send(
                     "13/14 April 2024 weekend for Ronfret 2024 in Lisboa. Only "
                     + days_left
-                    + " days left, act fast!"
+                    + " days left, you should probably have acted fast by now!"
                 )
             elif cmd in ["top", "toptags"]:
                 if message.room.name != "<PM>":
