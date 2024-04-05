@@ -496,6 +496,18 @@ class Room(Connection):
                 return x
         return None
 
+    def get_last_messages(self, user=None):
+        if not user:
+            return self.history
+        if isinstance(user, User):
+            user = user.name
+        user_msgs = []
+        for x in self.history:
+            if x.user.name == user:
+                user_msgs.append(x)
+        return user_msgs
+
+
     async def unban_user(self, user):
         rec = self.ban_record(user)
         print("rec", rec)
