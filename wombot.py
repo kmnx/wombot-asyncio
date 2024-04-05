@@ -2405,6 +2405,21 @@ class MyBot(chatango.Client):
         else:
             # very crude way to catch posted gifs and add them to allgif_set and allgif_file
             split_message = message.body.split(" ")
+
+            # anon bot spam detection
+            if message.user.isanon and len(message.room.get_last_messages(user=message.user))<3:
+                if any([w.startswith('http') for w in split_message]):
+                    # ban user, delete message
+                    try:
+                        await message.room.delete_message(message)
+                        await message.room.ban_user(user=message.user)
+                        print('Banned user ' + str(message.user) + ' for spam')
+                    except Exception as e:
+                        print('Could not ban user ' + str(message.user) + ' for spam: ' + str(e))
+
+                    split_message=[]
+
+
             for word in split_message:
                 if (
                     word.startswith("http")
