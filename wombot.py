@@ -2407,8 +2407,11 @@ class MyBot(chatango.Client):
             split_message = message.body.split(" ")
 
             # anon bot spam detection
+            # if within the first 3 messages
             if message.user.isanon and len(message.room.get_last_messages(user=message.user))<3:
-                if any([w.startswith('http') for w in split_message]):
+                # if any link thats not an image or youtube link is posted, ban user
+                if any([w.lower().startswith('http') and 'youtube' not in w.lower() and 'youtu.be' not in w.lower() for w in split_message]) or \
+                        any([w.lower().startswith('http') and re.search(r'\.(png|jpe*g|gif).{0,10}$', w.lower(), flags=re.MULTILINE) is None for w in split_message]):
                     # ban user, delete message
                     try:
                         await message.room.delete_message(message)
