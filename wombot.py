@@ -774,12 +774,12 @@ async def mpd_context_manager(mpd):
         async with mpd as mopidy:
             mopidy.bind("track_playback_started", playback_started_handler)
             mopidy.bind("*", all_events_handler)
-            await mpd.tracklist.set_consume(True)
+            mpd.tracklist.set_consume(True)
 
             # Your program's logic:
             # await mopidy.playback.play()
             while True:
-                await asyncio.sleep(1)
+                asyncio.sleep(1)
 
     except Exception as e:
         logging.error(e)
