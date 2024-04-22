@@ -769,15 +769,21 @@ async def all_events_handler(event, data):
 async def mpd_context_manager(mpd):
     logging.debug("mpd_context_manager")
 
-    async with mpd as mopidy:
-        mopidy.bind("track_playback_started", playback_started_handler)
-        mopidy.bind("*", all_events_handler)
-        await mpd.tracklist.set_consume(True)
+    try:
 
-        # Your program's logic:
-        # await mopidy.playback.play()
-        while True:
-            await asyncio.sleep(1)
+        async with mpd as mopidy:
+            mopidy.bind("track_playback_started", playback_started_handler)
+            mopidy.bind("*", all_events_handler)
+            await mpd.tracklist.set_consume(True)
+
+            # Your program's logic:
+            # await mopidy.playback.play()
+            while True:
+                await asyncio.sleep(1)
+
+    except Exception as e:
+        logging.error(e)
+        print(e)
 
 
 # convert utc to London time
@@ -2407,8 +2413,11 @@ class MyBot(chatango.Client):
             split_message = message.body.split(" ")
 
             # anon bot spam detection
+            # if within the first 3 messages
             if message.user.isanon and len(message.room.get_last_messages(user=message.user))<3:
-                if any([w.startswith('http') for w in split_message]):
+                # if any link thats not an image or youtube link is posted, ban user
+                if any([w.lower().startswith('http') and 'youtube' not in w.lower() and 'youtu.be' not in w.lower() for w in split_message]) or \
+                        any([w.lower().startswith('http') and re.search(r'\.(png|jpe*g|gif).{0,10}$', w.lower(), flags=re.MULTILINE) is None for w in split_message]):
                     # ban user, delete message
                     try:
                         await message.room.delete_message(message)
