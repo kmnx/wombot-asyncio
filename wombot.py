@@ -1388,6 +1388,90 @@ class MyBot(chatango.Client):
 
                     await message.channel.send(cleaner)
 
+            elif cmd in ["whenis"]:
+                chuntfm_queried_show = ""
+
+                if message.room.name != "<PM>":
+                    await message.room.delete_message(message)
+                if not args:
+                    await message.channel.send("Enter a query for show: !whenis [query]")
+                else:
+                    try:
+                        async with ClientSession() as s:
+                            r = await s.get("https://chunt.org/schedule.json", timeout=5)
+                            if r:
+                                schedule_json = await r.json()
+                                # print(chu_json)
+                                time_now = datetime.now(timezone.utc)
+                                #print("time_now: ", time_now)
+                                for show in schedule_json:
+                                    start_time = datetime.fromisoformat(show["startTimestamp"])
+                                    datetime.fromisoformat(show["endTimestamp"])
+                                    #print("start_time: ", start_time)
+                                    if (start_time > time_now 
+                                        and (args.lower() in show["title"].lower() 
+                                            or args.lower() in show["description"].lower())):
+                                        print(show)
+                                        timediff = start_time - time_now
+                                        time_rem = str(timediff)
+
+                                        when = time_rem.split(".")[0] + " hours"
+
+                                        print(
+                                            "stripped desc",
+                                            show["description"]
+                                            .replace("\n", " ")
+                                            .replace("\r", "")
+                                            .replace("<br>", " - "),
+                                        )
+                                        chuntfm_queried_show = (
+                                            "Next show containing "
+                                            + args
+                                            + " is "
+                                            + (show["title"])
+                                            + " | "
+                                            + show["description"]
+                                            .replace("\n", " ")
+                                            .replace("\r", "")
+                                            .replace("<br>", "")
+                                            + " on "
+                                            + show["dateUK"]
+                                            + " "
+                                            + show["startTimeUK"]
+                                            + " GMT"
+                                            + " (in "
+                                            + when
+                                            + ")"
+                                        )
+                                        break
+                                    else:
+                                        chuntfm_queried_show = "no shows with query: " + args + " found"
+                            else:
+                                chuntfm_queried_show = "i think chunt.org might be broken"
+                    except Exception as e:
+                        print(e)
+                        chuntfm_queried_show = "i think chunt.org might be broken"
+                    if chuntfm_queried_show:
+                        # chuntfm_upnext = chuntfm_upnext.encode("ascii", "ignore")
+                        # chuntfm_upnext = chuntfm_upnext.decode("utf-8")
+                        # await message.channel.send("UP NEXT: Brazillian Correspondence w/ Pedro | Pedro from Brazil, Author of Vivas Caf, graces the ChuntFM airwaves once a month | 2023-12-28 16:00 GMT (in 2 days, 2:19:57 hours)")
+                        # pe = "UP NEXT: Brazillian Correspondence w/ Pedro | Pedro from Brazil, Author of Vivas Caf, graces the ChuntFM airwaves once a month | 2023-12-28 16:00 GMT (in 2 days, 2:19:57 hours)"
+                        # chuntfm_cleaned = chuntfm_upnext
+                        # if pe == chuntfm_cleaned:
+                        #    print('strings are equal')
+                        # else:
+                        #    print(pe)
+                        #    print(chuntfm_upnext)
+                        clean = re.compile("<.*?>")
+                        chuntfm_queried_show = re.sub(clean, "", chuntfm_queried_show)
+                        #await message.channel.send(chuntfm_upnext)
+
+                        cleaner = htmlmod.escape(chuntfm_queried_show)
+                        cleaner.encode()
+                        cleaner = htmlmod.escape(cleaner)
+
+                        await message.channel.send(cleaner)
+
             # jukebox controls
             elif cmd.startswith("np"):
                 if message.room.name != "<PM>":
