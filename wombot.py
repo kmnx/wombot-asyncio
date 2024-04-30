@@ -1445,7 +1445,7 @@ class MyBot(chatango.Client):
                                         )
                                         break
                                     else:
-                                        chuntfm_queried_show = "No shows found with query: " + args
+                                        chuntfm_queried_show = "No upcoming shows found with query: " + args
                             else:
                                 chuntfm_queried_show = "i think chunt.org might be broken"
                     except Exception as e:
