@@ -1355,7 +1355,7 @@ class MyBot(chatango.Client):
                                         + show["dateUK"]
                                         + " "
                                         + show["startTimeUK"]
-                                        + " GMT"
+                                        + " BST"
                                         + " (in "
                                         + when
                                         + ")"
@@ -1438,7 +1438,7 @@ class MyBot(chatango.Client):
                                             + show["dateUK"]
                                             + " "
                                             + show["startTimeUK"]
-                                            + " GMT"
+                                            + " BST"
                                             + " (in "
                                             + when
                                             + ")"
@@ -2446,6 +2446,19 @@ class MyBot(chatango.Client):
                     + days_left
                     + " days left, you should probably have acted fast by now!"
                 )
+            
+            elif cmd == "wombot":
+                if message.room.name != "<PM>":
+                    await message.room.delete_message(message)
+                await message.channel.send(
+                        "My name is wombot! Call me up using commands "
+                        + "- for example, hit a !gif for a random gif, "
+                        + "a !cat for a cat gif, "
+                        + "or a !fortune for a daily fortune. "
+                        + "Call up the ChuntFM schedule by hitting !np for Now Playing, "
+                        + "or !upnext to see what's next xxx"
+                        )
+
             elif cmd in ["top", "toptags"]:
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
