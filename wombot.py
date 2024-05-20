@@ -54,6 +54,7 @@ import data_pics_capybara
 import data_pics_otter
 import data_pics_quokka
 import data_txt_fortunes as fortunes
+from data_txt_facts import facts
 import schedule
 import chuntfm
 import telnet
@@ -1726,6 +1727,19 @@ class MyBot(chatango.Client):
                                 arg.upper()
                                 + ": Sorry, I don't know that radio station.",
                             )
+
+            elif cmd == "funfact":
+                if message.room.name != "<PM>":
+                    await message.room.delete_message(message)
+                random_fact = random.choice(facts)['text']
+                await message.channel.send(
+                    "your random fact, "
+                    + message.user.showname
+                    + " : "
+                    + random_fact
+                    .replace(".", "")
+                    .lower()
+                )
 
             elif cmd == "fortune":
                 if message.room.name != "<PM>":
