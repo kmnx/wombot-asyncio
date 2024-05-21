@@ -2150,6 +2150,14 @@ class MyBot(chatango.Client):
                 gif_one = random.choice(list(allgif_set))
                 gif_two = random.choice(list(allgif_set))
                 await message.channel.send(gif_one + " " + gif_two + " " + gif_one)
+            
+            elif cmd == "vs":
+                if message.room.name != "<PM>":
+                    await message.room.delete_message(message)
+                gif_one = random.choice(list(allgif_set))
+                gif_two = random.choice(list(allgif_set))
+                gif_vs = "https://media4.giphy.com/media/saFoLCfgRajNm/giphy.gif"
+                await message.channel.send(gif_one + " " + gif_vs + " " + gif_two)
 
             elif cmd in ["gif", "gift", "dance"]:
                 if message.room.name != "<PM>":
