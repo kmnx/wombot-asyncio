@@ -1959,7 +1959,7 @@ class MyBot(chatango.Client):
 
                 the_longest_string = "to tag a gif: !tag link-to-the-gif tagname \r\r tags that post gifs/links: \r"
                 for key in tag_list:
-                    the_longest_string += "!" + key + " "
+                    the_longest_string += "!" + key[0] + " "
                 # print(the_longest_string)
                 n = 4000  # chunk length
                 chunks = [
@@ -1968,6 +1968,7 @@ class MyBot(chatango.Client):
                 ]
                 for c in chunks:
                     print(c)
+                    await asyncio.sleep(1)
                     await message.room.client.pm.send_message(message.user, str(c))
 
             elif cmd == "last":
@@ -2049,7 +2050,7 @@ class MyBot(chatango.Client):
                     for tag in in_tags:
                         if validators.url(tag):
                             url_tagged = True
-                    if url_tagged:
+                    if url_tagged is True:
                         await message.channel.send(
                                 "to tag a gif: !tag url-to-gif tag1 tag2 tag3"
                             )
@@ -2063,7 +2064,6 @@ class MyBot(chatango.Client):
                             for in_tag in in_tags:
                                 in_tag = in_tag.strip()
                                 
-
                                 await self.db.tag(in_url, in_tag)
 
             elif cmd == "untag":
