@@ -2363,13 +2363,16 @@ class MyBot(chatango.Client):
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
 
-
+                print("args are: ", args)
                 clean = re.compile("<.*?>")
+                print("clean, ", clean)
                 cleaned_args = re.sub(clean, "", args)
+                print("cleaned args", cleaned_args)
                 cleaned_args.encode()
-                cleaner_args = htmlmod.escape(cleaned_args)
-                print(cleaner_args)
-                await message.channel.send(cleaner_args)
+                print("cleaned args encoded", cleaned_args)
+                #cleaner_args = htmlmod.escape(cleaned_args)
+                #print("cleaner args",cleaner_args)
+                await message.channel.send(cleaned_args)
             elif cmd == "bg":
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)

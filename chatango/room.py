@@ -646,10 +646,12 @@ class Room(Connection):
             else:
                 msg = html.unescape(msg)
                 # print('unescaped:',msg)
-            _msg = msg.replace("\n", "\r").replace("~", "&#126;")
-            # print('_msg',_msg)
+            _msg = msg.replace("\n", "\r").replace("~", "&#126;").replace("<", "&lt;").replace("/", "&#47;")
+            print('_msg',_msg)
+
             for _message in message_cut(str(_msg), self._maxlen, self, use_html):
-                # print('_message',_message)
+                print('_message',_message)
+                
                 await self._send_command("bm", _id_gen(), message_flags, _message)
 
     ##
