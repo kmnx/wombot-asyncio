@@ -646,7 +646,7 @@ class Room(Connection):
             else:
                 msg = html.unescape(msg)
                 # print('unescaped:',msg)
-            _msg = msg.replace("\n", "\r").replace("~", "&#126;").replace("<", "&lt;").replace("/", "&#47;")
+            _msg = msg.replace("\n", "\r").replace("~", "&#126;")
             print('_msg',_msg)
 
             for _message in message_cut(str(_msg), self._maxlen, self, use_html):
