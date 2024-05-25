@@ -1940,7 +1940,7 @@ class MyBot(chatango.Client):
                 await message.channel.send(random.choice(data_pics_quokka.pics))
 
 
-            elif cmd == "timeis":
+            elif cmd in ["timeis","time"]:
                 """
                 prints the current time in dif timezones
                 """
