@@ -27,6 +27,12 @@ import re
 import json
 import html as htmlmod
 import validators
+from typing import List, Dict
+import zoneinfo
+
+if zoneinfo.available_timezones() is None:
+    import tzdata
+
 
 try:
     nltk.data.find("tokenizers/punkt")
@@ -58,6 +64,7 @@ from data_txt_facts import facts
 import schedule
 import chuntfm
 import telnet
+
 
 try:
     import mysecrets
@@ -1931,6 +1938,52 @@ class MyBot(chatango.Client):
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
                 await message.channel.send(random.choice(data_pics_quokka.pics))
+
+
+            elif cmd in ["timeis","time"]:
+                """
+                prints the current time in dif timezones
+                """
+                if message.room.name != "<PM>":
+                    await message.room.delete_message(message)
+
+                date_format = "%I:%M %p"
+                utc_now = datetime.now(timezone.utc)
+
+                # Name to print & IANA time zone
+                places = {
+                    "Amsterdam": zoneinfo.ZoneInfo("Europe/Amsterdam"),
+                    "London": zoneinfo.ZoneInfo("Europe/London"),
+                    "Lisboa": zoneinfo.ZoneInfo("Europe/Lisbon"),
+                    "New York": zoneinfo.ZoneInfo("America/New_York"),
+                    "Palanga": zoneinfo.ZoneInfo("Europe/Vilnius"),
+                    "San Diego": zoneinfo.ZoneInfo("America/Los_Angeles"),
+                    "São Paulo": zoneinfo.ZoneInfo("America/Sao_Paulo"),
+                    "Sydney": zoneinfo.ZoneInfo("Australia/Sydney"),
+                    "Texas": zoneinfo.ZoneInfo("America/Chicago"),
+                    "Tōkyō": zoneinfo.ZoneInfo("Asia/Tokyo"),
+                }  
+
+                local_datetimes: List[Dict[str, datetime]] = []
+                for place, local_zone in places.items():
+                    local_time = utc_now.astimezone(local_zone)
+                    local_datetimes.append(
+                        {
+                            "place": place,
+                            "time": local_time,
+                        }
+                    )
+            
+                local_datetimes.sort(key=lambda d: (d["time"].hour, d["time"].min))
+
+                local_strings = [
+                    f'{n["place"]} {n["time"].strftime(date_format)}' for n in local_datetimes
+                ]
+
+                msg_str = " | ".join(local_strings)
+                
+                await message.channel.send(msg_str)
+
 
             # gif management
 
