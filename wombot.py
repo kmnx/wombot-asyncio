@@ -2591,7 +2591,7 @@ class MyBot(chatango.Client):
             # anon bot spam detection
             # if within the first 3 messages
             if message.user.isanon and len(message.room.get_last_messages(user=message.user))<3:
-                if message.user.showname in ["matt","mattt","matttt","mattttt"]:
+                if message.user.showname in ["mattt","matttt"]:
                     pass
                 # if any link thats not an image or youtube link is posted, ban user
                 elif any([w.lower().startswith('http') and 'youtube' not in w.lower() and 'youtu.be' not in w.lower() for w in split_message]) or \
