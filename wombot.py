@@ -1735,7 +1735,7 @@ class MyBot(chatango.Client):
                                 + ": Sorry, I don't know that radio station.",
                             )
 
-            elif cmd == "funfact":
+            elif cmd in ["funfact","fact"]:
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
                 random_fact = random.choice(facts)['text']
@@ -1962,6 +1962,7 @@ class MyBot(chatango.Client):
                     "Sydney": zoneinfo.ZoneInfo("Australia/Sydney"),
                     "Texas": zoneinfo.ZoneInfo("America/Chicago"),
                     "Tōkyō": zoneinfo.ZoneInfo("Asia/Tokyo"),
+                    "Reykjavík": zoneinfo.ZoneInfo("Iceland"),
                 }  
 
                 local_datetimes: List[Dict[str, datetime]] = []
