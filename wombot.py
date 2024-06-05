@@ -2058,6 +2058,7 @@ class MyBot(chatango.Client):
                     await message.channel.send("Enter a query after !tagged")
 
                 else:
+                    args = str(args).rstrip()
                     await self.db.cursor.execute(
                         f"SELECT tag_name FROM tag_table WHERE tag_name LIKE '%{args}%' ORDER BY RANDOM() LIMIT 10"
                     )
