@@ -1748,6 +1748,37 @@ class MyBot(chatango.Client):
                     .lower()
                 )
 
+            elif cmd in ["chuntfact","cact"]:
+                if message.room.name != "<PM>":
+                    await message.room.delete_message(message)
+                random_fact = random.choice(facts)['text']
+                tokens = nltk.word_tokenize(random_fact)
+                tagged = [[token, tag] for (token, tag) in nltk.pos_tag(tokens)]
+                nn_idx = []
+                nns_idx = []
+                for i, [token, tag] in enumerate(tagged):
+                    if tag == "VBD":
+                        tagged[i][0] = "chunted"
+                    elif tag == "NN":
+                        nn_idx.append(i)
+                    elif tag == "NNS":
+                        nns_idx.append(i)
+                try:
+                    tagged[random.choice(nn_idx)][0] = "chunt"
+                except IndexError:
+                    pass
+                try:
+                    tagged[random.choice(nns_idx)][0] = "chunts"
+                except IndexError:
+                    pass
+                chunted_fact = " ".join([token[0] for token in tagged])
+                await message.channel.send(
+                        "your chunted random fact, "
+                        + message.user.showname
+                        + " : "
+                        + chunted_fact.replace(".", "").lower()
+                        )
+
             elif cmd == "fortune":
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
