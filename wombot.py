@@ -1234,9 +1234,11 @@ class MyBot(chatango.Client):
         )
         print(message.body)
         if message.body[0] == "!":
+            
             delete_message = True
-            print(message.room.name)
-            print("message.body: ", message.body)
+            #print(message.room.name)
+            #print("message.body: ", message.body)
+            logging.info(message.body)
             data = message.body[1:].split(" ", 1)
             if len(data) > 1:
                 orig_cmd, args = data[0], data[1]
