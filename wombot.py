@@ -500,6 +500,7 @@ async def now_playing(return_type):
         print("Error Connecting to Liquidsoap Telnet")
         print(e)
     '''
+    '''
     try:
         async with ClientSession() as s:
             r = await s.get("https://chunt.org/live.json", timeout=5)
@@ -510,8 +511,32 @@ async def now_playing(return_type):
             else:
                 print(live_json)
         print('live_json',live_json)
+    '''
+    try:
+        async with ClientSession() as s:
+            r = await s.get("http://127.0.0.1:7000/djconnected", timeout=5)
+        if r.status != 200:
+            try:
+                async with ClientSession() as s:
+                    r = await s.get("https://chunt.org/live.json", timeout=5)
+                    live_json = await r.json()
+                if live_json:
+                    if live_json["live"] == True:
+                        liquidsoap_harbor_status = "source"
+                    else:
+                        print(live_json)
+                print('live_json',live_json)
+            except Exception as e:
+                print("Error fetching live status")
+                print(e)
+        else:
+            response_json = await r.json()
+            if response_json and response_json["dj_connected"] == "True":
+                liquidsoap_harbor_status = "source"
+        
+
     except Exception as e:
-        print("Error fetching live.json from chunt.org")
+        print("Error fetching live status")
         print(e)
     # is someone scheduled to be live?
     print("made it past telnet connection attempt")
@@ -530,7 +555,7 @@ async def now_playing(return_type):
                 for show in schedule_json:
                     start_time = datetime.fromisoformat(show["startTimestamp"])
                     end_time = datetime.fromisoformat(show["endTimestamp"])
-                    print("start_time: ", start_time)
+                    #print("start_time: ", start_time)
                     if start_time < time_now:
                         if end_time > time_now:
                             print(show)
