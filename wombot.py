@@ -2699,7 +2699,7 @@ class MyBot(chatango.Client):
 
         else:
             # very crude way to catch posted gifs and add them to allgif_set and allgif_file
-            split_message = message.body.split(" ")
+            split_message = re.split(r'\s+', message.body.strip())
 
             # anon bot spam detection
             # if within the first 3 messages
