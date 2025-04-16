@@ -57,7 +57,7 @@ class Client:
         else is going to return None
         """
         room_name = room_name.lower()
-        expr = re.compile("^([a-z0-9\-]{1,20})$")
+        expr = re.compile(r"^([a-z0-9\-]{1,20})$")
         if not expr.match(room_name):
             return None
         if room_name in self._rooms:

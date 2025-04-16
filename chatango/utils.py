@@ -244,11 +244,11 @@ def get_anon_name(tssid: str, puid: str) -> str:
 def _fontFormat(text):
     # TODO check
     """Converts */_ into whattsap like formats"""
-    formats = {"/": "I", "\*": "B", "_": "U"}
+    formats = {"/": "I", r"\*": "B", "_": "U"}
     for f in formats:
         f1, f2 = set(formats.keys()) - {f}
         # find = ' <?[BUI]?>?[{0}{1}]?{2}(.+?[\S]){2}'.format(f1, f2, f+'{1}')
-        find = " <?[BUI]?>?[{0}{1}]?{2}(.+?[\S]?[{2}]?){2}[{0}{1}]?[\s]".format(
+        find = r" <?[BUI]?>?[{0}{1}]?{2}(.+?[\S]?[{2}]?){2}[{0}{1}]?[\s]".format(
             f1, f2, f
         )
         for x in re.findall(find, " " + text + " "):
@@ -277,15 +277,15 @@ def _parseFont(f: str, pm=False) -> (str, str, str):
 
 def _videoImagePMFormat(text):
     """Returns text with formatted video and image for PM sending"""
-    for x in re.findall("(http[s]?://[^\s]+outube.com/watch\?v=([^\s]+))", text):
+    for x in re.findall(r"(http[s]?://[^\s]+outube.com/watch\?v=([^\s]+))", text):
         original = x[0]
         cambio = '<i s="vid://yt:%s" w="126" h="96"/>' % x[1]
         text = text.replace(original, cambio)
-    for x in re.findall("(http[s]?://[\S]+outu.be/([^\s]+))", text):
+    for x in re.findall(r"(http[s]?://[\S]+outu.be/([^\s]+))", text):
         original = x[0]
         cambio = '<i s="vid://yt:%s" w="126" h="96"/>' % x[1]
         text = text.replace(original, cambio)
-    for x in re.findall("http[s]?://[\S]+?.jpg", text):
+    for x in re.findall(r"http[s]?://[\S]+?.jpg", text):
         text = text.replace(x, '<i s="%s" w="70.45" h="125"/>' % x)
     return text
 

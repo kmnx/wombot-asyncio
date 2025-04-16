@@ -255,7 +255,7 @@ class User:  # TODO a new format for users
                         r = dict(
                             [
                                 url.replace('"', "").split("=")
-                                for url in re.findall('(\w+=".*?")', src)
+                                for url in re.findall(r'(\w+=".*?")', src)
                             ]
                         )
                         if "fontFamily" in src:  # No bg in account / maybe a bug  #TODO
