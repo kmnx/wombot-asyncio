@@ -29,18 +29,10 @@ import html as htmlmod
 import validators
 from typing import List, Dict
 import zoneinfo
-handle = "wombo"
-logger = logging.getLogger(handle)
-
 
 if zoneinfo.available_timezones() is None:
     import tzdata
 
-logger.debug("this will get printed")
-logger.info("this will get printed")
-logger.warning("this will get printed")
-logger.error("this will get printed")
-logger.critical("this will get printed")
 
 try:
     nltk.data.find("tokenizers/punkt")
@@ -72,7 +64,8 @@ import data_txt_fortunes as fortunes
 from data_txt_facts import facts
 import schedule
 import chuntfm
-#import telnet
+import telnet
+
 
 try:
     import mysecrets
@@ -105,11 +98,11 @@ from mopidy_asyncio_client import MopidyClient
 # logging.basicConfig()
 # logging.getLogger("mopidy_asyncio_client").setLevel(logging.DEBUG)
 
-#logging.basicConfig(filename="example.log", encoding="utf-8", level=logging.DEBUG)
-#logging.debug("This message should go to the log file")
-#logging.info("So should this")
-#logging.warning("And this, too")
-#logging.error("And non-ASCII stuff, too, like Øresund and Malmö")
+logging.basicConfig(filename="example.log", encoding="utf-8", level=logging.DEBUG)
+logging.debug("This message should go to the log file")
+logging.info("So should this")
+logging.warning("And this, too")
+logging.error("And non-ASCII stuff, too, like Øresund and Malmö")
 
 print("start")
 command_list = [
@@ -242,7 +235,7 @@ def validate_and_convert_to_milliseconds(seektime):
     
 
 async def post_gif_of_the_hour(param):
-    logger.debug("post_gif_of_the_hour")
+    logging.debug("post_gif_of_the_hour")
 
     bots = []
     main_room = environ["wombotmainroom"]
@@ -259,7 +252,7 @@ async def post_gif_of_the_hour(param):
 
 
 async def schedule_gif_of_the_hour():
-    logger.debug("schedule_gif_of_the_hour")
+    logging.debug("schedule_gif_of_the_hour")
 
     # cron_min = aiocron.crontab('*/1 * * * *', func=post_gif_of_the_hour, args=("At every minute",), start=True)
     cron_jub = aiocron.crontab(
@@ -270,13 +263,12 @@ async def schedule_gif_of_the_hour():
         start=True,
     )
 
-    #while True:
-    #    logger.warning("sleeping for goth")
-    #    await asyncio.sleep(5)
+    while True:
+        await asyncio.sleep(5)
 
 
 async def post_chuntfm_status():
-    logger.debug("post_chuntfm_status")
+    logging.debug("post_chuntfm_status")
 
     bots = []
     main_room = environ["wombotmainroom"]
@@ -522,11 +514,9 @@ async def now_playing(return_type):
         print('live_json',live_json)
     '''
     try:
-        #async with ClientSession() as s:
-        #    r = await s.get("http://127.0.0.1:7000/djconnected", timeout=5)
-        #if r.status != 200:
-        print("bla")
-        if True:
+        async with ClientSession() as s:
+            r = await s.get("http://127.0.0.1:7000/djconnected", timeout=5)
+        if r.status != 200:
             try:
                 async with ClientSession() as s:
                     r = await s.get("https://chunt.org/live.json", timeout=5)
@@ -540,10 +530,10 @@ async def now_playing(return_type):
             except Exception as e:
                 print("Error fetching live status")
                 print(e)
-        #else:
-        #    response_json = await r.json()
-        #    if response_json and response_json["dj_connected"] == "True":
-        #        liquidsoap_harbor_status = "source"
+        else:
+            response_json = await r.json()
+            if response_json and response_json["dj_connected"] == "True":
+                liquidsoap_harbor_status = "source"
         
 
     except Exception as e:
@@ -782,7 +772,7 @@ async def get_most_used_commands(connection):
 
 
 async def playback_started_handler(data):
-    logger.debug("playback_started_handler")
+    logging.debug("playback_started_handler")
 
     """Callback function, called when the playback started."""
     print(data)
@@ -802,7 +792,7 @@ async def playback_started_handler(data):
 
 
 async def all_events_handler(event, data):
-    logger.debug("all_events_handler")
+    logging.debug("all_events_handler")
 
     """Callback function; catch-all function."""
     print(event, data)
@@ -811,7 +801,7 @@ async def all_events_handler(event, data):
 
 
 async def mpd_context_manager(mpd):
-    logger.debug("mpd_context_manager")
+    logging.debug("mpd_context_manager")
 
     try:
 
@@ -826,7 +816,7 @@ async def mpd_context_manager(mpd):
                 await asyncio.sleep(1)
 
     except Exception as e:
-        logger.error(e)
+        logging.error(e)
         print(e)
 
 
@@ -850,7 +840,7 @@ def convert_utc_to_london(utctime):
 
 
 async def raid(message, station_query):
-    logger.debug("raid")
+    logging.debug("raid")
 
     ra_stations = await radioactivity.get_station_list()
     print("wtf")
@@ -991,7 +981,7 @@ async def raid(message, station_query):
 
 async def shazam_station(message, station):
     print("shazam_station")
-    logger.debug("shazam_station")
+    logging.debug("shazam_station")
     if station == "nts1":
         audio_source = "https://stream-relay-geo.ntslive.net/stream"
     elif station == "nts2":
@@ -1115,7 +1105,7 @@ async def shazam_station(message, station):
 
 
 async def bandcamp_search(artist, title):
-    logger.debug("bandcamp_search")
+    logging.debug("bandcamp_search")
 
     google_query = artist + " " + title
     ""
@@ -1140,8 +1130,8 @@ async def bandcamp_search(artist, title):
 
 
 class Config:
-    #rooms = [environ["wombotmainroom"], environ["wombottestroom"]]
-    rooms = ["bothome2", "bothome"]
+    rooms = [environ["wombotmainroom"], environ["wombottestroom"]]
+
     bot_user = [mysecrets.chatango_user, mysecrets.chatango_pass]  # password
 
 class Timer:
@@ -1182,19 +1172,19 @@ class MyBot(chatango.Client):
         print("seriously")
 
     async def on_start(self):  # room join queue
-        logger.debug("on_start")
+        logging.debug("on_start")
 
         for room in Config.rooms:
             self.set_timeout(1, self.join, room)
 
     async def on_connect(self, room: typing.Union[chatango.Room, chatango.PM]):
-        logger.debug("on_connect")
+        logging.debug("on_connect")
 
         print(f"[{room.type}] Connected to", room)
         self._room = room
 
     async def on_disconnect(self, room):
-        logger.debug("on_disconnect")
+        logging.debug("on_disconnect")
 
         print(f"[{room.type}] Disconnected from", room)
 
@@ -1206,7 +1196,7 @@ class MyBot(chatango.Client):
         print(f"[{room.type}] Rejected from", room)
 
     async def on_room_init(self, room):
-        logger.debug("on_room_init")
+        logging.debug("on_room_init")
 
         if room.user.isanon:
             room.set_font(
@@ -1230,7 +1220,7 @@ class MyBot(chatango.Client):
             delete_message = True
             #print(message.room.name)
             #print("message.body: ", message.body)
-            logger.info(message.body)
+            logging.info(message.body)
             data = message.body[1:].split(" ", 1)
             if len(data) > 1:
                 orig_cmd, args = data[0], data[1]
@@ -1382,7 +1372,7 @@ class MyBot(chatango.Client):
                                         + show["dateUK"]
                                         + " "
                                         + show["startTimeUK"]
-                                        + " GMT"
+                                        + " BST"
                                         + " (in "
                                         + when
                                         + ")"
@@ -1465,7 +1455,7 @@ class MyBot(chatango.Client):
                                             + show["dateUK"]
                                             + " "
                                             + show["startTimeUK"]
-                                            + " GMT"
+                                            + " BST"
                                             + " (in "
                                             + when
                                             + ")"
@@ -1498,249 +1488,6 @@ class MyBot(chatango.Client):
                         cleaner = htmlmod.escape(cleaner)
 
                         await message.channel.send(cleaner)
-
-            elif cmd in ["whenis"]:
-                chuntfm_queried_show = ""
-
-                if message.room.name != "<PM>":
-                    await message.room.delete_message(message)
-                if not args:
-                    await message.channel.send("Enter a query for show: !whenis [query]")
-                else:
-                    try:
-                        async with ClientSession() as s:
-                            r = await s.get("https://chunt.org/schedule.json", timeout=5)
-                            if r:
-                                schedule_json = await r.json()
-                                # print(chu_json)
-                                time_now = datetime.now(timezone.utc)
-                                #print("time_now: ", time_now)
-                                for show in schedule_json:
-                                    start_time = datetime.fromisoformat(show["startTimestamp"])
-                                    datetime.fromisoformat(show["endTimestamp"])
-                                    #print("start_time: ", start_time)
-                                    if (start_time > time_now 
-                                        and (args.lower() in show["title"].lower() 
-                                            or args.lower() in show["description"].lower())):
-                                        print(show)
-                                        timediff = start_time - time_now
-                                        time_rem = str(timediff)
-
-                                        when = time_rem.split(".")[0] + " hours"
-
-                                        print(
-                                            "stripped desc",
-                                            show["description"]
-                                            .replace("\n", " ")
-                                            .replace("\r", "")
-                                            .replace("<br>", " - "),
-                                        )
-                                        chuntfm_queried_show = (
-                                            "Next show containing "
-                                            + args
-                                            + " is: "
-                                            + (show["title"])
-                                            + " | "
-                                            + show["description"]
-                                            .replace("\n", " ")
-                                            .replace("\r", "")
-                                            .replace("<br>", "")
-                                            + " on "
-                                            + show["dateUK"]
-                                            + " "
-                                            + show["startTimeUK"]
-                                            + " GMT"
-                                            + " (in "
-                                            + when
-                                            + ")"
-                                        )
-                                        break
-                                    else:
-                                        chuntfm_queried_show = "No upcoming shows found with query: " + args
-                            else:
-                                chuntfm_queried_show = "i think chunt.org might be broken"
-                    except Exception as e:
-                        print(e)
-                        chuntfm_queried_show = "i think chunt.org might be broken"
-                    if chuntfm_queried_show:
-                        # chuntfm_upnext = chuntfm_upnext.encode("ascii", "ignore")
-                        # chuntfm_upnext = chuntfm_upnext.decode("utf-8")
-                        # await message.channel.send("UP NEXT: Brazillian Correspondence w/ Pedro | Pedro from Brazil, Author of Vivas Caf, graces the ChuntFM airwaves once a month | 2023-12-28 16:00 GMT (in 2 days, 2:19:57 hours)")
-                        # pe = "UP NEXT: Brazillian Correspondence w/ Pedro | Pedro from Brazil, Author of Vivas Caf, graces the ChuntFM airwaves once a month | 2023-12-28 16:00 GMT (in 2 days, 2:19:57 hours)"
-                        # chuntfm_cleaned = chuntfm_upnext
-                        # if pe == chuntfm_cleaned:
-                        #    print('strings are equal')
-                        # else:
-                        #    print(pe)
-                        #    print(chuntfm_upnext)
-                        clean = re.compile("<.*?>")
-                        chuntfm_queried_show = re.sub(clean, "", chuntfm_queried_show)
-                        #await message.channel.send(chuntfm_upnext)
-
-                        cleaner = htmlmod.escape(chuntfm_queried_show)
-                        cleaner.encode()
-                        cleaner = htmlmod.escape(cleaner)
-
-                        await message.channel.send(cleaner)
-
-            elif cmd in ["today"]:
-                chuntfm_schedule = ""
-
-                if message.room.name != "<PM>":
-                    await message.room.delete_message(message)
-                try:
-                    async with ClientSession() as s:
-                        r = await s.get("https://chunt.org/schedule.json", timeout=5)
-                        if r:
-                            schedule_json = await r.json()
-                            # print(chu_json)
-                            time_now = datetime.now(timezone.utc)
-                            #print("time_now: ", time_now)
-                            for show in schedule_json:
-                                start_time = datetime.fromisoformat(show["startTimestamp"])
-                                datetime.fromisoformat(show["endTimestamp"])
-                                #print("start_time: ", start_time)
-                                if start_time.date() == time_now.date():
-                                    chuntfm_schedule += (
-                                        show["startTimeUK"]
-                                        + " - "
-                                        + show["endTimeUK"]
-                                        + " GMT: "
-                                        + show["title"]
-                                        + " | "
-                                    )
-                        else:
-                            chuntfm_schedule = "i think chunt.org might be broken"
-                except Exception as e:
-                    print(e)
-                    chuntfm_schedule = "i think chunt.org might be broken"
-                if chuntfm_schedule:
-                    # chuntfm_upnext = chuntfm_upnext.encode("ascii", "ignore")
-                    # chuntfm_upnext = chuntfm_upnext.decode("utf-8")
-                    # await message.channel.send("UP NEXT: Brazillian Correspondence w/ Pedro | Pedro from Brazil, Author of Vivas Caf, graces the ChuntFM airwaves once a month | 2023-12-28 16:00 GMT (in 2 days, 2:19:57 hours)")
-                    # pe = "UP NEXT: Brazillian Correspondence w/ Pedro | Pedro from Brazil, Author of Vivas Caf, graces the ChuntFM airwaves once a month | 2023-12-28 16:00 GMT (in 2 days, 2:19:57 hours)"
-                    # chuntfm_cleaned = chuntfm_upnext
-                    # if pe == chuntfm_cleaned:
-                    #    print('strings are equal')
-                    # else:
-                    #    print(pe)
-                    #    print(chuntfm_upnext)
-                    clean = re.compile("<.*?>")
-                    chuntfm_schedule = re.sub(clean, "", chuntfm_schedule)
-                    #await message.channel.send(chuntfm_upnext)
-
-                    cleaner = htmlmod.escape(chuntfm_schedule)
-                    cleaner.encode()
-                    cleaner = htmlmod.escape(cleaner)
-                    cleaner = "TODAY'S SCHEDULE: " + cleaner[:-2]
-                else:
-                    cleaner = "No upcoming shows today"
-                await message.channel.send(cleaner)
-
-
-            elif cmd in ["tomorrow"]:
-                chuntfm_schedule = ""
-
-                if message.room.name != "<PM>":
-                    await message.room.delete_message(message)
-                try:
-                    async with ClientSession() as s:
-                        r = await s.get("https://chunt.org/schedule.json", timeout=5)
-                        if r:
-                            schedule_json = await r.json()
-                            time_tomorrow = datetime.now(timezone.utc) + timedelta(days=1)
-                            for show in schedule_json:
-                                start_time = datetime.fromisoformat(show["startTimestamp"])
-                                datetime.fromisoformat(show["endTimestamp"])
-                                #print("start_time: ", start_time)
-                                if start_time.date() == time_tomorrow.date():
-                                    chuntfm_schedule += (
-                                        show["startTimeUK"]
-                                        + " - "
-                                        + show["endTimeUK"]
-                                        + " GMT: "
-                                        + show["title"]
-                                        + " | "
-                                    )
-                        else:
-                            chuntfm_schedule = "i think chunt.org might be broken"
-                except Exception as e:
-                    print(e)
-                    chuntfm_schedule = "i think chunt.org might be broken"
-                if chuntfm_schedule:
-                    # chuntfm_upnext = chuntfm_upnext.encode("ascii", "ignore")
-                    # chuntfm_upnext = chuntfm_upnext.decode("utf-8")
-                    # await message.channel.send("UP NEXT: Brazillian Correspondence w/ Pedro | Pedro from Brazil, Author of Vivas Caf, graces the ChuntFM airwaves once a month | 2023-12-28 16:00 GMT (in 2 days, 2:19:57 hours)")
-                    # pe = "UP NEXT: Brazillian Correspondence w/ Pedro | Pedro from Brazil, Author of Vivas Caf, graces the ChuntFM airwaves once a month | 2023-12-28 16:00 GMT (in 2 days, 2:19:57 hours)"
-                    # chuntfm_cleaned = chuntfm_upnext
-                    # if pe == chuntfm_cleaned:
-                    #    print('strings are equal')
-                    # else:
-                    #    print(pe)
-                    #    print(chuntfm_upnext)
-                    clean = re.compile("<.*?>")
-                    chuntfm_schedule = re.sub(clean, "", chuntfm_schedule)
-                    #await message.channel.send(chuntfm_upnext)
-
-                    cleaner = htmlmod.escape(chuntfm_schedule)
-                    cleaner.encode()
-                    cleaner = htmlmod.escape(cleaner)
-                    cleaner = "TOMORROW'S SCHEDULE: " + cleaner[:-2]
-                else:
-                    cleaner = "No upcoming shows tomorrow"
-                await message.channel.send(cleaner)
-
-            elif cmd in ["yesterday"]:
-                chuntfm_schedule = ""
-
-                if message.room.name != "<PM>":
-                    await message.room.delete_message(message)
-                try:
-                    async with ClientSession() as s:
-                        r = await s.get("https://chunt.org/schedule.json", timeout=5)
-                        if r:
-                            schedule_json = await r.json()
-                            time_yesterday = datetime.now(timezone.utc) - timedelta(days=1)
-                            for show in schedule_json:
-                                start_time = datetime.fromisoformat(show["startTimestamp"])
-                                datetime.fromisoformat(show["endTimestamp"])
-                                #print("start_time: ", start_time)
-                                if start_time.date() == time_yesterday.date():
-                                    chuntfm_schedule += (
-                                        show["startTimeUK"]
-                                        + " - "
-                                        + show["endTimeUK"]
-                                        + " GMT: "
-                                        + show["title"]
-                                        + " | "
-                                    )
-                        else:
-                            chuntfm_schedule = "i think chunt.org might be broken"
-                except Exception as e:
-                    print(e)
-                    chuntfm_schedule = "i think chunt.org might be broken"
-                if chuntfm_schedule:
-                    # chuntfm_upnext = chuntfm_upnext.encode("ascii", "ignore")
-                    # chuntfm_upnext = chuntfm_upnext.decode("utf-8")
-                    # await message.channel.send("UP NEXT: Brazillian Correspondence w/ Pedro | Pedro from Brazil, Author of Vivas Caf, graces the ChuntFM airwaves once a month | 2023-12-28 16:00 GMT (in 2 days, 2:19:57 hours)")
-                    # pe = "UP NEXT: Brazillian Correspondence w/ Pedro | Pedro from Brazil, Author of Vivas Caf, graces the ChuntFM airwaves once a month | 2023-12-28 16:00 GMT (in 2 days, 2:19:57 hours)"
-                    # chuntfm_cleaned = chuntfm_upnext
-                    # if pe == chuntfm_cleaned:
-                    #    print('strings are equal')
-                    # else:
-                    #    print(pe)
-                    #    print(chuntfm_upnext)
-                    clean = re.compile("<.*?>")
-                    chuntfm_schedule = re.sub(clean, "", chuntfm_schedule)
-                    #await message.channel.send(chuntfm_upnext)
-
-                    cleaner = htmlmod.escape(chuntfm_schedule)
-                    cleaner.encode()
-                    cleaner = htmlmod.escape(cleaner)
-                    cleaner = "YESTERDAY'S SCHEDULE: " + cleaner[:-2]
-                else:
-                    cleaner = "No shows yesterday"
-                await message.channel.send(cleaner)
 
             # jukebox controls
             elif cmd.startswith("np"):
@@ -2014,12 +1761,10 @@ class MyBot(chatango.Client):
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
                 random_fact = random.choice(facts)['text']
-                random_user = (random.choice(message.room.alluserlist)).name
                 tokens = nltk.word_tokenize(random_fact)
                 tagged = [[token, tag] for (token, tag) in nltk.pos_tag(tokens)]
                 nn_idx = []
                 nns_idx = []
-                nnp_idx = []
                 for i, [token, tag] in enumerate(tagged):
                     if tag == "VBD":
                         tagged[i][0] = "chunted"
@@ -2027,18 +1772,12 @@ class MyBot(chatango.Client):
                         nn_idx.append(i)
                     elif tag == "NNS":
                         nns_idx.append(i)
-                    elif tag == "NNP":
-                        nnp_idx.append(i)
                 try:
                     tagged[random.choice(nn_idx)][0] = "chunt"
                 except IndexError:
                     pass
                 try:
                     tagged[random.choice(nns_idx)][0] = "chunts"
-                except IndexError:
-                    pass
-                try:
-                    tagged[random.choice(nnp_idx)][0] = random_user
                 except IndexError:
                     pass
                 chunted_fact = " ".join([token[0] for token in tagged])
@@ -2254,7 +1993,6 @@ class MyBot(chatango.Client):
                 # Name to print & IANA time zone
                 places = {
                     "Amsterdam": zoneinfo.ZoneInfo("Europe/Amsterdam"),
-                    "Bali": zoneinfo.ZoneInfo("Asia/Makassar"),
                     "London": zoneinfo.ZoneInfo("Europe/London"),
                     "Lisboa": zoneinfo.ZoneInfo("Europe/Lisbon"),
                     "New York": zoneinfo.ZoneInfo("America/New_York"),
@@ -2288,7 +2026,7 @@ class MyBot(chatango.Client):
                 await message.channel.send(msg_str)
 
 
-            elif anniversary := re.match(r"^chunt#(\d{3,4})$", cmd):
+            elif anniversary := re.match("^chunt#(\d{3,4})$", cmd):
                 """
                 Prints the date + info of given an #number
                 """
@@ -2757,17 +2495,6 @@ class MyBot(chatango.Client):
 
                 await message.channel.send(profile_pic_url)
 
-            elif cmd == "battle":
-                if message.room.name != "<PM>":
-                    await message.room.delete_message(message)
-
-                random_user1 = (random.choice(message.room.alluserlist)).name
-                random_user2 = (random.choice(message.room.alluserlist)).name
-                profile_pic_url1 = f"https://ust.chatango.com/profileimg/{random_user1[0]}/{random_user1[1]}/{random_user1}/full.jpg"
-                profile_pic_url2 = f"https://ust.chatango.com/profileimg/{random_user2[0]}/{random_user2[1]}/{random_user2}/full.jpg"
-                gif_vs = "https://media4.giphy.com/media/saFoLCfgRajNm/giphy.gif"
-                await message.channel.send(profile_pic_url1 + " " + gif_vs + " " + profile_pic_url2)
-
             elif cmd == "say":
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
@@ -2881,27 +2608,6 @@ class MyBot(chatango.Client):
                     + " days left, you should probably have acted fast by now!"
                 )
             
-            elif cmd == "chavalon":
-                if message.room.name != "<PM>":
-                    await message.room.delete_message(message)
-                chavalon_date = date(2024, 9, 21)
-                days_left = str((chavalon_date - date.today()).days)
-                await message.channel.send(
-                        "CHUNT922 @ AVALON CAFE: 21 SEPTEMBER : only "
-                    + days_left
-                    + " days left, act fast!"
-                )
-            
-            elif cmd in ["days", "date"]:
-                if message.room.name != "<PM>":
-                    await message.room.delete_message(message)
-                chunt0_date = date(2022, 3, 14)
-                days_since = str((date.today() - chunt0_date).days)
-                await message.channel.send(
-                        "Today is CHUNT"
-                    + days_since
-                )
-            
             elif cmd == "wombot":
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
@@ -2968,7 +2674,7 @@ class MyBot(chatango.Client):
             # if within the first 3 messages
             if message.user.showname in ["mattt","matttt"]:
                     pass
-            elif (message.user.isanon or re.search(r'^(?:([a-z]{2})\1|([a-z]{1})\2([a-z]{1})\3)\d{3}$', message.user.showname,flags=re.I) is not None) and len(message.room.get_last_messages(user=message.user))<2:
+            elif (message.user.isanon or re.search('^(?:([a-z]{2})\1|([a-z]{1})\2([a-z]{1})\3)\d{3}$', message.user.showname,flags=re.I) is not None) and len(message.room.get_last_messages(user=message.user))<2:
                 # if any link thats not an image or youtube link is posted, ban user
                 if any([w.lower().startswith('http') and 'youtube' not in w.lower() and 'youtu.be' not in w.lower() for w in split_message]) or \
                         any([w.lower().startswith('http') and re.search(r'\.(png|jpe*g|gif).{0,10}$', w.lower(), flags=re.MULTILINE) is None for w in split_message]):
@@ -3003,7 +2709,7 @@ class MyBot(chatango.Client):
 
 async def get_db_idhistory_cur():
     # ugh
-    logger.debug("get_db_cur")
+    logging.debug("get_db_cur")
 
     conn = await aiosqlite.connect("/db/trackids.db")
     # conn.row_factory = lambda cursor, row: row[0]
@@ -3011,28 +2717,26 @@ async def get_db_idhistory_cur():
     cursor = await conn.cursor()
     return cursor
 
-    
-async def main():
+
+if __name__ == "__main__":
+    logging.debug("__main__")
+
+    loop = asyncio.get_event_loop()
     bot = MyBot()
     bot.default_user(Config.bot_user[0], Config.bot_user[1])  # easy_start
 
     #    or_accounts = [["user1","passwd1"], ["user2","passwd2"]]
     #    bot.default_user(accounts=or_accounts, pm=False) #True if passwd was input.
-    #ListBots = [bot.start()]  # Multiple instances
-    
-    
-    async with asyncio.TaskGroup() as tg:
-        bot_task = await tg.create_task(bot.start())
-        #mpd = tg.create_task(MopidyClient(host="139.177.181.183"))
-        #mpd_task = tg.create_task(mpd_context_manager(mpd))
-        #gif_task = tg.create_task(schedule_gif_of_the_hour())
-    print("now what")
+    ListBots = [bot.start()]  # Multiple instances
+    task = asyncio.gather(*ListBots, return_exceptions=True)
+    mpd = MopidyClient(host="139.177.181.183")
+    mpd_task = asyncio.gather(mpd_context_manager(mpd))
+    gif_task = schedule_gif_of_the_hour()
+    # cfm_task = schedule_chuntfm_livecheck()
 
+    tasks = asyncio.gather(task, gif_task, mpd_task)
+    logging.debug("init asyncio tasks started")
 
-
-
-if __name__ == "__main__":
-    logger.debug("__main__")
     allgif_file = os.path.join(base_path, "allgif.txt")
     if not os.path.exists(allgif_file):
         with open(allgif_file, "a") as file:
@@ -3047,42 +2751,11 @@ if __name__ == "__main__":
         with open(goth_file, "a") as file:
             pass
 
-    async def main():
-        bot = MyBot()
-        bot.default_user(Config.bot_user[0], Config.bot_user[1])  # easy_start
-
-        # Start the bot and other tasks
-        bot_task = asyncio.create_task(bot.start())  # Single bot instance
-        gif_task = asyncio.create_task(schedule_gif_of_the_hour())  # Continuous task
-        mpd = MopidyClient(host="139.177.181.183")
-        mpd_task = asyncio.create_task(mpd_context_manager(mpd))
-        # Group tasks to manage them together
-        tasks = asyncio.gather(bot_task, gif_task)
-        
-
-        try:
-            await tasks
-        except asyncio.CancelledError:
-            logger.debug("Tasks cancelled")
-        finally:
-            # Cancel tasks on shutdown
-            bot_task.cancel()
-            gif_task.cancel()
-            await asyncio.gather(bot_task, gif_task, return_exceptions=True)
-            logger.debug("Shutting down")
-
-    # Create the event loop manually
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-
     try:
-        # Run the main coroutine until it completes
-        loop.run_until_complete(main())
-        # Keep the loop running indefinitely
+        loop.run_until_complete(tasks)
         loop.run_forever()
     except KeyboardInterrupt:
-        logger.debug("Keyboard interrupt received, shutting down.")
+        print("[KeyboardInterrupt] Killed bot.")
     finally:
-        # Clean up the event loop
-        loop.stop()
+        task.cancel()
         loop.close()

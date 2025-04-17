@@ -8,6 +8,7 @@ import logging
 import ssl
 
 shazam_api_key = mysecrets.shazam_api_key
+print("shazam_api_key: ", shazam_api_key)
 
 
 async def on_request_start(session, context, params):
