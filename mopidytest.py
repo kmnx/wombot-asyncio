@@ -18,9 +18,11 @@ async def all_events_handler(event, data):
     print(event, data)
 
 
-async def main_context_manager():
-
-    async with MopidyClient(host='what') as mopidy:
+async def main():
+    mopidy = MopidyClient(host='139.177.181.183')  # Create the client instance
+    #mopidy = MopidyClient(host='what')
+    try:
+        await mopidy.connect()  # Explicitly connect to the Mopidy server
 
         mopidy.bind('track_playback_started', playback_started_handler)
         mopidy.bind('*', all_events_handler)
@@ -29,24 +31,11 @@ async def main_context_manager():
         await mopidy.playback.play()
         while True:
             await asyncio.sleep(1)
+    except Exception as e:
+        logging.error(f"An error occurred: {e}")
+    finally:
+        await mopidy.disconnect()  # Ensure the connection is closed
 
 
-async def main_plain():
-
-    mopidy = await MopidyClient().connect()
-
-    mopidy.bind('track_playback_started', playback_started_handler)
-    mopidy.bind('*', all_events_handler)
-
-    # Your program's logic:
-    await mopidy.playback.play()
-    while True:
-        await asyncio.sleep(1)
-
-    await mopidy.disconnect()  # close connection implicit
-
-
-# Either ...
-asyncio.run(main_context_manager())
-# ... or
-asyncio.run(main_plain())
+# Run the main function
+asyncio.run(main())
