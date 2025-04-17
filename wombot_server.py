@@ -64,7 +64,11 @@ import data_txt_fortunes as fortunes
 from data_txt_facts import facts
 import schedule
 import chuntfm
+<<<<<<< HEAD
+#import telnet
+=======
 import telnet
+>>>>>>> c67556c4dd164b6c59bde129a189b35a2e6587fa
 
 
 try:
@@ -2758,4 +2762,8 @@ if __name__ == "__main__":
         print("[KeyboardInterrupt] Killed bot.")
     finally:
         task.cancel()
+<<<<<<< HEAD
         loop.close()
+=======
+        loop.close()
+>>>>>>> c67556c4dd164b6c59bde129a189b35a2e6587fa

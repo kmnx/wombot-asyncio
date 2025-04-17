@@ -12,7 +12,7 @@ pydub
 aiosqlite
 nltk
 anyio
-asynctelnet
+#asynctelnet
 anyio
 matplotlib
 scipy

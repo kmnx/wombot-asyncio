@@ -21,6 +21,7 @@ import logging
 from urllib.parse import urlparse
 import bs4
 import nltk
+
 import edamam
 import re
 
@@ -1140,8 +1141,8 @@ async def bandcamp_search(artist, title):
 
 
 class Config:
-    #rooms = [environ["wombotmainroom"], environ["wombottestroom"]]
-    rooms = ["bothome2", "bothome"]
+    rooms = [environ["wombotmainroom"], environ["wombottestroom"]]
+    #rooms = ["bothome2", "bothome"]
     bot_user = [mysecrets.chatango_user, mysecrets.chatango_pass]  # password
 
 class Timer:
@@ -1754,12 +1755,12 @@ class MyBot(chatango.Client):
             elif cmd == ("juke"):
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
-                chuntfm_np = await now_playing_jukebox("formatted")
-                print(chuntfm_np)
+                #chuntfm_np = await now_playing_jukebox("formatted")
+                #print(chuntfm_np)
 
-                if chuntfm_np is not None:
-                    await message.channel.send(chuntfm_np)
-
+                #if chuntfm_np is not None:
+                #    await message.channel.send(chuntfm_np)
+                await message.channel.send("sorry, juke is brok")
             elif cmd.startswith("jukebox"):
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
@@ -1773,7 +1774,8 @@ class MyBot(chatango.Client):
 
             elif cmd in ["play", "add"]:
                 await message.room.delete_message(message)
-                # await mpd.tracklist.add(uris=['mixcloud:track:/NTSRadio/siren-w-dj-fart-in-the-club-14th-may-2020/'])
+                await message.channel.send("sorry, juke is brok")
+                '''# await mpd.tracklist.add(uris=['mixcloud:track:/NTSRadio/siren-w-dj-fart-in-the-club-14th-may-2020/'])
                 # await mpd.tracklist.add(uris=['sc:https://soundcloud.com/sirenldn/nts-dj-fart-in-the-club'])
                 playback_state = await mpd.playback.get_state()
                 schemes = await mpd.core.get_uri_schemes()
@@ -1893,6 +1895,7 @@ class MyBot(chatango.Client):
 
                     if results:
                         print(results)
+                    '''
 
             elif cmd in ["queue", "tl"]:
                 if message.room.name != "<PM>":
@@ -3057,7 +3060,7 @@ if __name__ == "__main__":
         mpd = MopidyClient(host="139.177.181.183")
         mpd_task = asyncio.create_task(mpd_context_manager(mpd))
         # Group tasks to manage them together
-        tasks = asyncio.gather(bot_task, gif_task)
+        tasks = asyncio.gather(bot_task, gif_task,mpd_task)
         
 
         try:
