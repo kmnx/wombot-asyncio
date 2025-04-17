@@ -244,7 +244,7 @@ def validate_and_convert_to_milliseconds(seektime):
 
 async def post_gif_of_the_hour(param):
     logger.debug("post_gif_of_the_hour")
-
+    bot = BotSingleton.get_instance()  # Get the singleton instance
     bots = []
     main_room = environ["wombotmainroom"]
     test_room = environ["wombottestroom"]
@@ -278,7 +278,7 @@ async def schedule_gif_of_the_hour():
 
 async def post_chuntfm_status():
     logger.debug("post_chuntfm_status")
-
+    bot = BotSingleton.get_instance()
     bots = []
     main_room = environ["wombotmainroom"]
     test_room = environ["wombottestroom"]
@@ -3013,23 +3013,40 @@ async def get_db_idhistory_cur():
     # self.conn.row_factory = aiosqlite.Row
     cursor = await conn.cursor()
     return cursor
+class BotSingleton:
+    _instance = None
 
+    @staticmethod
+    def get_instance():
+        """Static access method to get the single instance of MyBot."""
+        if BotSingleton._instance is None:
+            BotSingleton._instance = MyBot()
+            BotSingleton._instance.default_user(Config.bot_user[0], Config.bot_user[1])  # Initialize bot
+        return BotSingleton._instance
     
 async def main():
-    bot = MyBot()
+    bot = BotSingleton.get_instance()
     bot.default_user(Config.bot_user[0], Config.bot_user[1])  # easy_start
 
-    #    or_accounts = [["user1","passwd1"], ["user2","passwd2"]]
-    #    bot.default_user(accounts=or_accounts, pm=False) #True if passwd was input.
-    #ListBots = [bot.start()]  # Multiple instances
+    # Start the bot and other tasks
+    bot_task = asyncio.create_task(bot.start())  # Single bot instance
+    gif_task = asyncio.create_task(schedule_gif_of_the_hour())  # Continuous task
+    mpd = MopidyClient(host="139.177.181.183")
+    mpd_task = asyncio.create_task(mpd_context_manager(mpd))
+    # Group tasks to manage them together
+    tasks = asyncio.gather(bot_task, gif_task,mpd_task)
     
-    
-    async with asyncio.TaskGroup() as tg:
-        bot_task = await tg.create_task(bot.start())
-        #mpd = tg.create_task(MopidyClient(host="139.177.181.183"))
-        #mpd_task = tg.create_task(mpd_context_manager(mpd))
-        #gif_task = tg.create_task(schedule_gif_of_the_hour())
-    print("now what")
+
+    try:
+        await tasks
+    except asyncio.CancelledError:
+        logger.debug("Tasks cancelled")
+    finally:
+        # Cancel tasks on shutdown
+        bot_task.cancel()
+        gif_task.cancel()
+        await asyncio.gather(bot_task, gif_task, return_exceptions=True)
+        logger.debug("Shutting down")
 
 
 
@@ -3050,29 +3067,7 @@ if __name__ == "__main__":
         with open(goth_file, "a") as file:
             pass
 
-    async def main():
-        bot = MyBot()
-        bot.default_user(Config.bot_user[0], Config.bot_user[1])  # easy_start
-
-        # Start the bot and other tasks
-        bot_task = asyncio.create_task(bot.start())  # Single bot instance
-        gif_task = asyncio.create_task(schedule_gif_of_the_hour())  # Continuous task
-        mpd = MopidyClient(host="139.177.181.183")
-        mpd_task = asyncio.create_task(mpd_context_manager(mpd))
-        # Group tasks to manage them together
-        tasks = asyncio.gather(bot_task, gif_task,mpd_task)
-        
-
-        try:
-            await tasks
-        except asyncio.CancelledError:
-            logger.debug("Tasks cancelled")
-        finally:
-            # Cancel tasks on shutdown
-            bot_task.cancel()
-            gif_task.cancel()
-            await asyncio.gather(bot_task, gif_task, return_exceptions=True)
-            logger.debug("Shutting down")
+    
 
     # Create the event loop manually
     loop = asyncio.new_event_loop()
