@@ -1383,7 +1383,7 @@ class MyBot(chatango.Client):
                                         + show["dateUK"]
                                         + " "
                                         + show["startTimeUK"]
-                                        + " GMT"
+                                        + " London time"
                                         + " (in "
                                         + when
                                         + ")"
