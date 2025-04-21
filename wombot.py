@@ -1383,7 +1383,7 @@ class MyBot(chatango.Client):
                                         + show["dateUK"]
                                         + " "
                                         + show["startTimeUK"]
-                                        + " London time"
+                                        + " BST"
                                         + " (in "
                                         + when
                                         + ")"
@@ -1606,7 +1606,7 @@ class MyBot(chatango.Client):
                                         show["startTimeUK"]
                                         + " - "
                                         + show["endTimeUK"]
-                                        + " GMT: "
+                                        + " BST: "
                                         + show["title"]
                                         + " | "
                                     )
