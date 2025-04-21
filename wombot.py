@@ -101,6 +101,15 @@ except Exception:
     shazam_api_key = ""
     print("Please add shazam_api_key for rapidapi shazam functionality to mysecrets.py")
 
+def get_uk_timezone_label():
+    uk_tz = pytz.timezone('Europe/London')
+    now = datetime.now(uk_tz)
+    if now.dst():
+        return "BST"
+    else:
+        return "GMT"
+    
+
 from mopidy_asyncio_client import MopidyClient
 
 # logging.basicConfig()
@@ -1383,7 +1392,8 @@ class MyBot(chatango.Client):
                                         + show["dateUK"]
                                         + " "
                                         + show["startTimeUK"]
-                                        + " BST"
+                                        + " "
+                                        + get_uk_timezone_label()
                                         + " (in "
                                         + when
                                         + ")"
@@ -1606,7 +1616,9 @@ class MyBot(chatango.Client):
                                         show["startTimeUK"]
                                         + " - "
                                         + show["endTimeUK"]
-                                        + " BST: "
+                                        + " "
+                                        + get_uk_timezone_label()
+                                        + ": "
                                         + show["title"]
                                         + " | "
                                     )
@@ -1658,8 +1670,9 @@ class MyBot(chatango.Client):
                                     chuntfm_schedule += (
                                         show["startTimeUK"]
                                         + " - "
-                                        + show["endTimeUK"]
-                                        + " GMT: "
+                                        + show["endTimeUK"]+ " "
+                                        + get_uk_timezone_label()
+                                        + ": "
                                         + show["title"]
                                         + " | "
                                     )
@@ -1711,7 +1724,9 @@ class MyBot(chatango.Client):
                                         show["startTimeUK"]
                                         + " - "
                                         + show["endTimeUK"]
-                                        + " GMT: "
+                                        + " "
+                                        + get_uk_timezone_label()
+                                        + ": "
                                         + show["title"]
                                         + " | "
                                     )
