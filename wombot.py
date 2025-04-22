@@ -121,6 +121,23 @@ from mopidy_asyncio_client import MopidyClient
 #logging.warning("And this, too")
 #logging.error("And non-ASCII stuff, too, like Øresund and Malmö")
 
+class BotSingleton:
+    _instance = None
+
+    @staticmethod
+    def get_instance():
+        """Get the current bot instance, or raise an error if not initialized."""
+        if BotSingleton._instance is None:
+            raise Exception("Bot instance has not been initialized.")
+        return BotSingleton._instance
+
+    @staticmethod
+    def initialize(bot_instance):
+        """Initialize the bot instance."""
+        if BotSingleton._instance is not None:
+            raise Exception("Bot instance is already initialized.")
+        BotSingleton._instance = bot_instance
+
 print("start")
 command_list = [
     "help",
@@ -253,7 +270,7 @@ def validate_and_convert_to_milliseconds(seektime):
 
 async def post_gif_of_the_hour(param):
     logger.debug("post_gif_of_the_hour")
-
+    bot = BotSingleton.get_instance()
     bots = []
     main_room = environ["wombotmainroom"]
     test_room = environ["wombottestroom"]
@@ -287,7 +304,7 @@ async def schedule_gif_of_the_hour():
 
 async def post_chuntfm_status():
     logger.debug("post_chuntfm_status")
-
+    bot = BotSingleton.get_instance()
     bots = []
     main_room = environ["wombotmainroom"]
     test_room = environ["wombottestroom"]
@@ -793,7 +810,7 @@ async def get_most_used_commands(connection):
 
 async def playback_started_handler(data):
     logger.debug("playback_started_handler")
-
+    bot = BotSingleton.get_instance()
     """Callback function, called when the playback started."""
     print(data)
     print(bot.rooms)  # ok
@@ -860,6 +877,7 @@ def convert_utc_to_london(utctime):
 
 
 async def raid(message, station_query):
+    bot = BotSingleton.get_instance()
     logger.debug("raid")
 
     ra_stations = await radioactivity.get_station_list()
@@ -1000,7 +1018,9 @@ async def raid(message, station_query):
 
 
 async def shazam_station(message, station):
+
     print("shazam_station")
+    bot = BotSingleton.get_instance()
     logger.debug("shazam_station")
     if station == "nts1":
         audio_source = "https://stream-relay-geo.ntslive.net/stream"
@@ -1185,7 +1205,7 @@ class MyBot(chatango.Client):
         with open(goth_file, "r") as file:
             self.goth = file.readline().strip()
         if not self.goth:
-            self.goth = random.choice(await bot.db.get_objects_by_tag_name("bbb"))
+            self.goth = random.choice(await self.db.get_objects_by_tag_name("bbb"))
         
         print(self.goth)
         self._room = None
@@ -1228,6 +1248,7 @@ class MyBot(chatango.Client):
 
     
     async def on_message(self, message):
+        bot = BotSingleton.get_instance()
         print(
             time.strftime("%b/%d-%H:%M:%S", time.localtime(message.time)),
             message.room.name,
@@ -1255,6 +1276,7 @@ class MyBot(chatango.Client):
 
             # works but needs right instance and i cba rn
             elif cmd == "count":
+
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
                 print("user count", bot._room.usercount)
@@ -3032,6 +3054,7 @@ async def get_db_idhistory_cur():
     
 async def main():
     bot = MyBot()
+    BotSingleton.initialize(bot)
     bot.default_user(Config.bot_user[0], Config.bot_user[1])  # easy_start
 
     #    or_accounts = [["user1","passwd1"], ["user2","passwd2"]]
@@ -3067,6 +3090,7 @@ if __name__ == "__main__":
 
     async def main():
         bot = MyBot()
+        BotSingleton.initialize(bot)
         bot.default_user(Config.bot_user[0], Config.bot_user[1])  # easy_start
 
         # Start the bot and other tasks

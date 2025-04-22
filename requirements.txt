@@ -18,3 +18,4 @@ matplotlib
 scipy
 PyWavelets
 validators
+audioop-lts
