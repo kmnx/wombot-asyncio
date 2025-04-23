@@ -2,7 +2,7 @@
 example.log
 # macOS 
 .DS_Store
-
+goth.txt
 # IDE
 .idea/*
 

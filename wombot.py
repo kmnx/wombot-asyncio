@@ -673,6 +673,7 @@ async def now_playing(return_type):
     
 # juke np
 async def jukebox_status():
+    mpd = MpdSingleton.get_instance()
     data = None
     print("trying to get mpd data")
     try:
@@ -696,6 +697,7 @@ async def jukebox_status():
     return jukebox_status_msg
 
 async def now_playing_jukebox(return_type):
+    mpd = MpdSingleton.get_instance()
     chu2_np_formatted = ""
     chu2_np_raw = None
     
@@ -1792,12 +1794,12 @@ class MyBot(chatango.Client):
             elif cmd == ("juke"):
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
-                #chuntfm_np = await now_playing_jukebox("formatted")
-                #print(chuntfm_np)
+                chuntfm_np = await now_playing_jukebox("formatted")
+                print(chuntfm_np)
 
-                #if chuntfm_np is not None:
-                #    await message.channel.send(chuntfm_np)
-                await message.channel.send("sorry, juke is brok")
+                if chuntfm_np is not None:
+                    await message.channel.send(chuntfm_np)
+                #await message.channel.send("sorry, juke is brok")
             elif cmd.startswith("jukebox"):
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
@@ -1806,13 +1808,15 @@ class MyBot(chatango.Client):
                 )
 
             elif cmd == "clear":
+                mpd = MpdSingleton.get_instance()
                 await message.room.delete_message(message)
                 await mpd.tracklist.clear()
 
             elif cmd in ["play", "add"]:
+                mpd = MpdSingleton.get_instance()
                 await message.room.delete_message(message)
-                await message.channel.send("sorry, juke is brok")
-                '''# await mpd.tracklist.add(uris=['mixcloud:track:/NTSRadio/siren-w-dj-fart-in-the-club-14th-may-2020/'])
+                #await message.channel.send("sorry, juke is brok")
+                # await mpd.tracklist.add(uris=['mixcloud:track:/NTSRadio/siren-w-dj-fart-in-the-club-14th-may-2020/'])
                 # await mpd.tracklist.add(uris=['sc:https://soundcloud.com/sirenldn/nts-dj-fart-in-the-club'])
                 playback_state = await mpd.playback.get_state()
                 schemes = await mpd.core.get_uri_schemes()
@@ -1926,15 +1930,20 @@ class MyBot(chatango.Client):
                             print(top_slice)
                             tlid = top_slice[0]["tlid"]
                             print("the tlid is: ", tlid)
+                            playback_state = await mpd.playback.get_state()
+                            print("Playback state before play():", playback_state)
                             await mpd.playback.play()
+                            playback_state = await mpd.playback.get_state()
+                            print("Playback state after play():", playback_state)
                     else:
                         print("should be playing")
 
                     if results:
                         print(results)
-                    '''
+                    
 
             elif cmd in ["queue", "tl"]:
+                mpd = MpdSingleton.get_instance()
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
                 tracklist = ""
@@ -1965,12 +1974,14 @@ class MyBot(chatango.Client):
                 await message.channel.send(msg)
 
             elif cmd in ["skip"]:
+                mpd = MpdSingleton.get_instance()
                 await message.room.delete_message(message)
                 print("consume mode ", await mpd.tracklist.get_consume())
                 await mpd.playback.next()
             
 
             elif cmd in ["seek"]:
+                mpd = MpdSingleton.get_instance()
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
                 if args:
@@ -1985,6 +1996,7 @@ class MyBot(chatango.Client):
                                 await mpd.playback.seek(int(milliseconds))
                     
             elif cmd in ["ff","fastforward"]:
+                mpd = MpdSingleton.get_instance()
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
                 data = await mpd.playback.get_current_track()
@@ -1996,6 +2008,7 @@ class MyBot(chatango.Client):
                         await mpd.playback.seek(int(new_track_position))
             
             elif cmd in ["rewind","rw"]:
+                mpd = MpdSingleton.get_instance()
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
                 data = await mpd.playback.get_current_track()
@@ -3051,25 +3064,47 @@ async def get_db_idhistory_cur():
     cursor = await conn.cursor()
     return cursor
 
+class MpdSingleton:
+    _instance = None
+
+    @staticmethod
+    def get_instance():
+        """Get the current mpd instance, or raise an error if not initialized."""
+        if MpdSingleton._instance is None:
+            raise Exception("Mpd instance has not been initialized.")
+        return MpdSingleton._instance
+
+    @staticmethod
+    def initialize(mpd_instance):
+        """Initialize the mpd instance."""
+        if MpdSingleton._instance is not None:
+            raise Exception("Mpd instance is already initialized.")
+        MpdSingleton._instance = mpd_instance
     
+
 async def main():
-    bot = MyBot()
-    BotSingleton.initialize(bot)
-    bot.default_user(Config.bot_user[0], Config.bot_user[1])  # easy_start
+        bot = MyBot()
+        BotSingleton.initialize(bot)
+        bot.default_user(Config.bot_user[0], Config.bot_user[1])  # easy_start
 
-    #    or_accounts = [["user1","passwd1"], ["user2","passwd2"]]
-    #    bot.default_user(accounts=or_accounts, pm=False) #True if passwd was input.
-    #ListBots = [bot.start()]  # Multiple instances
-    
-    
-    async with asyncio.TaskGroup() as tg:
-        bot_task = await tg.create_task(bot.start())
-        #mpd = tg.create_task(MopidyClient(host="139.177.181.183"))
-        #mpd_task = tg.create_task(mpd_context_manager(mpd))
-        #gif_task = tg.create_task(schedule_gif_of_the_hour())
-    print("now what")
+        bot_task = asyncio.create_task(bot.start())  # Single bot instance
+        gif_task = asyncio.create_task(schedule_gif_of_the_hour())  # Continuous task
+        mpd_client = MopidyClient(host="139.177.181.183")
+        MpdSingleton.initialize(mpd_client)
+        mpd_task = asyncio.create_task(mpd_context_manager(mpd_client))
+        tasks = asyncio.gather(bot_task, gif_task,mpd_task)
+        
 
-
+        try:
+            await tasks
+        except asyncio.CancelledError:
+            logger.debug("Tasks cancelled")
+        finally:
+            # Cancel tasks on shutdown
+            bot_task.cancel()
+            gif_task.cancel()
+            await asyncio.gather(bot_task, gif_task, return_exceptions=True)
+            logger.debug("Shutting down")
 
 
 if __name__ == "__main__":
@@ -3088,30 +3123,7 @@ if __name__ == "__main__":
         with open(goth_file, "a") as file:
             pass
 
-    async def main():
-        bot = MyBot()
-        BotSingleton.initialize(bot)
-        bot.default_user(Config.bot_user[0], Config.bot_user[1])  # easy_start
-
-        # Start the bot and other tasks
-        bot_task = asyncio.create_task(bot.start())  # Single bot instance
-        gif_task = asyncio.create_task(schedule_gif_of_the_hour())  # Continuous task
-        mpd = MopidyClient(host="139.177.181.183")
-        mpd_task = asyncio.create_task(mpd_context_manager(mpd))
-        # Group tasks to manage them together
-        tasks = asyncio.gather(bot_task, gif_task,mpd_task)
-        
-
-        try:
-            await tasks
-        except asyncio.CancelledError:
-            logger.debug("Tasks cancelled")
-        finally:
-            # Cancel tasks on shutdown
-            bot_task.cancel()
-            gif_task.cancel()
-            await asyncio.gather(bot_task, gif_task, return_exceptions=True)
-            logger.debug("Shutting down")
+    
 
     # Create the event loop manually
     loop = asyncio.new_event_loop()
