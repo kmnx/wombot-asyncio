@@ -21,7 +21,8 @@ import logging
 from urllib.parse import urlparse
 import bs4
 import nltk
-
+nltk.download('averaged_perceptron_tagger')
+import bpmcheck
 import edamam
 import re
 
@@ -1339,6 +1340,27 @@ class MyBot(chatango.Client):
                     cmd = cmd[2:]
                     print(cmd)
                 asyncio.ensure_future(raid(message, cmd))
+
+            elif cmd.startswith("bpm") and cmd !="bpm":
+                if message.room.name != "<PM>":
+                    await message.room.delete_message(message)
+                # remove bpm from cmd
+                cmd = cmd[3:].strip()
+                print(cmd)
+                # pass cmd to bpm function
+                if cmd:
+                    try:
+                        station_name,bpm = await bpmcheck.get_bpm(cmd)
+                        if bpm:
+                            await message.channel.send(
+                                f"BPM for {station_name} is {float(bpm):.2f} BPM"
+                            )
+                        else:
+                            pass
+                            
+                    except Exception as e:
+                        print("Error fetching BPM:", e)
+                        pass
 
             elif cmd == "randomstation":
                 if message.room.name != "<PM>":
