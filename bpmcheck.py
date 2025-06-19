@@ -30,7 +30,7 @@ async def get_bpm(station):
         station_name = "Juke"
         
         match = True
-    elif station in ["1","ch1","chu1","chunt1","chunt"]
+    elif station in ["1","ch1","chu1","chunt1","chunt"]:
         stream_url = "https://fm.chunt.org/stream"
         station_name = "ChuntFM"
         match = True
