@@ -11,19 +11,35 @@ async def get_bpm(station):
     print(f"get_bpm called with station: {station}")
     if station == "nts1":
         stream_url = "https://stream-relay-geo.ntslive.net/stream"
+        station_name = "NTS1"
         match = True
     elif station == "nts2":
         stream_url = "https://stream-relay-geo.ntslive.net/stream2"
+        station_name = "NTS2"
         match = True
     elif station == "doyou":
         stream_url = "https://doyouworld.out.airtime.pro/doyouworld_a"
+        station_name = "DoYou"
         match = True
     elif station == "chunt1":
         stream_url = "https://fm.chunt.org/stream"
+        station_name = "ChuntFM"
         match = True
     elif station == "chunt2":
         stream_url = "https://fm.chunt.org/stream2"
+        station_name = "Juke"
+        
         match = True
+    elif station in ["1","ch1","chu1","chunt1","chunt"]
+        stream_url = "https://fm.chunt.org/stream"
+        station_name = "ChuntFM"
+        match = True
+    elif station in ["2","ch2","chu2","chunt2","juke"]:
+        stream_url = "https://fm.chunt.org/stream2"
+        station_name = "Juke"
+        match = True
+
+
     elif station == "soho":
         stream_url = "https://sohoradiomusic.doughunt.co.uk:8010/128mp3"
         match = True
