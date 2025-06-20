@@ -101,8 +101,11 @@ async def get_bpm(station):
 
 async def record_audio_snippet(stream_url, duration_sec=6):
     recording = BytesIO()
+    ssl_context = ssl.create_default_context()
+    ssl_context.check_hostname = False
+    ssl_context.verify_mode = ssl.CERT_NONE
     async with aiohttp.ClientSession() as session:
-        async with session.get(stream_url) as response:
+        async with session.get(stream_url, ssl=ssl_context) as response:
             start_time = asyncio.get_event_loop().time()
             while asyncio.get_event_loop().time() < (start_time + duration_sec):
                 chunk = await response.content.read(1024)
