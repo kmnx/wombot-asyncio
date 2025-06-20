@@ -90,6 +90,7 @@ async def get_bpm(station):
 
     # station could be identified, let's go
     if match:
+        bpm = 0
         bpm = await main(stream_url=stream_url)
         return station_name,bpm
     else:
@@ -114,7 +115,10 @@ def detect_bpm(audio_bytes):
     sound = sound.set_channels(1).set_frame_rate(44100).set_sample_width(2)
     # Convert to numpy array for librosa
     samples = np.array(sound.get_array_of_samples()).astype(np.float32) / 32768.0
-    tempo, _ = librosa.beat.beat_track(y=samples, sr=44100)
+    # Use HPSS to separate percussive elements
+    y_harmonic, y_percussive = librosa.effects.hpss(samples)
+    # Use percussive part for beat tracking
+    tempo, _ = librosa.beat.beat_track(y=y_percussive, sr=44100)
     return tempo
 
 async def main(stream_url=None):
