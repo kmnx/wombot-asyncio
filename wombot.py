@@ -1351,7 +1351,9 @@ class MyBot(chatango.Client):
                 if cmd:
                     try:
                         station_name,bpm = await bpmcheck.get_bpm(cmd)
+                        print(bpm)
                         if bpm:
+                            print(bpm)
                             await message.channel.send(
                                 f"BPM for {station_name} is {float(bpm):.2f}"
                             )

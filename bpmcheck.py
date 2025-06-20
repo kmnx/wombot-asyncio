@@ -135,6 +135,7 @@ async def main(stream_url=None):
     if hasattr(bpm, "item"):
         bpm = bpm.item()
     #return print(f"Estimated BPM: {bpm:.2f}")
+    
     return bpm
 
 if __name__ == "__main__":
