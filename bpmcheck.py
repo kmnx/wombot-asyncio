@@ -2,10 +2,10 @@ import asyncio
 import aiohttp
 from io import BytesIO
 from pydub import AudioSegment
-import librosa
 import numpy as np
 import radioactivity
-
+from madmom.audio.signal import Signal
+from madmom.features.tempo import TempoEstimationProcessor
 
 async def get_bpm(station):
     print(f"get_bpm called with station: {station}")
@@ -109,6 +109,11 @@ async def record_audio_snippet(stream_url, duration_sec=6):
     recording.seek(0)
     return recording
 
+def madmom_detect_bpm(audio_bytes):
+    proc = TempoEstimationProcessor(fps=100)
+    bpm = proc(audio_bytes)[0][0]  # Returns (bpm, strength)
+    return bpm
+
 def detect_bpm(audio_bytes):
     # Load audio with pydub, convert to mono, 44.1kHz, 16-bit
     sound = AudioSegment.from_file(audio_bytes)
@@ -130,12 +135,12 @@ async def main(stream_url=None):
     print("Recording snippet...")
     snippet = await record_audio_snippet(stream_url)
     print("Detecting BPM...")
-    bpm = detect_bpm(snippet)
+    bpm = madmom_detect_bpm(snippet)
     # Ensure bpm is a Python float, not a NumPy scalar or array
     if hasattr(bpm, "item"):
         bpm = bpm.item()
     #return print(f"Estimated BPM: {bpm:.2f}")
-    
+
     return bpm
 
 if __name__ == "__main__":
