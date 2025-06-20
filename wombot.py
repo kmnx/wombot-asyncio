@@ -1353,7 +1353,7 @@ class MyBot(chatango.Client):
                         station_name,bpm = await bpmcheck.get_bpm(cmd)
                         if bpm:
                             await message.channel.send(
-                                f"BPM for {station_name} is {float(bpm):.2f} BPM"
+                                f"BPM for {station_name} is {float(bpm):.2f}"
                             )
                         else:
                             pass
