@@ -7,7 +7,7 @@ import radioactivity
 #from madmom.audio.signal import Signal
 #from madmom.features.tempo import TempoEstimationProcessor
 import aubio
-
+import ssl
 
 
 async def get_bpm(station):
