@@ -4,8 +4,8 @@ from io import BytesIO
 from pydub import AudioSegment
 import numpy as np
 import radioactivity
-from madmom.audio.signal import Signal
-from madmom.features.tempo import TempoEstimationProcessor
+#from madmom.audio.signal import Signal
+#from madmom.features.tempo import TempoEstimationProcessor
 
 async def get_bpm(station):
     print(f"get_bpm called with station: {station}")
@@ -135,7 +135,7 @@ async def main(stream_url=None):
     print("Recording snippet...")
     snippet = await record_audio_snippet(stream_url)
     print("Detecting BPM...")
-    bpm = madmom_detect_bpm(snippet)
+    bpm = detect_bpm(snippet)
     # Ensure bpm is a Python float, not a NumPy scalar or array
     if hasattr(bpm, "item"):
         bpm = bpm.item()
