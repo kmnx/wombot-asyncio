@@ -119,6 +119,7 @@ def detect_bpm(audio_bytes):
     y_harmonic, y_percussive = librosa.effects.hpss(samples)
     # Use percussive part for beat tracking
     tempo, _ = librosa.beat.beat_track(y=y_percussive, sr=44100)
+    print(f"Detected tempo: {tempo} BPM")
     return tempo
 
 async def main(stream_url=None):
