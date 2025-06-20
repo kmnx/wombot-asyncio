@@ -96,7 +96,7 @@ async def get_bpm(station):
     else:
         return None
 
-async def record_audio_snippet(stream_url, duration_sec=4):
+async def record_audio_snippet(stream_url, duration_sec=6):
     recording = BytesIO()
     async with aiohttp.ClientSession() as session:
         async with session.get(stream_url) as response:
