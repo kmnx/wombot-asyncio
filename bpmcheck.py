@@ -6,6 +6,9 @@ import numpy as np
 import radioactivity
 #from madmom.audio.signal import Signal
 #from madmom.features.tempo import TempoEstimationProcessor
+import aubio
+
+
 
 async def get_bpm(station):
     print(f"get_bpm called with station: {station}")
@@ -127,6 +130,26 @@ def detect_bpm(audio_bytes):
     print(f"Detected tempo: {tempo} BPM")
     return tempo
 
+def aubio_detect_bpm(audio_bytes):
+    sound = AudioSegment.from_file(audio_bytes)
+    sound = sound.set_channels(1).set_frame_rate(44100).set_sample_width(2)
+    samples = np.array(sound.get_array_of_samples()).astype(np.float32) / 32768.0
+
+    win_s = 1024
+    hop_s = 512
+    tempo_obj = aubio.tempo("default", win_s, hop_s, 44100)
+    beats = []
+    for i in range(0, len(samples), hop_s):
+        block = samples[i:i+hop_s]
+        if len(block) < hop_s:
+            block = np.pad(block, (0, hop_s - len(block)))
+        is_beat = tempo_obj(block)
+        if is_beat:
+            beats.append(tempo_obj.get_bpm())
+    if beats:
+        return float(np.median(beats))
+    return 0.0
+
 async def main(stream_url=None):
     print("got a request for bpm")
     print(f"stream_url: {stream_url}")
@@ -135,7 +158,7 @@ async def main(stream_url=None):
     print("Recording snippet...")
     snippet = await record_audio_snippet(stream_url)
     print("Detecting BPM...")
-    bpm = detect_bpm(snippet)
+    bpm = aubio_detect_bpm(snippet)
     # Ensure bpm is a Python float, not a NumPy scalar or array
     if hasattr(bpm, "item"):
         bpm = bpm.item()
