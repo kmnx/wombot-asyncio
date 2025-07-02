@@ -57,7 +57,8 @@ class ShazamApi:
                 async with session.get(stream_source) as response:
                     
                     print("started recording")
-
+                    print("HTTP status:", response.status)
+                    print("Content-Type:", response.headers.get("Content-Type"))
                     # added chunk_count to counter initial data burst of some stations
                     chunk_count = 0
                     while asyncio.get_event_loop().time() < (start_time + 4):
@@ -75,10 +76,17 @@ class ShazamApi:
 
                     recording.seek(0)
 
-                    sound = AudioSegment.from_file(recording)
+                    if response.headers.get("Content-Type") == "audio/aacp":
+                        sound = AudioSegment.from_file(recording, format="aac")
+                    else:
+                        sound = AudioSegment.from_file(recording)
+                    #with open("rinse_test.raw", "wb") as f:
+                    #    f.write(recording.getvalue())
+                    #print("Saved raw recording as rinse_test.raw, size:", recording.getbuffer().nbytes)
                     sound = sound.set_channels(1)
                     sound = sound.set_sample_width(2)
                     sound = sound.set_frame_rate(44100)
+                    sound = sound[:5000]  # keep only the first 5 seconds (5000 ms)
                  #except aiohttp.client_exceptions.ClientConnectorError as e:
                  #    print("there was a ClientConnectorError")
                  #    print(e)
@@ -87,6 +95,7 @@ class ShazamApi:
                 print(e)
             if sound:
                 payload = base64.b64encode(sound.raw_data)
+                print("Payload size (bytes):", len(payload))
                 async with session.post(
                     "https://shazam.p.rapidapi.com/songs/v2/detect",
                     data=payload,
@@ -113,10 +122,11 @@ async def loopy(loop):
 
 async def main(loop):
     # audio_source = 'https://stream-relay-geo.ntslive.net/stream'
-    # audio_source = 'https://fm.chunt.org/stream'
+    #audio_source = 'https://fm.chunt.org/stream'
     #audio_source = "https://doyouworld.out.airtime.pro/doyouworld_a"
-    audio_source = "https://kioskradiobxl.out.airtime.pro/kioskradiobxl_a"
+    # audio_source = "https://kioskradiobxl.out.airtime.pro/kioskradiobxl_a"
     #audio_source = "https://sharedfrequencies.out.airtime.pro/sharedfrequencies_a"
+    audio_source = "https://admin.stream.rinse.fm/proxy/rinse_uk/stream"
     asyncio.ensure_future(loopy(loop))
     #logging.basicConfig(level=logging.DEBUG)
     #trace_config = aiohttp.TraceConfig()
