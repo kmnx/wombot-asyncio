@@ -1,7 +1,7 @@
 import asyncio
 import aiosqlite
 import logging
-
+import random
 logger = logging.getLogger(__name__)
 
 
@@ -20,8 +20,40 @@ class Sqlite3Class:
         self.cursor = None
 
     async def _init(self):
+      
+    
+    
+    
         self.conn = await aiosqlite.connect(self.db_name)
         self.cursor = await self.conn.cursor()
+        # Create tables if they don't exist
+        await self.cursor.execute("""
+            CREATE TABLE IF NOT EXISTS object_table (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                object_name TEXT UNIQUE
+            )
+        """)
+        await self.cursor.execute("""
+            CREATE TABLE IF NOT EXISTS tag_table (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tag_name TEXT UNIQUE
+            )
+        """)
+        await self.cursor.execute("""
+            CREATE TABLE IF NOT EXISTS object_tag_mapping (
+                object_reference INTEGER,
+                tag_reference INTEGER,
+                FOREIGN KEY(object_reference) REFERENCES object_table(id),
+                FOREIGN KEY(tag_reference) REFERENCES tag_table(id)
+            )
+        """)
+        await self.cursor.execute("""
+            CREATE TABLE IF NOT EXISTS blocked_table (
+                object_id INTEGER PRIMARY KEY,
+                object_name TEXT UNIQUE
+            )
+        """)
+        await self.conn.commit()
 
     async def _close(self):
         await self.conn.close()
@@ -95,7 +127,8 @@ class Sqlite3Class:
 
     async def get_objects_by_tag_name(self, intag):
         await self.cursor.execute(
-            "SELECT object_name from object_tag_mapping JOIN object_table ON object_reference = object_table.id JOIN tag_table ON tag_reference = tag_table.id WHERE tag_name = ?",
+            "SELECT object_name from object_tag_mapping JOIN object_table ON object_reference = object_table.id JOIN tag_table ON tag_reference = tag_table.id WHERE tag_name = ? AND object_table.id NOT IN (SELECT object_id FROM blocked_table)
+          """,
             (intag,),
         )
         object_list = []
@@ -353,25 +386,56 @@ class Sqlite3Class:
                 (object_id, tag_id,),
             )
         await self.conn.commit()
+    async def get_random_unblocked_gif(self):
+        await self.cursor.execute(
+            """
+            SELECT object_name FROM object_table
+            WHERE id NOT IN (SELECT object_id FROM blocked_table)
+            """
+        )
+        results = await self.cursor.fetchall()
+        if results:
+            return random.choice(results)[0]
+        else:
+            return None
+        
+    async def block_object(self, inurl):
+        urlid = await self.get_object_id_from_object(inurl)
+        if urlid:
+            await self.cursor.execute(
+                "INSERT OR IGNORE INTO blocked_table (object_id, object_name) VALUES (?, ?)",
+                (urlid, inurl)
+            )
+            await self.conn.commit()
+
+    async def unblock_object(self, inurl):
+        urlid = await self.get_object_id_from_object(inurl)
+        if urlid:
+            await self.cursor.execute(
+                "DELETE FROM blocked_table WHERE object_id = ?", (urlid,)
+            )
+            await self.conn.commit()
+
+        
 
     
 
-    
+
 
 
 async def run():
     db = Sqlite3Class()
     await db._init()
+    gif = await db.get_random_unblocked_gif()
+    if gif:
+        print("Random gif:", gif)
+    else:
+        print("No unblocked gifs found.")
     await db._close()
 
 
 if __name__ == "__main__":
-    # logging.basicConfig(level=logging.DEBUG)
-    # query_in = input("Enter search term: ")
-    loop = asyncio.get_event_loop()
     try:
-        loop.run_until_complete(run())
+        asyncio.run(run())
     except KeyboardInterrupt:
         print("[KeyboardInterrupt] Exiting.")
-    finally:
-        loop.close()

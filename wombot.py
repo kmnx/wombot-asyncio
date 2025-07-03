@@ -2581,6 +2581,26 @@ class MyBot(chatango.Client):
                                 )
                             else:
                                 pass
+            elif cmd == "block":
+                if message.room.name != "<PM>":
+                    await message.room.delete_message(message)
+                if message.room.get_level(message.user) > 0:
+                    if args:
+                        splitargs = args.split(" ")
+                        in_url = splitargs[0]
+
+                    # add url to blocked_file
+                    if url not in blocked_set:
+                        with open(self.blocked_file, "a") as f:
+                            f.write(in_url + "\n")
+                    blocked_set.add(in_url)
+                    if url in allgif_set:
+                        allgif_set.remove(in_url)
+                    # send url to block_object 
+                    # the db module should handle looking it up by url,
+                    # and add the DB id to the blocked_table
+                    await self.db.block_object(in_url)
+
 
             elif cmd == "info":
                 if message.room.name != "<PM>":
@@ -3143,14 +3163,24 @@ async def main():
 if __name__ == "__main__":
     logger.debug("__main__")
     allgif_file = os.path.join(base_path, "allgif.txt")
+    blocked_file = os.path.join(base_path, "blocked.txt")
+    if not os.path.exists(blocked_file):
+        with open(allgif_file, "a") as file:
+            pass
+        blocked_set = set()
+    else:
+        with open(blocked_file) as file:
+            blocked_set = set(line.strip() for line in file if line.startswith("http"))
+    
     if not os.path.exists(allgif_file):
         with open(allgif_file, "a") as file:
             pass
         allgif_set = set()
     else:
         with open(allgif_file) as file:
-            allgif_set = set(line.strip() for line in file if line.startswith("http"))
-
+            allgif_set = set(line.strip() for line in file if (line.startswith("http") and line.strip() not in blocked_set ))
+    
+            
     goth_file = os.path.join(base_path, "goth.txt")
     if not os.path.exists(goth_file):
         with open(goth_file, "a") as file:
