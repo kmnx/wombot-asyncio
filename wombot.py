@@ -2641,7 +2641,7 @@ class MyBot(chatango.Client):
 
                     # add url to blocked_file
                     if in_url not in blocked_set:
-                        with open(self.blocked_file, "a") as f:
+                        with open(blocked_file, "a") as f:
                             f.write(in_url + "\n")
                     blocked_set.add(in_url)
                     if in_url in allgif_set:
