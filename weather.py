@@ -3,8 +3,10 @@ import os
 import re
 import asyncio
 
-#OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY")  # Set this in your environment
-OPENWEATHER_API_KEY = 'df8013e4ddd2b41ae3119ff7f287f667'
+# OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY")  # Set this in your environment
+OPENWEATHER_API_KEY = "df8013e4ddd2b41ae3119ff7f287f667"
+
+
 async def get_weather(location: str) -> str:
     """
     Fetch weather data for a given location (city, country, or lat/lon).
@@ -21,7 +23,7 @@ async def get_weather(location: str) -> str:
             f"https://api.openweathermap.org/data/2.5/weather?"
             f"lat={lat}&lon={lon}&appid={OPENWEATHER_API_KEY}&units=metric"
         )
-        
+
     else:
         # Assume city/country name
         url = (
@@ -45,10 +47,11 @@ async def get_weather(location: str) -> str:
         except Exception as e:
             print(f"Exception: {e}")
             return f"No weather data found for {location}"
-    
+
 
 if __name__ == "__main__":
     import sys
+
     if len(sys.argv) < 2:
         print("Usage: python weather.py <location>")
     else:

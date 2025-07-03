@@ -2,6 +2,7 @@ import asyncio
 import aiosqlite
 import logging
 import random
+
 logger = logging.getLogger(__name__)
 
 
@@ -20,46 +21,53 @@ class Sqlite3Class:
         self.cursor = None
 
     async def _init(self):
-      
-    
-    
-    
+
         self.conn = await aiosqlite.connect(self.db_name)
         self.cursor = await self.conn.cursor()
         # Create tables if they don't exist
-        await self.cursor.execute("""
+        await self.cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS object_table (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 object_name TEXT UNIQUE
             )
-        """)
-        await self.cursor.execute("""
+        """
+        )
+        await self.cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS tag_table (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 tag_name TEXT UNIQUE
             )
-        """)
-        await self.cursor.execute("""
+        """
+        )
+        await self.cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS object_tag_mapping (
                 object_reference INTEGER,
                 tag_reference INTEGER,
                 FOREIGN KEY(object_reference) REFERENCES object_table(id),
                 FOREIGN KEY(tag_reference) REFERENCES tag_table(id)
             )
-        """)
-        await self.cursor.execute("""
+        """
+        )
+        await self.cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS blocked_table (
                 object_id INTEGER PRIMARY KEY,
                 object_name TEXT UNIQUE
             )
-        """)
+        """
+        )
         await self.conn.commit()
 
     async def _close(self):
         await self.conn.close()
 
     async def get_tag_id_from_tag(self, intag):
-        await self.cursor.execute("SELECT id FROM tag_table WHERE tag_name=? ", (intag,))
+        await self.cursor.execute(
+            "SELECT id FROM tag_table WHERE tag_name=? ", (intag,)
+        )
         result = await self.cursor.fetchone()
         if result:
             return result[0]
@@ -117,18 +125,24 @@ class Sqlite3Class:
         print("tag urlid", urlid)
         if not urlid:
             urlid = await self.create_object(inurl)
-        
+
         tagid = await self.get_tag_id_from_tag(intag)
         print("tag tagid", tagid)
         if not tagid:
             tagid = await self.create_tag(intag)
-        
+
         await self.create_mapping(tagid, urlid)
 
     async def get_objects_by_tag_name(self, intag):
         await self.cursor.execute(
-            "SELECT object_name from object_tag_mapping JOIN object_table ON object_reference = object_table.id JOIN tag_table ON tag_reference = tag_table.id WHERE tag_name = ? AND object_table.id NOT IN (SELECT object_id FROM blocked_table)
-          """,
+            """
+            SELECT object_name
+            FROM object_tag_mapping
+            JOIN object_table ON object_reference = object_table.id
+            JOIN tag_table ON tag_reference = tag_table.id
+            WHERE tag_name = ?
+            AND object_table.id NOT IN (SELECT object_id FROM blocked_table)
+            """,
             (intag,),
         )
         object_list = []
@@ -163,7 +177,7 @@ class Sqlite3Class:
         return result
 
     async def untag(self, inurl, intag):
-        print('untagging....')
+        print("untagging....")
         urlid = await self.get_object_id_from_object(inurl)
         tagid = await self.get_tag_id_from_tag(intag)
         print(urlid)
@@ -221,7 +235,6 @@ class Sqlite3Class:
                             await self.remove_tag_by_tag_id(tag_id)
                         return 1
 
-
     async def untag_by_tag_id(self, tag_id):
         tuples = await self.get_object_ids_by_tag_id(tag_id)
         if tuples:
@@ -229,7 +242,7 @@ class Sqlite3Class:
                 pass
             else:
                 object_id = tuples[0][0]
-                
+
                 print(object_id)
                 print(tag_id)
                 if object_id and tag_id:
@@ -263,10 +276,10 @@ class Sqlite3Class:
                 if not test_object_has_tags:
                     await self.remove_object_by_object_id(object_id)
 
-    async def untag_by_object_id_and_object_data(self, object_id,object_data):
+    async def untag_by_object_id_and_object_data(self, object_id, object_data):
         tag_ids = await self.get_tag_ids_by_object_id(object_id)
         object_data_from_db = await self.get_object_by_object_id(object_id)
-        
+
         if object_data_from_db is None:
             print("object not found")
             print(object_id)
@@ -274,41 +287,38 @@ class Sqlite3Class:
         else:
             if object_data_from_db[1].strip().strip("'") == object_data:
                 print(object_data)
-                #print(object_id)
-                #print(tag_ids)
+                # print(object_id)
+                # print(tag_ids)
                 await self.remove_object_by_object_id(object_id)
                 if object_id and tag_ids:
                     for tag_id in tag_ids:
                         tag_name = await self.get_tag_name_by_tag_id(tag_id[1])
-                        
+
                         print(tag_name[1])
-                        #print(tag_id[1])
+                        # print(tag_id[1])
                         await self.remove_mapping_by_ids(object_id, tag_id[1])
                         await self.conn.commit()
-                        test_tag_has_objects = await self.get_object_ids_by_tag_id(tag_id[1])
-                        #print(test_tag_has_objects)
+                        test_tag_has_objects = await self.get_object_ids_by_tag_id(
+                            tag_id[1]
+                        )
+                        # print(test_tag_has_objects)
 
                         if test_tag_has_objects:
                             pass
                         else:
-                            print("dead:",tag_name[1])
+                            print("dead:", tag_name[1])
                             await self.remove_tag_by_tag_id(tag_id[1])
                             print(tag_name)
             else:
                 print("object data does not match")
                 print(object_data_from_db)
                 print(object_data)
-                    
-                
-            
-        
-
 
     async def info(self, in_string):
         resulting_tags = []
         resulting_urls = []
         object_result = await self.get_objects_by_tag_name(in_string)
-        
+
         for object in object_result:
             if object:
                 resulting_urls.append(object)
@@ -318,36 +328,37 @@ class Sqlite3Class:
                 resulting_tags.append(tag)
         print(resulting_tags, resulting_urls)
         return resulting_urls, resulting_tags
-    
+
     async def get_tag_ids_by_object_id(self, object_id):
-            """
-            Retrieves the tag IDs associated with the given object ID.
+        """
+        Retrieves the tag IDs associated with the given object ID.
 
-            Args:
-                object_id (int): The ID of the object.
+        Args:
+            object_id (int): The ID of the object.
 
-            Returns:
-                tuples of (object_id,tag_id) or None.
-            """
-            await self.cursor.execute(
-                "SELECT * FROM object_tag_mapping WHERE object_reference=?", (object_id,)
-            )
-            result = await self.cursor.fetchall()
-            if result:
-                return result
-            else:
-                return None
-    
-    async def get_object_ids_by_tag_id(self, tag_id):
+        Returns:
+            tuples of (object_id,tag_id) or None.
+        """
         await self.cursor.execute(
-            "SELECT object_reference FROM object_tag_mapping WHERE tag_reference=?", (tag_id,)
+            "SELECT * FROM object_tag_mapping WHERE object_reference=?", (object_id,)
         )
         result = await self.cursor.fetchall()
         if result:
             return result
         else:
             return None
-        
+
+    async def get_object_ids_by_tag_id(self, tag_id):
+        await self.cursor.execute(
+            "SELECT object_reference FROM object_tag_mapping WHERE tag_reference=?",
+            (tag_id,),
+        )
+        result = await self.cursor.fetchall()
+        if result:
+            return result
+        else:
+            return None
+
     async def get_object_by_object_id(self, object_id):
         await self.cursor.execute(
             "SELECT object_name FROM object_table WHERE id=?", (object_id,)
@@ -357,7 +368,7 @@ class Sqlite3Class:
             return result
         else:
             return None
-        
+
     async def get_tag_name_by_tag_id(self, tag_id):
         await self.cursor.execute(
             "SELECT tag_name FROM tag_table WHERE id=?", (tag_id,)
@@ -367,25 +378,25 @@ class Sqlite3Class:
             return result
         else:
             return None
-    
+
     async def remove_tag_by_tag_id(self, tag_id):
-        await self.cursor.execute(
-            "DELETE FROM tag_table WHERE id = ?", (tag_id,)
-        )
+        await self.cursor.execute("DELETE FROM tag_table WHERE id = ?", (tag_id,))
         await self.conn.commit()
-    
+
     async def remove_object_by_object_id(self, object_id):
+        await self.cursor.execute("DELETE FROM object_table WHERE id = ?", (object_id,))
+        await self.conn.commit()
+
+    async def remove_mapping_by_ids(self, object_id, tag_id):
         await self.cursor.execute(
-            "DELETE FROM object_table WHERE id = ?", (object_id,)
+            "DELETE FROM object_tag_mapping  WHERE object_reference = ? AND tag_reference = ?",
+            (
+                object_id,
+                tag_id,
+            ),
         )
         await self.conn.commit()
 
-    async def remove_mapping_by_ids(self, object_id,tag_id):
-        await self.cursor.execute(
-                "DELETE FROM object_tag_mapping  WHERE object_reference = ? AND tag_reference = ?",
-                (object_id, tag_id,),
-            )
-        await self.conn.commit()
     async def get_random_unblocked_gif(self):
         await self.cursor.execute(
             """
@@ -398,13 +409,13 @@ class Sqlite3Class:
             return random.choice(results)[0]
         else:
             return None
-        
+
     async def block_object(self, inurl):
         urlid = await self.get_object_id_from_object(inurl)
         if urlid:
             await self.cursor.execute(
                 "INSERT OR IGNORE INTO blocked_table (object_id, object_name) VALUES (?, ?)",
-                (urlid, inurl)
+                (urlid, inurl),
             )
             await self.conn.commit()
 
@@ -415,12 +426,6 @@ class Sqlite3Class:
                 "DELETE FROM blocked_table WHERE object_id = ?", (urlid,)
             )
             await self.conn.commit()
-
-        
-
-    
-
-
 
 
 async def run():

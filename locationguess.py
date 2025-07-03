@@ -1,5 +1,6 @@
 import aiohttp
-import asyncio 
+import asyncio
+
 
 async def get_location_from_ip(ip):
     url = f"http://ip-api.com/json/{ip}"
@@ -15,9 +16,11 @@ async def get_location_from_ip(ip):
                 }
             else:
                 return None
-            
+
+
 if __name__ == "__main__":
     import sys
+
     if len(sys.argv) < 2:
         print("Usage: python locationguess.py <ip>")
     else:

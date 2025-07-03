@@ -507,7 +507,6 @@ class Room(Connection):
                 user_msgs.append(x)
         return user_msgs
 
-
     async def unban_user(self, user):
         rec = self.ban_record(user)
         print("rec", rec)
@@ -647,11 +646,11 @@ class Room(Connection):
                 msg = html.unescape(msg)
                 # print('unescaped:',msg)
             _msg = msg.replace("\n", "\r").replace("~", "&#126;")
-            print('_msg',_msg)
+            print("_msg", _msg)
 
             for _message in message_cut(str(_msg), self._maxlen, self, use_html):
-                print('_message',_message)
-                
+                print("_message", _message)
+
                 await self._send_command("bm", _id_gen(), message_flags, _message)
 
     ##

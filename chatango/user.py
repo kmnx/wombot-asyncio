@@ -1,6 +1,7 @@
 """
 Module for user related stuff
 """
+
 import enum
 import aiohttp
 import asyncio

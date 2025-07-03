@@ -8,22 +8,24 @@ import logging
 
 
 async def on_request_start(session, context, params):
-    logging.getLogger('aiohttp.client').debug(f'Starting request <{params}>')
+    logging.getLogger("aiohttp.client").debug(f"Starting request <{params}>")
+
 
 async def main(loop):
     stream_source = "https://sharedfrequencies.out.airtime.pro/sharedfrequencies_a"
-    #session = aiohttp.ClientSession()
+    # session = aiohttp.ClientSession()
     logging.basicConfig(level=logging.DEBUG)
     trace_config = aiohttp.TraceConfig()
     trace_config.on_request_start.append(on_request_start)
     session = aiohttp.ClientSession(trace_configs=[trace_config])
     headers = {
-    'accept': '* / *',
-    'accept - encoding': 'gzip, deflate, br',
-    'accept - language': 'ru - RU, ru; q = 0.9, en - US; q = 0.8, en; q = 0.7',
-    'cache - control': 'no - cache',
-    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36'}
-    async with session.get(stream_source,headers=headers) as response:
+        "accept": "* / *",
+        "accept - encoding": "gzip, deflate, br",
+        "accept - language": "ru - RU, ru; q = 0.9, en - US; q = 0.8, en; q = 0.7",
+        "cache - control": "no - cache",
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36",
+    }
+    async with session.get(stream_source, headers=headers) as response:
 
         print("started recording")
 
@@ -43,7 +45,6 @@ async def main(loop):
                 break
 
         recording.seek(0)
-
 
 
 if __name__ == "__main__":

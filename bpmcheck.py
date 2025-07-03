@@ -4,8 +4,9 @@ from io import BytesIO
 from pydub import AudioSegment
 import numpy as np
 import radioactivity
-#from madmom.audio.signal import Signal
-#from madmom.features.tempo import TempoEstimationProcessor
+
+# from madmom.audio.signal import Signal
+# from madmom.features.tempo import TempoEstimationProcessor
 import aubio
 import ssl
 
@@ -31,17 +32,16 @@ async def get_bpm(station):
     elif station == "chunt2":
         stream_url = "https://fm.chunt.org/stream2"
         station_name = "Juke"
-        
+
         match = True
-    elif station in ["1","ch1","chu1","chunt1","chunt"]:
+    elif station in ["1", "ch1", "chu1", "chunt1", "chunt"]:
         stream_url = "https://fm.chunt.org/stream"
         station_name = "ChuntFM"
         match = True
-    elif station in ["2","ch2","chu2","chunt2","juke"]:
+    elif station in ["2", "ch2", "chu2", "chunt2", "juke"]:
         stream_url = "https://fm.chunt.org/stream2"
         station_name = "Juke"
         match = True
-
 
     elif station == "soho":
         stream_url = "https://sohoradiomusic.doughunt.co.uk:8010/128mp3"
@@ -56,7 +56,6 @@ async def get_bpm(station):
         ra_stations = await radioactivity.get_station_list()
         print("wtf")
         ra_station_names = list(ra_stations.keys())
-        
 
         if station in ra_station_names:
             station_name = station
@@ -65,9 +64,10 @@ async def get_bpm(station):
         else:
             print("trying to guess station")
             station_name = [
-                item for item in ra_station_names if station in item.lower() or station in item.upper()
+                item
+                for item in ra_station_names
+                if station in item.lower() or station in item.upper()
             ]
-
 
             # if more than station has particular matches, return an error message
             if station_name is not None:
@@ -95,9 +95,10 @@ async def get_bpm(station):
     if match:
         bpm = 0
         bpm = await main(stream_url=stream_url)
-        return station_name,bpm
+        return station_name, bpm
     else:
         return None
+
 
 async def record_audio_snippet(stream_url, duration_sec=6):
     recording = BytesIO()
@@ -115,10 +116,12 @@ async def record_audio_snippet(stream_url, duration_sec=6):
     recording.seek(0)
     return recording
 
+
 def madmom_detect_bpm(audio_bytes):
     proc = TempoEstimationProcessor(fps=100)
     bpm = proc(audio_bytes)[0][0]  # Returns (bpm, strength)
     return bpm
+
 
 def detect_bpm(audio_bytes):
     # Load audio with pydub, convert to mono, 44.1kHz, 16-bit
@@ -133,6 +136,7 @@ def detect_bpm(audio_bytes):
     print(f"Detected tempo: {tempo} BPM")
     return tempo
 
+
 def aubio_detect_bpm(audio_bytes):
     sound = AudioSegment.from_file(audio_bytes)
     sound = sound.set_channels(1).set_frame_rate(44100).set_sample_width(2)
@@ -143,7 +147,7 @@ def aubio_detect_bpm(audio_bytes):
     tempo_obj = aubio.tempo("default", win_s, hop_s, 44100)
     beats = []
     for i in range(0, len(samples), hop_s):
-        block = samples[i:i+hop_s]
+        block = samples[i : i + hop_s]
         if len(block) < hop_s:
             block = np.pad(block, (0, hop_s - len(block)))
         is_beat = tempo_obj(block)
@@ -152,6 +156,7 @@ def aubio_detect_bpm(audio_bytes):
     if beats:
         return float(np.median(beats))
     return 0.0
+
 
 async def main(stream_url=None):
     print("got a request for bpm")
@@ -165,9 +170,10 @@ async def main(stream_url=None):
     # Ensure bpm is a Python float, not a NumPy scalar or array
     if hasattr(bpm, "item"):
         bpm = bpm.item()
-    #return print(f"Estimated BPM: {bpm:.2f}")
+    # return print(f"Estimated BPM: {bpm:.2f}")
 
     return bpm
+
 
 if __name__ == "__main__":
     asyncio.run(main())

@@ -12,7 +12,8 @@ print("shazam_api_key: ", shazam_api_key)
 
 
 async def on_request_start(session, context, params):
-    logging.getLogger('aiohttp.client').debug(f'Starting request <{params}>')
+    logging.getLogger("aiohttp.client").debug(f"Starting request <{params}>")
+
 
 class ShazamApi:
     def __init__(self, loop, api_key):
@@ -42,20 +43,21 @@ class ShazamApi:
             ssl_context = ssl.create_default_context()
             ssl_context.check_hostname = False
             ssl_context.verify_mode = ssl.CERT_NONE
-            session = aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=ssl_context))
+            session = aiohttp.ClientSession(
+                connector=aiohttp.TCPConnector(ssl=ssl_context)
+            )
         else:
-     
 
-            #logging.basicConfig(level=logging.DEBUG)
-            #trace_config = aiohttp.TraceConfig()
-            #trace_config.on_request_start.append(on_request_start)
+            # logging.basicConfig(level=logging.DEBUG)
+            # trace_config = aiohttp.TraceConfig()
+            # trace_config.on_request_start.append(on_request_start)
             session = aiohttp.ClientSession()
-            
+
         async with session as session:
             try:
-                print('attempting connection')
+                print("attempting connection")
                 async with session.get(stream_source) as response:
-                    
+
                     print("started recording")
                     print("HTTP status:", response.status)
                     print("Content-Type:", response.headers.get("Content-Type"))
@@ -80,16 +82,16 @@ class ShazamApi:
                         sound = AudioSegment.from_file(recording, format="aac")
                     else:
                         sound = AudioSegment.from_file(recording)
-                    #with open("rinse_test.raw", "wb") as f:
+                    # with open("rinse_test.raw", "wb") as f:
                     #    f.write(recording.getvalue())
-                    #print("Saved raw recording as rinse_test.raw, size:", recording.getbuffer().nbytes)
+                    # print("Saved raw recording as rinse_test.raw, size:", recording.getbuffer().nbytes)
                     sound = sound.set_channels(1)
                     sound = sound.set_sample_width(2)
                     sound = sound.set_frame_rate(44100)
                     sound = sound[:5000]  # keep only the first 5 seconds (5000 ms)
-                 #except aiohttp.client_exceptions.ClientConnectorError as e:
-                 #    print("there was a ClientConnectorError")
-                 #    print(e)
+                # except aiohttp.client_exceptions.ClientConnectorError as e:
+                #    print("there was a ClientConnectorError")
+                #    print(e)
             except Exception as e:
                 print("Error in shazam.py _get")
                 print(e)
@@ -122,15 +124,15 @@ async def loopy(loop):
 
 async def main(loop):
     # audio_source = 'https://stream-relay-geo.ntslive.net/stream'
-    #audio_source = 'https://fm.chunt.org/stream'
-    #audio_source = "https://doyouworld.out.airtime.pro/doyouworld_a"
+    # audio_source = 'https://fm.chunt.org/stream'
+    # audio_source = "https://doyouworld.out.airtime.pro/doyouworld_a"
     # audio_source = "https://kioskradiobxl.out.airtime.pro/kioskradiobxl_a"
-    #audio_source = "https://sharedfrequencies.out.airtime.pro/sharedfrequencies_a"
+    # audio_source = "https://sharedfrequencies.out.airtime.pro/sharedfrequencies_a"
     audio_source = "https://admin.stream.rinse.fm/proxy/rinse_uk/stream"
     asyncio.ensure_future(loopy(loop))
-    #logging.basicConfig(level=logging.DEBUG)
-    #trace_config = aiohttp.TraceConfig()
-    #trace_config.on_request_start.append(on_request_start)
+    # logging.basicConfig(level=logging.DEBUG)
+    # trace_config = aiohttp.TraceConfig()
+    # trace_config.on_request_start.append(on_request_start)
     api = ShazamApi(loop, shazam_api_key)
     out = await api._get(audio_source)
     print(out)
