@@ -2640,11 +2640,11 @@ class MyBot(chatango.Client):
                         in_url = splitargs[0]
 
                     # add url to blocked_file
-                    if url not in blocked_set:
+                    if in_url not in blocked_set:
                         with open(self.blocked_file, "a") as f:
                             f.write(in_url + "\n")
                     blocked_set.add(in_url)
-                    if url in allgif_set:
+                    if in_url in allgif_set:
                         allgif_set.remove(in_url)
                     # send url to block_object
                     # the db module should handle looking it up by url,
