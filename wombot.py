@@ -3235,7 +3235,7 @@ if __name__ == "__main__":
     allgif_file = os.path.join(base_path, "allgif.txt")
     blocked_file = os.path.join(base_path, "blocked.txt")
     if not os.path.exists(blocked_file):
-        with open(allgif_file, "a") as file:
+        with open(blocked_file, "a") as file:
             pass
         blocked_set = set()
     else:
