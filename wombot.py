@@ -1234,6 +1234,10 @@ class MyBot(chatango.Client):
 
         print(self.goth)
         self._room = None
+        banned_ips_file = "banned_ips.txt"
+        with open(banned_ips_file, "r") as file:
+            self.banned_ips = file.readlines().strip()
+        
         print("seriously")
 
     async def on_start(self):  # room join queue
@@ -1280,6 +1284,9 @@ class MyBot(chatango.Client):
             ascii(message.body)[1:-1],
         )
         print(message.body)
+        if message.ip in self.banned_ips:
+            await message.room.delete_message(message)
+            await self.ban_user(message.user)
         if message.body[0] == "!":
 
             delete_message = True
