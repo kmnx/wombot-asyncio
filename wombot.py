@@ -1236,7 +1236,7 @@ class MyBot(chatango.Client):
         self._room = None
         banned_ips_file = "banned_ips.txt"
         with open(banned_ips_file, "r") as file:
-            self.banned_ips = file.readlines().strip()
+            self.banned_ips = [line.strip() for line in file]
         
         print("seriously")
 
