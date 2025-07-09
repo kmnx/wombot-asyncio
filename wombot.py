@@ -77,7 +77,8 @@ from data_txt_facts import facts
 import schedule
 import chuntfm
 
-# import telnet
+# banned usernames like 4422jkf or dkl3322
+pattern = r"(\d{3}[a-zA-Z]{4}|[a-zA-Z]{4}\d{3})"
 
 try:
     import mysecrets
@@ -1287,6 +1288,14 @@ class MyBot(chatango.Client):
         if message.ip in self.banned_ips:
             await message.room.delete_message(message)
             await message.room.ban_user(message.user)
+            return
+        
+        if "anon" not in message.user.name.lower():
+            if re.fullmatch(pattern, message.user.showname):
+                await message.room.delete_message(message)
+                await message.room.ban_user(message.user)
+                return
+            
         if message.body[0] == "!":
 
             delete_message = True
