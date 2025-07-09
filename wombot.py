@@ -1286,7 +1286,7 @@ class MyBot(chatango.Client):
         print(message.body)
         if message.ip in self.banned_ips:
             await message.room.delete_message(message)
-            await self.ban_user(message.user)
+            await message.room.ban_user(message.user)
         if message.body[0] == "!":
 
             delete_message = True
