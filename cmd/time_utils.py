@@ -7,6 +7,9 @@ from commands import register_exact, wrapped
 from typing import List, Dict
 import zoneinfo
 
+if zoneinfo.available_timezones() is None:
+    import tzdata
+
 
 @wrapped
 async def timeis_handler(self, message, cmd, args):
