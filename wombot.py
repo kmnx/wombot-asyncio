@@ -1445,22 +1445,16 @@ class MyBot(chatango.Client):
                 
                 try:
                     async with ClientSession() as s:
-                        r = await s.get("https://fm.chunt.org/status.xsl", timeout=5)
+                        r = await s.get("https://fm.chunt.org/status-json.xsl", timeout=5)
                         if r.status == 200:
                             try:
-                                html_content = await r.text()
-                                # Parse HTML using BeautifulSoup
-                                soup = bs4.BeautifulSoup(html_content, features="lxml")
-                                # Look for listener count in the table with class "streamstats"
-                                stats_cells = soup.find_all("td", class_="streamstats")
-                                if stats_cells:
-                                    listener_count = stats_cells[0].get_text().strip()
-                                    await message.channel.send(f"Current listeners on /stream: {listener_count}")
-                                else:
-                                    await message.channel.send("Error parsing server response")
+                                status_json = await r.json()
+                                listener_count = status_json["icestats"]["source"]["listeners"]
+                                await message.channel.send(f"Current listeners on /stream: {listener_count}")
                             except Exception as e:
-                                print(f"Error parsing HTML: {e}")
+                                print(f"Error parsing JSON: {e}")
                                 await message.channel.send("Error parsing server response")
+
                         else:
                             await message.channel.send("Could not reach server")
                 except Exception as e:
