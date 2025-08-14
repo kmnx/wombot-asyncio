@@ -27,7 +27,18 @@ async def capybara_handler(self, message, cmd, args):
 async def otter_handler(self, message, cmd, args):
     """Handle !otter command."""
     if message.room.name != "<PM>":
-        await message.room.delete_message(message)
+    await message.channel.send(random.choice(data_pics_wombat.pics))
+
+
+@wrapped
+async def capybara_handler(self, message, cmd, args):
+    """Handle !capybara command."""
+    await message.channel.send(random.choice(data_pics_capybara.pics))
+
+
+@wrapped
+async def otter_handler(self, message, cmd, args):
+    """Handle !otter command."""
     await message.channel.send(random.choice(data_pics_otter.pics))
 
 
