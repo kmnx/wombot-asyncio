@@ -1353,20 +1353,23 @@ class MyBot(chatango.Client):
                         with open(allgif_file, "a") as gif_file:
                             gif_file.write(word + "\n")
 
-        # Command handling
-
-        logger.info(message.body)
-        data = message.body[1:].split(" ", 1)
-        if len(data) > 1:
-            orig_cmd, args = data[0], data[1]
+        # Command handling - only process messages starting with "!"
+        if not message.body.startswith("!"):
+            # Not a command, skip
+            cmd = message.body.lower().strip()
         else:
-            orig_cmd, args = data[0], ""
-        cmd = orig_cmd.lower().strip().lstrip().rstrip()
-        print(cmd)
+            logger.info(message.body)
+            data = message.body[1:].split(" ", 1)
+            if len(data) > 1:
+                orig_cmd, args = data[0], data[1]
+            else:
+                orig_cmd, args = data[0], ""
+            cmd = orig_cmd.lower().strip().lstrip().rstrip()
+            print(cmd)
 
-        # Route through the command registry
-        if await commands.route_command(self, message, cmd, args):
-            return
+            # Route through the command registry
+            if await commands.route_command(self, message, cmd, args):
+                return
 
         print(cmd)
         print(cmd.startswith("raid"))
