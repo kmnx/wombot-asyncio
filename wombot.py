@@ -1447,16 +1447,20 @@ class MyBot(chatango.Client):
                     async with ClientSession() as s:
                         r = await s.get("https://fm.chunt.org/status.xsl", timeout=5)
                         if r.status == 200:
-                            html_content = await r.text()
-                            # Parse HTML using BeautifulSoup
-                            soup = bs4.BeautifulSoup(html_content, features="lxml")
-                            # Look for listener count in the table with class "streamstats"
-                            stats_cells = soup.find_all("td", class_="streamstats")
-                            if stats_cells:
-                                listener_count = stats_cells[0].get_text().strip()
-                                await message.channel.send(f"Current listeners on /stream: {listener_count}")
-                            else:
-                                await message.channel.send("Could not parse listener count")
+                            try:
+                                html_content = await r.text()
+                                # Parse HTML using BeautifulSoup
+                                soup = bs4.BeautifulSoup(html_content, features="lxml")
+                                # Look for listener count in the table with class "streamstats"
+                                stats_cells = soup.find_all("td", class_="streamstats")
+                                if stats_cells:
+                                    listener_count = stats_cells[0].get_text().strip()
+                                    await message.channel.send(f"Current listeners on /stream: {listener_count}")
+                                else:
+                                    await message.channel.send("Error parsing server response")
+                            except Exception as e:
+                                print(f"Error parsing HTML: {e}")
+                                await message.channel.send("Error parsing server response")
                         else:
                             await message.channel.send("Could not reach server")
                 except Exception as e:
