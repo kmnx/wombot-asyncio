@@ -14,7 +14,7 @@ async def anniversary_handler(self, message, cmd, args):
 
     zero_day = date(2022, 3, 14)
 
-    this_number = int(anniversary[1])
+    this_number = int(match.group(1))
     anni_date = zero_day + timedelta(days=this_number)
     days_differnt = (anni_date - date.today()).days
 
