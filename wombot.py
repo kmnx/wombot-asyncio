@@ -1448,8 +1448,14 @@ class MyBot(chatango.Client):
                         r = await s.get("https://fm.chunt.org/status-json.xsl", timeout=5)
                         if r.status == 200:
                             try:
+<<<<<<< HEAD
                                 status_json = await r.json()
                                 listener_count = status_json["icestats"]["source"]["listeners"]
+=======
+                                json_data = await r.json()
+                                # Extract listener count from JSON
+                                listener_count = json_data.get("icestats", {}).get("source", {}).get("listeners", 'NA')
+>>>>>>> 872a732f738c9dfbfc4bfeda6f1367fe90f10e41
                                 await message.channel.send(f"Current listeners on /stream: {listener_count}")
                             except Exception as e:
                                 print(f"Error parsing JSON: {e}")
