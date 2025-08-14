@@ -39,7 +39,24 @@ async def shoutout_handler(self, message, cmd, args):
             + args
             + " ! "
             + random.choice(shout_end)
-        )
+    if not args:
+        await message.channel.send("Please provide a user to shout out (e.g., !shoutout @username).")
+        return
+
+    splitargs = args.split(" ")
+    if args.startswith("@"):
+        for arg in splitargs:
+            print("arg ", arg)
+            if arg.startswith("@"):
+                await message.channel.send(
+                    random.choice(shout_start)
+                    + " "
+                    + arg
+                    + " ! "
+                    + random.choice(shout_end)
+                )
+    else:
+        await message.channel.send("Please mention a user with '@' (e.g., !shoutout @username).")
 
 # Register the shoutout command
 register_exact("shoutout", ["shoutout", "shout", "out"], shoutout_handler)
