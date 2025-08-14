@@ -1439,6 +1439,30 @@ class MyBot(chatango.Client):
                 else:
                     await message.channel.send("No online stations found :(")
 
+            elif cmd == "listeners":
+                if message.room.name != "<PM>":
+                    await message.room.delete_message(message)
+                
+                try:
+                    async with ClientSession() as s:
+                        r = await s.get("https://fm.chunt.org/status.xsl", timeout=5)
+                        if r.status == 200:
+                            html_content = await r.text()
+                            # Parse HTML using BeautifulSoup
+                            soup = bs4.BeautifulSoup(html_content, features="lxml")
+                            # Look for listener count in the table with class "streamstats"
+                            stats_cells = soup.find_all("td", class_="streamstats")
+                            if stats_cells and len(stats_cells) >= 1:
+                                listener_count = stats_cells[0].get_text().strip()
+                                await message.channel.send(f"Current listeners on /stream: {listener_count}")
+                            else:
+                                await message.channel.send("Could not reach server")
+                        else:
+                            await message.channel.send("Could not reach server")
+                except Exception as e:
+                    print(f"Error fetching listeners: {e}")
+                    await message.channel.send("Could not reach server")
+
             elif cmd in ["upnext", "nextup"]:
                 chuntfm_upnext = ""
 
