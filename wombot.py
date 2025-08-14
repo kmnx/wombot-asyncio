@@ -1456,7 +1456,7 @@ class MyBot(chatango.Client):
                                 listener_count = stats_cells[0].get_text().strip()
                                 await message.channel.send(f"Current listeners on /stream: {listener_count}")
                             else:
-                                await message.channel.send("Could not reach server")
+                                await message.channel.send("Could not parse listener count")
                         else:
                             await message.channel.send("Could not reach server")
                 except Exception as e:
