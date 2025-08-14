@@ -1439,6 +1439,34 @@ class MyBot(chatango.Client):
                 else:
                     await message.channel.send("No online stations found :(")
 
+            elif cmd == "listeners":
+                if message.room.name != "<PM>":
+                    await message.room.delete_message(message)
+                
+                try:
+                    async with ClientSession() as s:
+                        r = await s.get("https://fm.chunt.org/status-json.xsl", timeout=5)
+                        if r.status == 200:
+                            try:
+<<<<<<< HEAD
+                                status_json = await r.json()
+                                listener_count = status_json["icestats"]["source"]["listeners"]
+=======
+                                json_data = await r.json()
+                                # Extract listener count from JSON
+                                listener_count = json_data.get("icestats", {}).get("source", {}).get("listeners", 'NA')
+>>>>>>> 872a732f738c9dfbfc4bfeda6f1367fe90f10e41
+                                await message.channel.send(f"Current listeners on /stream: {listener_count}")
+                            except Exception as e:
+                                print(f"Error parsing JSON: {e}")
+                                await message.channel.send("Error parsing server response")
+
+                        else:
+                            await message.channel.send("Could not reach server")
+                except Exception as e:
+                    print(f"Error fetching listeners: {e}")
+                    await message.channel.send("Could not reach server")
+
             elif cmd in ["upnext", "nextup"]:
                 chuntfm_upnext = ""
 
