@@ -1371,26 +1371,27 @@ class MyBot(chatango.Client):
             if await commands.route_command(self, message, cmd, args):
                 return
 
-        print(cmd)
-        print(cmd.startswith("raid"))
-        print(cmd.startswith("id") or cmd.startswith("raid"))
-        connection_pool = await create_connection_pool()
-        await insert_command(
-            connection_pool, cmd, message.user.showname, message.room.name
-        )
-        await connection_pool.close()
-        try:
-            gif_res = await self.db.get_objects_by_tag_name(cmd)
-        except Exception as e:
-            gif_res = None
-            print(e)
-        if gif_res:
-            if message.room.name != "<PM>":
-                await message.room.delete_message(message)
-            print(gif_res)
-            await message.channel.send(random.choice(gif_res))
-        else:
-            print("no result for gif search")
+
+            print(cmd)
+            print(cmd.startswith("raid"))
+            print(cmd.startswith("id") or cmd.startswith("raid"))
+            connection_pool = await create_connection_pool()
+            await insert_command(
+                connection_pool, cmd, message.user.showname, message.room.name
+            )
+            await connection_pool.close()
+            try:
+                gif_res = await self.db.get_objects_by_tag_name(cmd)
+            except Exception as e:
+                gif_res = None
+                print(e)
+            if gif_res:
+                if message.room.name != "<PM>":
+                    await message.room.delete_message(message)
+                print(gif_res)
+                await message.channel.send(random.choice(gif_res))
+            else:
+                print("no result for gif search")
 
 
 async def get_db_idhistory_cur():
