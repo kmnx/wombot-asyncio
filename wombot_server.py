@@ -21,7 +21,6 @@ import logging
 from urllib.parse import urlparse
 import bs4
 import nltk
-import edamam
 import re
 
 import json
@@ -55,19 +54,15 @@ except Exception:
 
 from aiosqliteclass import Sqlite3Class
 import aiosqliteclass_id
-import data_pics_wombat
-import data_pics_capybara
-import data_pics_otter
-import data_pics_quokka
-import data_text_anniversaries as anniversaries
-import data_txt_fortunes as fortunes
-from data_txt_facts import facts
+from data import data_txt_fortunes as fortunes, data_pics_quokka, data_pics_capybara, \
+    data_pics_otter, data_text_anniversaries as anniversaries, data_pics_wombat
+import edamam
+from data.data_txt_facts import facts
 import schedule
 import chuntfm
 <<<<<<< HEAD
 #import telnet
 =======
-import telnet
 >>>>>>> c67556c4dd164b6c59bde129a189b35a2e6587fa
 
 
