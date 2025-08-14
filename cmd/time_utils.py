@@ -7,7 +7,7 @@ from commands import register_exact, wrapped
 from typing import List, Dict
 import zoneinfo
 
-if zoneinfo.available_timezones() is None:
+if not zoneinfo.available_timezones():
     import tzdata
 
 
