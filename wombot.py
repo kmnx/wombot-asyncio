@@ -1452,7 +1452,7 @@ class MyBot(chatango.Client):
                             soup = bs4.BeautifulSoup(html_content, features="lxml")
                             # Look for listener count in the table with class "streamstats"
                             stats_cells = soup.find_all("td", class_="streamstats")
-                            if stats_cells and len(stats_cells) >= 1:
+                            if stats_cells:
                                 listener_count = stats_cells[0].get_text().strip()
                                 await message.channel.send(f"Current listeners on /stream: {listener_count}")
                             else:
