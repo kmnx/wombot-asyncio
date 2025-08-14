@@ -3,7 +3,7 @@ Date and anniversary command implementations.
 """
 
 import re
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from commands import register_exact, register_regex, wrapped
 
 @wrapped
