@@ -12,7 +12,9 @@ async def stats_handler(self, message, cmd, args):
     import wombot
     connection_pool = await wombot.create_connection_pool()
     try:
-        most_used = await wombot.get_most_used_commands(connection_pool)
+    connection_pool = await self.create_connection_pool()
+    try:
+        most_used = await self.get_most_used_commands(connection_pool)
         if most_used:
             stats_msg = "Most used commands: "
             for cmd_name, count in most_used[:5]:  # Top 5
