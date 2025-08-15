@@ -1406,7 +1406,6 @@ class MpdSingleton:
     @staticmethod
     def get_instance():
         if MpdSingleton._instance is None:
-            logger.error("MpdSingleton has not been initialized.")
             raise RuntimeError("MpdSingleton has not been initialized.")
         return MpdSingleton._instance
 
