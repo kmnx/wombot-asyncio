@@ -6,29 +6,10 @@ import random
 from helpers.commands import register_exact, wrapped
 from data import data_pics_wombat, data_pics_capybara, data_pics_otter, data_pics_quokka
 
-
 @wrapped
 async def wombat_handler(self, message, cmd, args):
     """Handle !wombat command."""
-    if message.room.name != "<PM>":
-        await message.room.delete_message(message)
-    await message.channel.send(random.choice(data_pics_wombat.pics))
-
-
-@wrapped
-async def capybara_handler(self, message, cmd, args):
-    """Handle !capybara command."""
-    if message.room.name != "<PM>":
-        await message.room.delete_message(message)
-    await message.channel.send(random.choice(data_pics_capybara.pics))
-
-
-@wrapped
-async def otter_handler(self, message, cmd, args):
-    """Handle !otter command."""
-    if message.room.name != "<PM>":
-    await message.channel.send(random.choice(data_pics_wombat.pics))
-
+    await message.channel.send(random.choice(data_pics_wombat))
 
 @wrapped
 async def capybara_handler(self, message, cmd, args):
