@@ -102,9 +102,7 @@ async def route_command(self, message, cmd: str, args: str) -> bool:
             await message.channel.send("❌ Command system error. Please try again later.")
         except:
             logger.error(f"Failed to send routing error message for command '{cmd}'")
-        except Exception as send_exc:
-            logger.error(f"Failed to send routing error message for command '{cmd}': {type(send_exc).__name__}: {send_exc}")
-            
+
         # Return True to prevent fallback since we handled the error
         return True
 
