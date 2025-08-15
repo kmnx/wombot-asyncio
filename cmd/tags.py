@@ -11,8 +11,7 @@ async def stats_handler(self, message, cmd, args):
     """Handle !stats command."""
     import wombot
     connection_pool = await wombot.create_connection_pool()
-    try:
-    connection_pool = await self.create_connection_pool()
+
     try:
         most_used = await self.get_most_used_commands(connection_pool)
         if most_used:

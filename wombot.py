@@ -85,9 +85,18 @@ except Exception:
     shazam_api_key = ""
     print("Please add shazam_api_key for rapidapi shazam functionality to mysecrets.py")
 
+try:
+    from mysecrets import edamam_app_id
+except:
+    print("Please add edamam_app_id to mysecrets.py or !scran won't work :o")
+    edamam_app_id = ""
+
 
 from helpers import radioactivity, search_google, commands, chuntfm, schedule, \
     aiosqliteclass_id, shazam
+
+# Import command modules to register them
+import cmd
 
 def get_uk_timezone_label():
     uk_tz = pytz.timezone("Europe/London")
@@ -880,8 +889,7 @@ def convert_utc_to_london(utctime):
 # radioactivity id
 
 
-async def raid(message, station_query):
-    bot = BotSingleton.get_instance()
+async def raid(bot, message, station_query):
     logger.debug("raid")
 
     ra_stations = await radioactivity.get_station_list()
@@ -1213,7 +1221,11 @@ class MyBot(chatango.Client):
         with open(goth_file, "r") as file:
             self.goth = file.readline().strip()
         if not self.goth:
-            self.goth = random.choice(await self.db.get_objects_by_tag_name("bbb"))
+            try:
+                self.goth = random.choice(await self.db.get_objects_by_tag_name("bbb"))
+            except Exception as e:
+                print("Error getting goth from db:", e)
+                self.goth = "No goth :("
 
         print(self.goth)
         self._room = None
@@ -1358,6 +1370,7 @@ class MyBot(chatango.Client):
             print(cmd)
 
             # Route through the command registry
+            print('** Routing command:', cmd)
             if await commands.route_command(self, message, cmd, args):
                 return
 
@@ -1431,9 +1444,6 @@ async def main():
         logger.debug("Tasks cancelled")
     finally:
         # Cancel tasks on shutdown
-
-        await bot_task.cancel()
-        await gif_task.cancel()
         bot_task.cancel()
         gif_task.cancel()
         mpd_task.cancel()

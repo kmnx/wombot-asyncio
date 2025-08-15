@@ -831,7 +831,7 @@ def convert_utc_to_london(utctime):
 # radioactivity id
 
 
-async def raid(message, station_query):
+async def raid(bot, message, station_query):
     logging.debug("raid")
 
     ra_stations = await radioactivity.get_station_list()
@@ -1286,7 +1286,7 @@ class MyBot(chatango.Client):
                 elif cmd.startswith("id"):
                     cmd = cmd[2:]
                     print(cmd)
-                asyncio.ensure_future(raid(message, cmd))
+                asyncio.ensure_future(raid(self, message, cmd))
 
             elif cmd == "randomstation":
                 if message.room.name != "<PM>":

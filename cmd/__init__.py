@@ -37,4 +37,10 @@ from . import b2b
 from . import goth
 from . import chuntfm_live
 from . import scran
+from . import shoutout
+from . import kiss
+from . import anniversary
+from . import events
+from . import heart
+from . import say
 # from . import test_error  # Uncomment for testing error handling

@@ -5,6 +5,9 @@ This module provides a clean way to register and route commands,
 replacing the large if/elif chain in on_message.
 """
 
+# TODO switch print to logging with appropriate debug level
+
+
 from dataclasses import dataclass
 from typing import Callable, Awaitable, Iterable, Optional, Pattern, Any, List
 import re
@@ -25,16 +28,25 @@ REGISTRY: List[CommandSpec] = []
 
 def register_exact(name: str, aliases: Iterable[str], handler):
     """Register a command that matches exactly."""
+
+    print("Registering command:", name, "with aliases:", aliases)
+
     REGISTRY.append(CommandSpec(name, aliases, "exact", None, handler))
 
 
 def register_startswith(prefix: str, handler):
     """Register a command that matches by prefix."""
+
+    print("Registering startswith command:", prefix)
+
     REGISTRY.append(CommandSpec(prefix, (), "startswith", None, handler))
 
 
 def register_regex(name: str, pattern: str, handler):
     """Register a command that matches by regex."""
+
+    print("Registering regex command:", name, "with pattern:", pattern)
+
     REGISTRY.append(CommandSpec(name, (), "regex", re.compile(pattern), handler))
 
 
@@ -84,11 +96,19 @@ async def route_command(self, message, cmd: str, args: str) -> bool:
     Returns True if a command was handled, False if it should fall back
     to the original logic.
     """
+
+    if len(REGISTRY) == 0:
+        print("WARNING: No commands registered!")
+
     try:
         for spec in REGISTRY:
             if _match(spec, cmd):
+                print(f"Matched command '{cmd}' with spec '{spec.name}'")
                 await spec.handler(self, message, cmd, args)
                 return True
+
+        print(f"No matching command found for '{cmd}'")
+
         return False
         
     except Exception as e:

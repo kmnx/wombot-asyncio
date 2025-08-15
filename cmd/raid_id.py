@@ -17,7 +17,7 @@ async def raid_or_id_handler(self, message, cmd, args):
         newcmd = cmd[2:]
     
     import wombot
-    asyncio.ensure_future(wombot.raid(message, newcmd))
+    asyncio.ensure_future(wombot.raid(self, message, newcmd))
 
 
 # Register the startswith patterns
