@@ -9,7 +9,7 @@ from data import data_pics_wombat, data_pics_capybara, data_pics_otter, data_pic
 @wrapped
 async def wombat_handler(self, message, cmd, args):
     """Handle !wombat command."""
-    await message.channel.send(random.choice(data_pics_wombat))
+    await message.channel.send(random.choice(data_pics_wombat.pics))
 
 @wrapped
 async def capybara_handler(self, message, cmd, args):
@@ -27,7 +27,6 @@ async def quokka_handler(self, message, cmd, args):
     """Handle !quokka command."""
     print("quokka")
     if message.room.name != "<PM>":
-        await message.room.delete_message(message)
     await message.channel.send(random.choice(data_pics_quokka.pics))
 
 

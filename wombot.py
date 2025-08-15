@@ -1407,7 +1407,7 @@ class MpdSingleton:
     @staticmethod
     def get_instance():
         if MpdSingleton._instance is None:
-            raise RuntimeError("MpdSingleton has not been initialized.")
+            raise RuntimeError("Call initialize() before get_instance()")
         return MpdSingleton._instance
 
     @staticmethod
@@ -1438,7 +1438,9 @@ async def main():
 
         await bot_task.cancel()
         await gif_task.cancel()
-        await mpd_task.cancel()
+        bot_task.cancel()
+        gif_task.cancel()
+        mpd_task.cancel()
 
 
 base_path = os.path.dirname(os.path.abspath(__file__))
