@@ -4,14 +4,14 @@ Shazam/ID station commands implementation.
 
 import asyncio
 from helpers.commands import register_exact, wrapped
+from wombot import shazam_station
 
 
 def shazam_handler_for(station: str):
     """Create a shazam handler for a specific station."""
     @wrapped
     async def _handler(self, message, cmd, args):
-        import wombot
-        asyncio.ensure_future(wombot.shazam_station(message, station))
+        asyncio.ensure_future(shazam_station(message, station))
     return _handler
 
 
