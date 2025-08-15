@@ -27,7 +27,6 @@ async def quokka_handler(self, message, cmd, args):
     """Handle !quokka command."""
     print("quokka")
     if message.room.name != "<PM>":
-        await message.room.delete_message(message)
     await message.channel.send(random.choice(data_pics_quokka.pics))
 
 
