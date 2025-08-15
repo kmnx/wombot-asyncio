@@ -14,6 +14,10 @@ async def anniversary_handler(self, message, cmd, args):
 
     zero_day = date(2022, 3, 14)
 
+    match = re.match(r"^chunt#(\d{3,4})$", cmd)
+    if not match:
+        await message.channel.send("Invalid command format. Please use chunt#NNN or chunt#NNNN.")
+        return
     this_number = int(match.group(1))
     anni_date = zero_day + timedelta(days=this_number)
     days_differnt = (anni_date - date.today()).days
