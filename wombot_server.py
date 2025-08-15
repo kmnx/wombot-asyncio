@@ -890,7 +890,7 @@ async def raid(bot, message, station_query):
 
             # shazam it
 
-            shazamapi = shazam.ShazamApi(loop, api_key=shazam_api_key)
+            shazamapi = shazam.ShazamApi(asyncio.get_running_loop(), api_key=shazam_api_key)
             tz = pytz.timezone("Europe/London")
             london_now = datetime.now(tz)
             hours_minutes = london_now.strftime("%H:%M")
@@ -997,7 +997,7 @@ async def shazam_station(message, station):
     bandcamp_result = None
     shazam_result = None
 
-    shazamapi = shazam.ShazamApi(loop, api_key=shazam_api_key)
+    shazamapi = shazam.ShazamApi(asyncio.get_running_loop(), api_key=shazam_api_key)
     # session = ClientSession(trust_env=True)
     tz = pytz.timezone("Europe/London")
     london_now = datetime.now(tz)

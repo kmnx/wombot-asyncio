@@ -948,7 +948,7 @@ async def raid(bot, message, station_query):
 
             # shazam it
 
-            shazamapi = shazam.ShazamApi(loop, api_key=shazam_api_key)
+            shazamapi = shazam.ShazamApi(asyncio.get_running_loop(), api_key=shazam_api_key)
             tz = pytz.timezone("Europe/London")
             london_now = datetime.now(tz)
             hours_minutes = london_now.strftime("%H:%M")
@@ -1059,7 +1059,7 @@ async def shazam_station(message, station):
     bandcamp_result = None
     shazam_result = None
 
-    shazamapi = shazam.ShazamApi(loop, api_key=shazam_api_key)
+    shazamapi = shazam.ShazamApi(asyncio.get_running_loop(), api_key=shazam_api_key)
     # session = ClientSession(trust_env=True)
     tz = pytz.timezone("Europe/London")
     london_now = datetime.now(tz)
@@ -1367,17 +1367,17 @@ class MyBot(chatango.Client):
             else:
                 orig_cmd, args = data[0], ""
             cmd = orig_cmd.lower().strip().lstrip().rstrip()
-            print(cmd)
+            #print(cmd)
 
             # Route through the command registry
-            print('** Routing command:', cmd)
+            logger.info('** Routing command:', cmd)
             if await commands.route_command(self, message, cmd, args):
                 return
 
 
-            print(cmd)
-            print(cmd.startswith("raid"))
-            print(cmd.startswith("id") or cmd.startswith("raid"))
+            #print(cmd)
+            #print(cmd.startswith("raid"))
+            #print(cmd.startswith("id") or cmd.startswith("raid"))
             connection_pool = await create_connection_pool()
             await insert_command(
                 connection_pool, cmd, message.user.showname, message.room.name
