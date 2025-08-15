@@ -11,7 +11,7 @@ async def randomstation_handler(self, message, cmd, args):
     """Handle !randomstation command."""
     from helpers import radioactivity
 
-    ra_stations = radioactivity.get_station_list()
+    ra_stations = await radioactivity.get_station_list()
     online_stations = []
     
     for station in ra_stations.values():
