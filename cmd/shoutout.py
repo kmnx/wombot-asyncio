@@ -38,7 +38,6 @@ async def shoutout_handler(self, message, cmd, args):
             + " "
             + args
             + " ! "
-            + random.choice(shout_end)
     if not args:
         await message.channel.send("Please provide a user to shout out (e.g., !shoutout @username).")
         return
