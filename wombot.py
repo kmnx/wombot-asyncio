@@ -1436,9 +1436,9 @@ async def main():
     finally:
         # Cancel tasks on shutdown
 
-        bot_task.cancel()
-        gif_task.cancel()
-        mpd_task.cancel()
+        await bot_task.cancel()
+        await gif_task.cancel()
+        await mpd_task.cancel()
 
 
 base_path = os.path.dirname(os.path.abspath(__file__))
