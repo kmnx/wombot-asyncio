@@ -15,13 +15,6 @@ if not zoneinfo.available_timezones():
 async def timeis_handler(self, message, cmd, args):
     """Handle !timeis and !time commands."""
 
-
-
-
-@wrapped
-async def timeis_handler(self, message, cmd, args):
-    """Handle !timeis and !time commands."""
-
     # Ensure tzdata is available if zoneinfo has no timezones
     if not zoneinfo.available_timezones():
         import tzdata
