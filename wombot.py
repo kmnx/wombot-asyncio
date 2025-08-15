@@ -51,15 +51,8 @@ try:
 except LookupError:
     nltk.download("averaged_perceptron_tagger")
 
-from helpers import radioactivity, search_google, commands, chuntfm, schedule, \
-    aiosqliteclass_id, shazam
 
-try:
-    pass
-except Exception:
-    print(
-        "Please add shazam_api_key to mysecrets.py for rapidapi shazam functionality "
-    )
+
 
 from helpers.aiosqliteclass import Sqlite3Class
 
@@ -92,6 +85,9 @@ except Exception:
     shazam_api_key = ""
     print("Please add shazam_api_key for rapidapi shazam functionality to mysecrets.py")
 
+
+from helpers import radioactivity, search_google, commands, chuntfm, schedule, \
+    aiosqliteclass_id, shazam
 
 def get_uk_timezone_label():
     uk_tz = pytz.timezone("Europe/London")
