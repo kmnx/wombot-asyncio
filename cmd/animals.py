@@ -35,7 +35,6 @@ async def capybara_handler(self, message, cmd, args):
     """Handle !capybara command."""
     await message.channel.send(random.choice(data_pics_capybara.pics))
 
-
 @wrapped
 async def otter_handler(self, message, cmd, args):
     """Handle !otter command."""
