@@ -2,8 +2,7 @@
 Jukebox command implementations.
 """
 
-import asyncio
-from commands import register_exact, wrapped
+from helpers.commands import register_exact, wrapped
 
 
 @wrapped

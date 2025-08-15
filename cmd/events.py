@@ -4,7 +4,7 @@ ChuntFM people command implementations.
 
 from datetime import date
 
-from commands import register_exact, wrapped
+from helpers.commands import register_exact, wrapped
 
 
 @wrapped

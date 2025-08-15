@@ -3,7 +3,7 @@ Test command that deliberately throws an error (for testing error handling).
 Remove this file in production!
 """
 
-from commands import register_exact, wrapped
+from helpers.commands import register_exact, wrapped
 
 
 @wrapped

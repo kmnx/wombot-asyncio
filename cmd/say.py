@@ -3,7 +3,7 @@ Text manipulation command implementations.
 """
 
 import html
-from commands import register_exact, wrapped
+from helpers.commands import register_exact, wrapped
 
 
 @wrapped

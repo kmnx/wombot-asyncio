@@ -2,8 +2,8 @@
 Recipe command implementation using Edamam API.
 """
 
-import edamam
-from commands import register_exact, wrapped
+from helpers import edamam
+from helpers.commands import register_exact, wrapped
 
 
 @wrapped

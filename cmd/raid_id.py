@@ -3,7 +3,7 @@ Raid and ID prefix commands implementation.
 """
 
 import asyncio
-from commands import register_startswith, delete_unless_pm
+from helpers.commands import register_startswith, delete_unless_pm
 
 
 async def raid_or_id_handler(self, message, cmd, args):

@@ -18,8 +18,6 @@ from . import animals
 from . import facts
 from . import dates
 from . import tags
-
-# More specific modules (split from generic ones)
 from . import cannabis
 from . import bufo
 from . import sandwich

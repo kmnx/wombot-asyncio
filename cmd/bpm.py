@@ -2,7 +2,7 @@
 BPM command implementation.
 """
 
-from commands import register_startswith, delete_unless_pm
+from helpers.commands import register_startswith, delete_unless_pm
 
 
 async def bpm_handler(self, message, cmd, args):
@@ -12,7 +12,7 @@ async def bpm_handler(self, message, cmd, args):
     real = cmd[3:].strip()
     if real:
         try:
-            import bpmcheck
+            from helpers import bpmcheck
             station_name, bpm = await bpmcheck.get_bpm(real)
             if bpm is not None:
                 await message.channel.send(f"BPM for {station_name} is {float(bpm):.2f}")

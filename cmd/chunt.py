@@ -2,7 +2,7 @@
 Chunt command implementation.
 """
 
-from commands import register_exact, wrapped
+from helpers.commands import register_exact, wrapped
 
 
 @wrapped

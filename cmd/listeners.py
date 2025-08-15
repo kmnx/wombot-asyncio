@@ -3,7 +3,7 @@ Listeners command implementation.
 """
 
 from aiohttp import ClientSession
-from commands import register_exact, wrapped
+from helpers.commands import register_exact, wrapped
 
 
 @wrapped

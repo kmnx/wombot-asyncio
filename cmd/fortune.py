@@ -3,7 +3,7 @@ Fortune command implementations (properly translated from original wombot.py).
 """
 
 import random
-from commands import register_exact, wrapped
+from helpers.commands import register_exact, wrapped
 
 from data import data_txt_fortunes as fortunes
 

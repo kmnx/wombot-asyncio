@@ -6,7 +6,7 @@ import re
 import html as htmlmod
 from datetime import datetime, timezone, timedelta
 from aiohttp import ClientSession
-from commands import register_exact, wrapped
+from helpers.commands import register_exact, wrapped
 
 
 @wrapped
@@ -136,7 +136,6 @@ async def whenis_handler(self, message, cmd, args):
 
 async def _get_schedule_for_date(date_offset_days: int):
     """Helper function to get schedule for a specific date."""
-    import wombot
     target_date = datetime.now(timezone.utc) + timedelta(days=date_offset_days)
     target_date_str = target_date.strftime("%Y-%m-%d")
     

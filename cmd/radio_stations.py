@@ -3,15 +3,14 @@ Radio station command implementations.
 """
 
 import random
-from commands import register_exact, wrapped
+from helpers.commands import register_exact, wrapped
 
 
 @wrapped
 async def randomstation_handler(self, message, cmd, args):
     """Handle !randomstation command."""
-    import wombot
-    import radioactivity
-    
+    from helpers import radioactivity
+
     ra_stations = radioactivity.get_station_list()
     online_stations = []
     

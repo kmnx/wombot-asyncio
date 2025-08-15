@@ -3,7 +3,7 @@ Coinflip command implementation.
 """
 
 import random
-from commands import register_exact, wrapped
+from helpers.commands import register_exact, wrapped
 
 
 @wrapped

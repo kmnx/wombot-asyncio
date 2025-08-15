@@ -3,7 +3,7 @@ Animal command implementations.
 """
 
 import random
-from commands import register_exact, wrapped
+from helpers.commands import register_exact, wrapped
 from data import data_pics_wombat, data_pics_capybara, data_pics_otter, data_pics_quokka
 
 

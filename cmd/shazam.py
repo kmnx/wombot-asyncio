@@ -3,7 +3,7 @@ Shazam/ID station commands implementation.
 """
 
 import asyncio
-from commands import register_exact, wrapped
+from helpers.commands import register_exact, wrapped
 
 
 def shazam_handler_for(station: str):

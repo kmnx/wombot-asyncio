@@ -3,8 +3,8 @@ Date and anniversary command implementations.
 """
 
 import re
-from datetime import datetime, date, timedelta
-from commands import register_exact, register_regex, wrapped
+from datetime import date, timedelta
+from helpers.commands import register_regex, wrapped
 
 @wrapped
 async def chunt_number_handler(self, message, cmd, args):

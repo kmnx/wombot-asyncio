@@ -6,14 +6,13 @@ import re
 import html as htmlmod
 from datetime import datetime, timezone
 from aiohttp import ClientSession
-from commands import register_exact, wrapped
+from helpers.commands import register_exact, wrapped
 
 
 @wrapped
 async def chuntfm_handler(self, message, cmd, args):
     """Handle !chuntfm command."""
-    import wombot
-    
+
     chu2_np_formatted = ""
     try:
         async with ClientSession() as s:

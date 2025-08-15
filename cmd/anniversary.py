@@ -1,7 +1,7 @@
 import random
 from datetime import date, timedelta
 from data import data_text_anniversaries as anniversaries
-from commands import wrapped, register_regex
+from helpers.commands import wrapped, register_regex
 
 
 @wrapped
