@@ -1350,8 +1350,7 @@ class MyBot(chatango.Client):
 
         # Command handling - only process messages starting with "!"
         if not message.body.startswith("!"):
-            # Not a command, skip
-            cmd = message.body.lower().strip()
+            return
         else:
             logger.info(message.body)
             data = message.body[1:].split(" ", 1)
@@ -1387,6 +1386,8 @@ class MyBot(chatango.Client):
                 await message.channel.send(random.choice(gif_res))
             else:
                 print("no result for gif search")
+
+            return
 
 
 async def get_db_idhistory_cur():
