@@ -42,28 +42,21 @@ try:
 except LookupError:
     nltk.download("averaged_perceptron_tagger")
 
-import radioactivity
-import search_google
+from helpers import radioactivity, search_google, edamam, chuntfm, schedule, \
+    aiosqliteclass_id, shazam
 
 try:
-    import shazam
+    pass
 except Exception:
     print(
         "Please add shazam_api_key to mysecrets.py for rapidapi shazam functionality "
     )
 
-from aiosqliteclass import Sqlite3Class
-import aiosqliteclass_id
+from helpers.aiosqliteclass import Sqlite3Class
 from data import data_txt_fortunes as fortunes, data_pics_quokka, data_pics_capybara, \
     data_pics_otter, data_text_anniversaries as anniversaries, data_pics_wombat
-import edamam
 from data.data_txt_facts import facts
-import schedule
-import chuntfm
-<<<<<<< HEAD
-#import telnet
-=======
->>>>>>> c67556c4dd164b6c59bde129a189b35a2e6587fa
+
 
 
 try:
@@ -2757,8 +2750,4 @@ if __name__ == "__main__":
         print("[KeyboardInterrupt] Killed bot.")
     finally:
         task.cancel()
-<<<<<<< HEAD
-        loop.close()
-=======
-        loop.close()
->>>>>>> c67556c4dd164b6c59bde129a189b35a2e6587fa
+

@@ -28,7 +28,6 @@ import validators
 import zoneinfo
 
 # Import command system
-import commands
 
 handle = "wombo"
 logger = logging.getLogger(handle)
@@ -52,21 +51,17 @@ try:
 except LookupError:
     nltk.download("averaged_perceptron_tagger")
 
-import radioactivity
-import search_google
+from helpers import radioactivity, search_google, commands, chuntfm, schedule, \
+    aiosqliteclass_id, shazam
 
 try:
-    import shazam
+    pass
 except Exception:
     print(
         "Please add shazam_api_key to mysecrets.py for rapidapi shazam functionality "
     )
 
-from aiosqliteclass import Sqlite3Class
-import aiosqliteclass_id
-
-import schedule
-import chuntfm
+from helpers.aiosqliteclass import Sqlite3Class
 
 # banned usernames like 4422jkf or dkl3322
 pattern = r"(\d{3}[a-zA-Z]{4}|[a-zA-Z]{4}\d{3})"
@@ -1226,7 +1221,7 @@ class MyBot(chatango.Client):
 
         print(self.goth)
         self._room = None
-        banned_ips_file = "banned_ips.txt"
+        banned_ips_file = "data/banned_ips.txt"
         with open(banned_ips_file, "r") as file:
             self.banned_ips = [line.strip() for line in file]
         
