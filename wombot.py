@@ -7,7 +7,7 @@ import aiocron
 import chatango
 
 from aiohttp import ClientSession
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 
 import random
 import typing
@@ -15,16 +15,16 @@ from os import environ
 import os.path
 from pathlib import Path
 import time
-import pytz
 import logging
 from urllib.parse import urlparse
-import bs4
 import nltk
+
+from helpers.db import create_commands_table, insert_command
+from helpers.jukebox import jukebox_status, mpd_context_manager, MpdSingleton
 
 nltk.download("averaged_perceptron_tagger")
 import re
 
-import validators
 import zoneinfo
 
 # Import command system
@@ -92,19 +92,10 @@ except:
     edamam_app_id = ""
 
 
-from helpers import radioactivity, search_google, commands, chuntfm, schedule, \
-    aiosqliteclass_id, shazam
+from helpers import search_google, commands, chuntfm, aiosqliteclass_id
+
 
 # Import command modules to register them
-import cmd
-
-def get_uk_timezone_label():
-    uk_tz = pytz.timezone("Europe/London")
-    now = datetime.now(uk_tz)
-    if now.dst():
-        return "BST"
-    else:
-        return "GMT"
 
 
 from mopidy_asyncio_client import MopidyClient
@@ -242,38 +233,6 @@ else:
 print("init variables done")
 
 
-def validate_and_convert_to_milliseconds(seektime):
-    # Regular expression to match the format HH:MM:SS, HH:MM, or MM
-    pattern = r"^(\d{1,2}):(\d{1,2}):(\d{1,2})$|^(\d{1,2}):(\d{1,2})$|^(\d{1,2})$"
-
-    # Check if the input matches the pattern
-    match = re.match(pattern, seektime)
-
-    if match:
-        # Extract hours, minutes, and seconds from the matched groups
-        groups = match.groups()
-        hours = int(groups[0]) if groups[0] else int(groups[3]) if groups[3] else 0
-        minutes = (
-            int(groups[1])
-            if groups[1]
-            else int(groups[4]) if groups[4] else int(groups[5]) if groups[5] else 0
-        )
-        seconds = int(groups[2]) if groups[2] else 0
-
-        # If single digit, add leading zero
-        hours = str(hours).zfill(2)
-        minutes = str(minutes).zfill(2)
-        seconds = str(seconds).zfill(2)
-
-        # Convert to milliseconds
-        total_milliseconds = (
-            int(hours) * 3600 + int(minutes) * 60 + int(seconds)
-        ) * 1000
-        return total_milliseconds
-    else:
-        return None
-
-
 async def post_gif_of_the_hour(param):
     logger.debug("post_gif_of_the_hour")
     bot = BotSingleton.get_instance()
@@ -357,26 +316,6 @@ async def schedule_chuntfm_livecheck():
 
 
 # juke helper functions
-def convert_to_time(milliseconds):
-    seconds = milliseconds // 1000
-    minutes, seconds = divmod(seconds, 60)
-    hours, minutes = divmod(minutes, 60)
-    return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
-
-
-def display_progress(track_position, track_length):
-    position_str = convert_to_time(track_position)
-    length_str = convert_to_time(track_length)
-
-    percentage = int((track_position / track_length) * 100)
-    progress_bar_length = 10
-    progress_bar = "#" * (percentage // (100 // progress_bar_length))
-    remaining_space = "." * (progress_bar_length - len(progress_bar))
-
-    print(
-        f"at [{position_str}] of [{length_str}] [{progress_bar}{remaining_space}] {percentage}%"
-    )
-    return f"at [{position_str}] of [{length_str}] [{progress_bar}{remaining_space}] {percentage}%"
 
 
 """
@@ -685,78 +624,6 @@ async def now_playing(return_type):
 
 
 # juke np
-async def jukebox_status():
-    mpd = MpdSingleton.get_instance()
-    data = None
-    print("trying to get mpd data")
-    try:
-        data = await mpd.playback.get_current_track()
-    except Exception as e:
-        print("exception in np")
-        print(e)
-        jukebox_status_msg = "!juke is down"
-
-    if data is not None:
-        print(data)
-        jukebox_status_msg = " !juke is playing"
-
-    else:
-        print("no mpd data")
-        url = ""
-        jukebox_status_msg = ""
-    return jukebox_status_msg
-
-
-async def now_playing_jukebox(return_type):
-    mpd = MpdSingleton.get_instance()
-    chu2_np_formatted = ""
-    chu2_np_raw = None
-
-    # anything on chu2?
-    data = None
-    print("trying to get mpd data")
-    try:
-        data = await mpd.playback.get_current_track()
-        track_position = await mpd.playback.get_time_position()
-    except Exception as e:
-        print("exception in np")
-        print(e)
-
-    # print(data)
-
-    if data is not None:
-        print(data)
-        track_length = data["length"]
-        progress_bar = display_progress(track_position, track_length)
-        if "__model__" in data:
-            if data["uri"].startswith("mixcloud"):
-                uri = data["uri"]
-                url = uri.replace("mixcloud:track:", "https://www.mixcloud.com")
-
-            elif data["uri"].startswith("soundcloud"):
-                url = data["comment"]
-            elif data["uri"].startswith("bandcamp"):
-                comment = data["comment"]
-                url = comment.replace("URL: ", "")
-            else:
-                url = ""
-            chu2_np_raw = url
-            chu2_np_formatted = (
-                " https://fm.chunt.org/stream2 jukebox now playing: "
-                + url
-                + " "
-                + progress_bar
-            )
-
-    else:
-        print("no mpd data")
-        url = ""
-        chu2_np_formatted = "jukebox is empty. !add a link from sc,mc,bc or nts!"
-
-    if return_type == "formatted":
-        return chu2_np_formatted
-    elif return_type == "raw":
-        return chu2_np_raw
 
 
 async def create_connection_pool():
@@ -764,398 +631,15 @@ async def create_connection_pool():
 
 
 # Function to create the commands table if not exists
-async def create_commands_table(connection):
-    cursor = await connection.cursor()
-    await cursor.execute(
-        """
-        CREATE TABLE IF NOT EXISTS commands (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            command TEXT,
-            time TEXT,
-            date TEXT,
-            username TEXT,
-            channel TEXT
-        )
-    """
-    )
-    await connection.commit()
-
-
-async def insert_command(connection, command, username, channel):
-    current_time = datetime.now().strftime("%H:%M:%S")
-    current_date = datetime.now().strftime("%Y-%m-%d")
-
-    cursor = await connection.cursor()
-    await cursor.execute(
-        """
-        INSERT INTO commands (command, time, date, username, channel)
-        VALUES (?, ?, ?, ?, ?)
-    """,
-        (command, current_time, current_date, username, channel),
-    )
-    await connection.commit()
-
-
-async def get_most_used_commands(connection):
-    # Calculate the date 7 days ago from today
-    seven_days_ago = (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d")
-
-    cursor = await connection.cursor()
-    await cursor.execute(
-        """
-        SELECT command, COUNT(*) as command_count
-        FROM commands
-        WHERE date >= ?
-        GROUP BY command
-        ORDER BY command_count DESC
-        LIMIT 10
-    """,
-        (seven_days_ago,),
-    )
-
-    rows = await cursor.fetchall()
-
-    return rows
 
 
 # mopidy logic
 
 
-async def playback_started_handler(data):
-    logger.debug("playback_started_handler")
-    bot = BotSingleton.get_instance()
-    """Callback function, called when the playback started."""
-    print(data)
-    print(bot.rooms)  # ok
-    main_room = environ["wombotmainroom"]
-    my_room = bot.get_room(main_room)
-    # print(my_room) # ok
-    if data["tl_track"]["track"]["uri"].startswith("soundcloud"):
-        url = data["tl_track"]["track"]["comment"]
-    elif data["tl_track"]["track"]["uri"].startswith("mixcloud"):
-        uri = data["tl_track"]["track"]["uri"]
-        url = uri.replace("mixcloud:track:", "https://www.mixcloud.com")
-    else:
-        url = data["tl_track"]["track"]["name"]
-    msg = "https://fm.chunt.org/stream2 jukebox now playing: " + url
-    await my_room.send_message(msg)
-
-
-async def all_events_handler(event, data):
-    logger.debug("all_events_handler")
-
-    """Callback function; catch-all function."""
-    print(event, data)
-    if event == "tracklist_changed":
-        print(data)
-
-
-async def mpd_context_manager(mpd):
-    logger.debug("mpd_context_manager")
-
-    try:
-
-        async with mpd as mopidy:
-            mopidy.bind("track_playback_started", playback_started_handler)
-            mopidy.bind("*", all_events_handler)
-            await mpd.tracklist.set_consume(True)
-
-            # Your program's logic:
-            # await mopidy.playback.play()
-            while True:
-                await asyncio.sleep(1)
-
-    except Exception as e:
-        logger.error(e)
-        print(e)
-
-
 # convert utc to London time
 
 
-def convert_utc_to_london(utctime):
-    pytz.timezone("UTC")
-    naive_time = datetime.strptime(utctime, "%Y-%m-%d %H:%M:%S")
-    utc_time = naive_time.replace(tzinfo=pytz.UTC)
-    london_tz = pytz.timezone("Europe/London")
-    london_time = utc_time.astimezone(london_tz)
-    string_time = str(london_time)
-    less_time = string_time.split(" ")[1].split(":")
-    hours_minutes = str(less_time[0]) + ":" + str(less_time[1])
-
-    return hours_minutes
-
-
 # radioactivity id
-
-
-async def raid(bot, message, station_query):
-    logger.debug("raid")
-
-    ra_stations = await radioactivity.get_station_list()
-    print("wtf")
-    ra_station_names = list(ra_stations.keys())
-
-    # pm a list of station names to the user if the typed !raidlist
-    if station_query == "list":
-        msg = "Radioactivity stations: "
-        for station in ra_station_names:
-            msg += station + ", "
-
-        # delete user message from room
-        await message.room.delete_message(message)
-        # send raid list to user via pm
-        await message.room.client.pm.send_message(message.user, msg)
-
-        return None
-
-    match = False
-
-    # if the provided station name is in the list of stations
-    if station_query in ra_station_names:
-        station_name = station_query
-        match = True
-    # try to guess which station is meant
-    else:
-        station_name = [
-            station for station in ra_station_names if station_query in station
-        ]
-
-        # if more than station has particular matches, return an error message
-        if station_name is not None:
-            if isinstance(station_name, list) and len(station_name) > 1:
-                await message.channel.send(
-                    "Sorry, station name was ambiguous. Please specify the station name exactly (type !raidlist to get a list of possible options)."
-                )
-            elif isinstance(station_name, list) and len(station_name) == 0:
-                await message.channel.send(
-                    "Sorry, no station name match found (type !raidlist to get a list of possible options)."
-                )
-            else:
-                match = True
-                station_name = station_name[0]
-
-    # station could be identified, let's go
-    if match:
-        await message.room.delete_message(message)
-        id_station = ra_stations[station_name]
-        # for all stations urls for the given station, run the shazam api and append results to the message
-        for stream in id_station["stream_url"]:
-            stream_name = stream[0]
-            if stream_name == "station":
-                stream_name = ""
-            stream_url = stream[1]
-
-            # shazam it
-
-            shazamapi = shazam.ShazamApi(asyncio.get_running_loop(), api_key=shazam_api_key)
-            tz = pytz.timezone("Europe/London")
-            london_now = datetime.now(tz)
-            hours_minutes = london_now.strftime("%H:%M")
-
-            stream_sep = "" if stream_name == "" else " "
-
-            try:
-                shazam_result = await shazamapi._get(stream_url)
-                if "track" in shazam_result:
-                    artist = shazam_result["track"]["subtitle"]
-                    title = shazam_result["track"]["title"]
-                    bandcamp_result = await bandcamp_search(artist, title)
-                    if bandcamp_result is not None:
-                        bandcamp_result_msg = " | maybe it's: " + bandcamp_result + " "
-                    else:
-                        bandcamp_result_msg = "  | no bandcamp found"
-                    await message.channel.send(
-                        "ID "
-                        + station_name
-                        + stream_sep
-                        + stream_name
-                        + " "
-                        + hours_minutes
-                        + " - "
-                        + artist
-                        + " - "
-                        + title
-                        + bandcamp_result_msg
-                    )
-                    # bandcamp search found something, insert into db
-                    try:
-                        await bot.db_id.insert_id_request(
-                            str(london_now),
-                            message.user.showname,
-                            message.room.name,
-                            message.body,
-                            stream_name,
-                            None,
-                            artist,
-                            title,
-                            bandcamp_result,
-                            str(shazam_result),
-                            None,
-                        )
-                    except Exception as e:
-                        print(e)
-                else:
-                    await message.channel.send(
-                        "ID "
-                        + station_name
-                        + stream_sep
-                        + stream_name
-                        + ": "
-                        + hours_minutes
-                        + " - "
-                        + "shazam found nothing"
-                    )
-                    # shazam found nothing, insert into db anyway
-                    try:
-                        await bot.db_id.insert_id_request(
-                            str(london_now),
-                            message.user.showname,
-                            message.room.name,
-                            message.body,
-                            stream_name,
-                            None,
-                            None,
-                            None,
-                            None,
-                            None,
-                            None,
-                        )
-                    except Exception as e:
-                        print(e)
-            except Exception as e:
-                print(str(e))
-        # print(artist + " - " + track)
-        # return artist,track
-
-
-async def shazam_station(message, station):
-
-    print("shazam_station")
-    bot = BotSingleton.get_instance()
-    logger.debug("shazam_station")
-    if station == "nts1":
-        audio_source = "https://stream-relay-geo.ntslive.net/stream"
-    elif station == "nts2":
-        audio_source = "https://stream-relay-geo.ntslive.net/stream2"
-    elif station == "doyou":
-        audio_source = "https://doyouworld.out.airtime.pro/doyouworld_a"
-    elif station == "chunt1":
-        audio_source = "https://fm.chunt.org/stream"
-    elif station == "chunt2":
-        audio_source = "https://fm.chunt.org/stream2"
-    elif station == "soho":
-        audio_source = "https://sohoradiomusic.doughunt.co.uk:8010/128mp3"
-    elif station == "alhara":
-        audio_source = "https://n13.radiojar.com/78cxy6wkxtzuv?1708984512=&rj-tok=AAABjedzXYAAkdrS5yt-8kMFEA&rj-ttl=5"
-    elif station == "sharedfrequencies":
-        audio_source = "https://sharedfrequencies.out.airtime.pro/sharedfrequencies_a"
-    elif station == "rinse":
-        audio_source = "https://admin.stream.rinse.fm/proxy/rinse_uk/stream"
-    station_name = station
-    show_name = None
-    artist = None
-    title = None
-    bandcamp_result = None
-    shazam_result = None
-
-    shazamapi = shazam.ShazamApi(asyncio.get_running_loop(), api_key=shazam_api_key)
-    # session = ClientSession(trust_env=True)
-    tz = pytz.timezone("Europe/London")
-    london_now = datetime.now(tz)
-    hours_minutes = london_now.strftime("%H:%M")
-    ""
-    ""
-    shazam_result = await shazamapi._get(audio_source)
-    # print(shazam_result)
-
-    if "track" in shazam_result:
-        artist = shazam_result["track"]["subtitle"]
-        title = shazam_result["track"]["title"]
-        bandcamp_result = await bandcamp_search(artist, title)
-        if bandcamp_result is not None:
-            bandcamp_result_msg = " | maybe it's: " + bandcamp_result + " "
-        else:
-            bandcamp_result_msg = "  | no bandcamp found"
-        # bandcamp search found something, insert into db
-
-        await message.channel.send(
-            "ID "
-            + station_name
-            + " "
-            + hours_minutes
-            + " - "
-            + artist
-            + " - "
-            + title
-            + bandcamp_result_msg
-        )
-    else:
-        shazam_result = None
-        await message.channel.send(
-            "ID " + station_name + ": " + hours_minutes + " - " + "shazam found nothing"
-        )
-    # insert anything we found into db anyway
-    if station == "chunt1":
-        try:
-            show_name, who_cares = await now_playing("raw")
-        except Exception as e:
-            print(e)
-    elif station == "chunt2":
-        try:
-            who_cares, show_name = await now_playing("raw")
-        except Exception as e:
-            print(e)
-    elif station == "nts1":
-        try:
-            show_name = await schedule.get_now_playing(station)
-        except Exception as e:
-            print(e)
-    elif station == "nts2":
-        try:
-            show_name = await schedule.get_now_playing(station)
-        except Exception as e:
-            print(e)
-
-    data_package = [
-        str(london_now),
-        message.user.showname,
-        message.room.name,
-        message.body,
-        station,
-        show_name,
-        artist,
-        title,
-        bandcamp_result,
-        str(shazam_result),
-        None,
-    ]
-    print("should get a data pack:")
-    print(data_package)
-    try:
-        await bot.db_id.insert_id_request(
-            str(london_now),
-            message.user.showname,
-            message.room.name,
-            message.body,
-            str(station),
-            show_name,
-            artist,
-            title,
-            bandcamp_result,
-            str(shazam_result),
-            None,
-        )
-    except Exception as e:
-        print(e)
-    """
-    try:
-        whole_db = await bot.db_id.query_history_all()
-        for shazam_result in whole_db:
-            print(shazam_result)
-    except Exception as e:
-        print(e)
-    """
 
 
 async def bandcamp_search(artist, title):
@@ -1378,6 +862,8 @@ class MyBot(chatango.Client):
             #print(cmd)
             #print(cmd.startswith("raid"))
             #print(cmd.startswith("id") or cmd.startswith("raid"))
+
+            # log command
             connection_pool = await create_connection_pool()
             await insert_command(
                 connection_pool, cmd, message.user.showname, message.room.name
@@ -1397,33 +883,6 @@ class MyBot(chatango.Client):
                 print("no result for gif search")
 
             return
-
-
-async def get_db_idhistory_cur():
-    # ugh
-    logger.debug("get_db_cur")
-
-    conn = await aiosqlite.connect("/db/trackids.db")
-    # conn.row_factory = lambda cursor, row: row[0]
-    # self.conn.row_factory = aiosqlite.Row
-    cursor = await conn.cursor()
-    return cursor
-
-
-class MpdSingleton:
-    _instance = None
-
-    @staticmethod
-    def get_instance():
-        if MpdSingleton._instance is None:
-            raise RuntimeError("Call initialize() before get_instance()")
-        return MpdSingleton._instance
-
-    @staticmethod
-    def initialize(mpd_instance):
-        if MpdSingleton._instance is None:
-            MpdSingleton._instance = mpd_instance
-
 
 
 async def main():

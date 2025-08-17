@@ -4,6 +4,7 @@ Tag and database command implementations.
 
 import random
 from helpers.commands import register_exact, wrapped
+from helpers.db import get_most_used_commands
 
 
 @wrapped

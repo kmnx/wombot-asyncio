@@ -1,11 +1,18 @@
 import asyncio
+from datetime import datetime
+
 import aiohttp
 from io import BytesIO
+
+import pytz
 from pydub import AudioSegment
 import base64
 import mysecrets
 import logging
 import ssl
+
+from helpers import radioactivity, schedule
+from wombot import logger, shazam_api_key, bandcamp_search, BotSingleton, now_playing
 
 shazam_api_key = mysecrets.shazam_api_key
 print("shazam_api_key: ", shazam_api_key)
@@ -141,3 +148,272 @@ async def main(loop):
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main(loop))
+
+
+async def raid(bot, message, station_query):
+    logger.debug("raid")
+
+    ra_stations = await radioactivity.get_station_list()
+    print("wtf")
+    ra_station_names = list(ra_stations.keys())
+
+    # pm a list of station names to the user if the typed !raidlist
+    if station_query == "list":
+        msg = "Radioactivity stations: "
+        for station in ra_station_names:
+            msg += station + ", "
+
+        # delete user message from room
+        await message.room.delete_message(message)
+        # send raid list to user via pm
+        await message.room.client.pm.send_message(message.user, msg)
+
+        return None
+
+    match = False
+
+    # if the provided station name is in the list of stations
+    if station_query in ra_station_names:
+        station_name = station_query
+        match = True
+    # try to guess which station is meant
+    else:
+        station_name = [
+            station for station in ra_station_names if station_query in station
+        ]
+
+        # if more than station has particular matches, return an error message
+        if station_name is not None:
+            if isinstance(station_name, list) and len(station_name) > 1:
+                await message.channel.send(
+                    "Sorry, station name was ambiguous. Please specify the station name exactly (type !raidlist to get a list of possible options)."
+                )
+            elif isinstance(station_name, list) and len(station_name) == 0:
+                await message.channel.send(
+                    "Sorry, no station name match found (type !raidlist to get a list of possible options)."
+                )
+            else:
+                match = True
+                station_name = station_name[0]
+
+    # station could be identified, let's go
+    if match:
+        await message.room.delete_message(message)
+        id_station = ra_stations[station_name]
+        # for all stations urls for the given station, run the shazam api and append results to the message
+        for stream in id_station["stream_url"]:
+            stream_name = stream[0]
+            if stream_name == "station":
+                stream_name = ""
+            stream_url = stream[1]
+
+            # shazam it
+
+            shazamapi = shazam.ShazamApi(asyncio.get_running_loop(), api_key=shazam_api_key)
+            tz = pytz.timezone("Europe/London")
+            london_now = datetime.now(tz)
+            hours_minutes = london_now.strftime("%H:%M")
+
+            stream_sep = "" if stream_name == "" else " "
+
+            try:
+                shazam_result = await shazamapi._get(stream_url)
+                if "track" in shazam_result:
+                    artist = shazam_result["track"]["subtitle"]
+                    title = shazam_result["track"]["title"]
+                    bandcamp_result = await bandcamp_search(artist, title)
+                    if bandcamp_result is not None:
+                        bandcamp_result_msg = " | maybe it's: " + bandcamp_result + " "
+                    else:
+                        bandcamp_result_msg = "  | no bandcamp found"
+                    await message.channel.send(
+                        "ID "
+                        + station_name
+                        + stream_sep
+                        + stream_name
+                        + " "
+                        + hours_minutes
+                        + " - "
+                        + artist
+                        + " - "
+                        + title
+                        + bandcamp_result_msg
+                    )
+                    # bandcamp search found something, insert into db
+                    try:
+                        await bot.db_id.insert_id_request(
+                            str(london_now),
+                            message.user.showname,
+                            message.room.name,
+                            message.body,
+                            stream_name,
+                            None,
+                            artist,
+                            title,
+                            bandcamp_result,
+                            str(shazam_result),
+                            None,
+                        )
+                    except Exception as e:
+                        print(e)
+                else:
+                    await message.channel.send(
+                        "ID "
+                        + station_name
+                        + stream_sep
+                        + stream_name
+                        + ": "
+                        + hours_minutes
+                        + " - "
+                        + "shazam found nothing"
+                    )
+                    # shazam found nothing, insert into db anyway
+                    try:
+                        await bot.db_id.insert_id_request(
+                            str(london_now),
+                            message.user.showname,
+                            message.room.name,
+                            message.body,
+                            stream_name,
+                            None,
+                            None,
+                            None,
+                            None,
+                            None,
+                            None,
+                        )
+                    except Exception as e:
+                        print(e)
+            except Exception as e:
+                print(str(e))
+        # print(artist + " - " + track)
+        # return artist,track
+
+
+async def shazam_station(message, station):
+
+    print("shazam_station")
+    bot = BotSingleton.get_instance()
+    logger.debug("shazam_station")
+    if station == "nts1":
+        audio_source = "https://stream-relay-geo.ntslive.net/stream"
+    elif station == "nts2":
+        audio_source = "https://stream-relay-geo.ntslive.net/stream2"
+    elif station == "doyou":
+        audio_source = "https://doyouworld.out.airtime.pro/doyouworld_a"
+    elif station == "chunt1":
+        audio_source = "https://fm.chunt.org/stream"
+    elif station == "chunt2":
+        audio_source = "https://fm.chunt.org/stream2"
+    elif station == "soho":
+        audio_source = "https://sohoradiomusic.doughunt.co.uk:8010/128mp3"
+    elif station == "alhara":
+        audio_source = "https://n13.radiojar.com/78cxy6wkxtzuv?1708984512=&rj-tok=AAABjedzXYAAkdrS5yt-8kMFEA&rj-ttl=5"
+    elif station == "sharedfrequencies":
+        audio_source = "https://sharedfrequencies.out.airtime.pro/sharedfrequencies_a"
+    elif station == "rinse":
+        audio_source = "https://admin.stream.rinse.fm/proxy/rinse_uk/stream"
+    station_name = station
+    show_name = None
+    artist = None
+    title = None
+    bandcamp_result = None
+    shazam_result = None
+
+    shazamapi = shazam.ShazamApi(asyncio.get_running_loop(), api_key=shazam_api_key)
+    # session = ClientSession(trust_env=True)
+    tz = pytz.timezone("Europe/London")
+    london_now = datetime.now(tz)
+    hours_minutes = london_now.strftime("%H:%M")
+    ""
+    ""
+    shazam_result = await shazamapi._get(audio_source)
+    # print(shazam_result)
+
+    if "track" in shazam_result:
+        artist = shazam_result["track"]["subtitle"]
+        title = shazam_result["track"]["title"]
+        bandcamp_result = await bandcamp_search(artist, title)
+        if bandcamp_result is not None:
+            bandcamp_result_msg = " | maybe it's: " + bandcamp_result + " "
+        else:
+            bandcamp_result_msg = "  | no bandcamp found"
+        # bandcamp search found something, insert into db
+
+        await message.channel.send(
+            "ID "
+            + station_name
+            + " "
+            + hours_minutes
+            + " - "
+            + artist
+            + " - "
+            + title
+            + bandcamp_result_msg
+        )
+    else:
+        shazam_result = None
+        await message.channel.send(
+            "ID " + station_name + ": " + hours_minutes + " - " + "shazam found nothing"
+        )
+    # insert anything we found into db anyway
+    if station == "chunt1":
+        try:
+            show_name, who_cares = await now_playing("raw")
+        except Exception as e:
+            print(e)
+    elif station == "chunt2":
+        try:
+            who_cares, show_name = await now_playing("raw")
+        except Exception as e:
+            print(e)
+    elif station == "nts1":
+        try:
+            show_name = await schedule.get_now_playing(station)
+        except Exception as e:
+            print(e)
+    elif station == "nts2":
+        try:
+            show_name = await schedule.get_now_playing(station)
+        except Exception as e:
+            print(e)
+
+    data_package = [
+        str(london_now),
+        message.user.showname,
+        message.room.name,
+        message.body,
+        station,
+        show_name,
+        artist,
+        title,
+        bandcamp_result,
+        str(shazam_result),
+        None,
+    ]
+    print("should get a data pack:")
+    print(data_package)
+    try:
+        await bot.db_id.insert_id_request(
+            str(london_now),
+            message.user.showname,
+            message.room.name,
+            message.body,
+            str(station),
+            show_name,
+            artist,
+            title,
+            bandcamp_result,
+            str(shazam_result),
+            None,
+        )
+    except Exception as e:
+        print(e)
+    """
+    try:
+        whole_db = await bot.db_id.query_history_all()
+        for shazam_result in whole_db:
+            print(shazam_result)
+    except Exception as e:
+        print(e)
+    """

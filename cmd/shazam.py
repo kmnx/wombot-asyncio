@@ -4,7 +4,7 @@ Shazam/ID station commands implementation.
 
 import asyncio
 from helpers.commands import register_exact, wrapped
-from wombot import shazam_station
+from helpers.shazam import shazam_station
 
 
 def shazam_handler_for(station: str):

@@ -3,6 +3,8 @@ Raid and ID prefix commands implementation.
 """
 
 import asyncio
+
+import helpers.shazam
 from helpers.commands import register_startswith, delete_unless_pm
 
 
@@ -17,7 +19,7 @@ async def raid_or_id_handler(self, message, cmd, args):
         newcmd = cmd[2:]
     
     import wombot
-    asyncio.ensure_future(wombot.raid(self, message, newcmd))
+    asyncio.ensure_future(helpers.shazam.raid(self, message, newcmd))
 
 
 # Register the startswith patterns

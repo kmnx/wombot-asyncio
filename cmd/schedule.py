@@ -6,6 +6,8 @@ import re
 import html as htmlmod
 from datetime import datetime, timezone, timedelta
 from aiohttp import ClientSession
+
+import helpers.timing
 from helpers.commands import register_exact, wrapped
 
 
@@ -40,22 +42,22 @@ async def upnext_handler(self, message, cmd, args):
                             .replace("<br>", " - "),
                         )
                         chuntfm_upnext = (
-                            "UP NEXT: "
-                            + (show["title"])
-                            + " | "
-                            + show["description"]
-                            .replace("\n", " ")
-                            .replace("\r", "")
-                            .replace("<br>", "")
-                            + " | "
-                            + show["dateUK"]
-                            + " "
-                            + show["startTimeUK"]
-                            + " "
-                            + wombot.get_uk_timezone_label()
-                            + " (in "
-                            + when
-                            + ")"
+                                "UP NEXT: "
+                                + (show["title"])
+                                + " | "
+                                + show["description"]
+                                .replace("\n", " ")
+                                .replace("\r", "")
+                                .replace("<br>", "")
+                                + " | "
+                                + show["dateUK"]
+                                + " "
+                                + show["startTimeUK"]
+                                + " "
+                                + helpers.timing.get_uk_timezone_label()
+                                + " (in "
+                                + when
+                                + ")"
                         )
                         break
             else:
@@ -100,22 +102,22 @@ async def whenis_handler(self, message, cmd, args):
                                 when = time_rem.split(".")[0] + " hours"
                                 
                                 chuntfm_queried_show = (
-                                    "FOUND: "
-                                    + show["title"]
-                                    + " | "
-                                    + show["description"]
-                                    .replace("\n", " ")
-                                    .replace("\r", "")
-                                    .replace("<br>", "")
-                                    + " | "
-                                    + show["dateUK"]
-                                    + " "
-                                    + show["startTimeUK"]
-                                    + " "
-                                    + wombot.get_uk_timezone_label()
-                                    + " (in "
-                                    + when
-                                    + ")"
+                                        "FOUND: "
+                                        + show["title"]
+                                        + " | "
+                                        + show["description"]
+                                        .replace("\n", " ")
+                                        .replace("\r", "")
+                                        .replace("<br>", "")
+                                        + " | "
+                                        + show["dateUK"]
+                                        + " "
+                                        + show["startTimeUK"]
+                                        + " "
+                                        + helpers.timing.get_uk_timezone_label()
+                                        + " (in "
+                                        + when
+                                        + ")"
                                 )
                                 break
                     

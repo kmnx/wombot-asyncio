@@ -1,7 +1,7 @@
 """
 Jukebox command implementations.
 """
-
+import helpers.jukebox
 from helpers.commands import register_exact, wrapped
 
 
@@ -10,7 +10,7 @@ async def play_add_handler(self, message, cmd, args):
     """Handle !play and !add commands."""
     import wombot
     # Import MpdSingleton from main module
-    mpd = wombot.MpdSingleton.get_instance()
+    mpd = helpers.jukebox.MpdSingleton.get_instance()
     
     if args:
         # Extract URL from args
@@ -31,7 +31,7 @@ async def play_add_handler(self, message, cmd, args):
 async def queue_handler(self, message, cmd, args):
     """Handle !queue and !tl commands."""
     import wombot
-    mpd = wombot.MpdSingleton.get_instance()
+    mpd = helpers.jukebox.MpdSingleton.get_instance()
     
     try:
         tracklist = await mpd.tracklist.get_tl_tracks()
@@ -63,7 +63,7 @@ async def queue_handler(self, message, cmd, args):
 async def skip_handler(self, message, cmd, args):
     """Handle !skip command."""
     import wombot
-    mpd = wombot.MpdSingleton.get_instance()
+    mpd = helpers.jukebox.MpdSingleton.get_instance()
     
     try:
         await mpd.playback.next()
@@ -77,7 +77,7 @@ async def skip_handler(self, message, cmd, args):
 async def seek_handler(self, message, cmd, args):
     """Handle !seek command."""
     import wombot
-    mpd = wombot.MpdSingleton.get_instance()
+    mpd = helpers.jukebox.MpdSingleton.get_instance()
     
     if args:
         try:
@@ -97,7 +97,7 @@ async def seek_handler(self, message, cmd, args):
 async def ff_handler(self, message, cmd, args):
     """Handle !ff and !fastforward commands."""
     import wombot
-    mpd = wombot.MpdSingleton.get_instance()
+    mpd = helpers.jukebox.MpdSingleton.get_instance()
     
     try:
         # Fast forward by 30 seconds by default
@@ -114,7 +114,7 @@ async def ff_handler(self, message, cmd, args):
 async def rewind_handler(self, message, cmd, args):
     """Handle !rewind and !rw commands."""
     import wombot
-    mpd = wombot.MpdSingleton.get_instance()
+    mpd = helpers.jukebox.MpdSingleton.get_instance()
     
     try:
         # Rewind by 30 seconds by default
@@ -131,7 +131,7 @@ async def rewind_handler(self, message, cmd, args):
 async def clear_handler(self, message, cmd, args):
     """Handle !clear command."""
     import wombot
-    mpd = wombot.MpdSingleton.get_instance()
+    mpd = helpers.jukebox.MpdSingleton.get_instance()
     
     try:
         await mpd.tracklist.clear()
@@ -149,7 +149,7 @@ async def juke_handler(self, message, cmd, args):
     
     try:
         # Check jukebox status
-        mpd = wombot.MpdSingleton.get_instance()
+        mpd = helpers.jukebox.MpdSingleton.get_instance()
         data = await mpd.status()
         
         if data is not None:
