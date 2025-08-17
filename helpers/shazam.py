@@ -12,7 +12,8 @@ import logging
 import ssl
 
 from helpers import radioactivity, schedule
-from wombot import logger, shazam_api_key, bandcamp_search, BotSingleton, now_playing
+from wombot import logger, shazam_api_key, BotSingleton, now_playing
+from helpers.bandcamp import bandcamp_search
 
 shazam_api_key = mysecrets.shazam_api_key
 print("shazam_api_key: ", shazam_api_key)

@@ -16,7 +16,6 @@ import os.path
 from pathlib import Path
 import time
 import logging
-from urllib.parse import urlparse
 import nltk
 
 from helpers.db import create_commands_table, insert_command
@@ -92,7 +91,7 @@ except:
     edamam_app_id = ""
 
 
-from helpers import search_google, commands, chuntfm, aiosqliteclass_id
+from helpers import commands, chuntfm, aiosqliteclass_id
 
 
 # Import command modules to register them
@@ -157,25 +156,6 @@ command_list = [
     "ntsweirdo",
 ]
 
-help_message = (
-    "commands: \r \r "
-    + "!id1 to shazam chunt1 \r!idnts1 for NTS1 \r!idyourfavouritestation for your favourite station \r \r"
-    + "!fortune (your daily fortune)  \r \r "
-    + "!shoutout [username]  \r "
-    + "!b2b for some random random gifs \r !rnd for even more random gifs \r"
-    + "gifs curated by bigbunnybrer, oscmal, and others \r \r"
-    + "keep chuntin!"
-)
-
-shout_start = [
-    "out to you, ",
-    "out to the absolute legend ",
-    "much love out to ",
-    "out to the amazing ",
-    "out to the inimitable",
-]
-
-shout_end = ["😘", "❤️", "💙", "*h*", "<3"]
 
 gif_hosts = ["https://c.tenor.com/", "https://media.giphy.com/"]
 
@@ -623,48 +603,9 @@ async def now_playing(return_type):
         return chu1_np_raw, chu2_np_raw
 
 
-# juke np
-
 
 async def create_connection_pool():
     return await aiosqlite.connect("chatbot_database.db")
-
-
-# Function to create the commands table if not exists
-
-
-# mopidy logic
-
-
-# convert utc to London time
-
-
-# radioactivity id
-
-
-async def bandcamp_search(artist, title):
-    logger.debug("bandcamp_search")
-
-    google_query = artist + " " + title
-    ""
-    res = await search_google.search(google_query)
-    # print(res)
-    if res is not None:
-        bc_link = res[0]["link"]
-        # print(bc_link)
-        filters = ["track", "album"]
-        parsed = urlparse(bc_link)
-        split_path = parsed.path.split("/")
-        bc_page_type = split_path[1]
-        if any(word in bc_page_type for word in filters):
-            bandcamp_result = bc_link
-        else:
-            bandcamp_result = None
-
-    else:
-        bandcamp_result = None
-
-    return bandcamp_result
 
 
 class Config:
