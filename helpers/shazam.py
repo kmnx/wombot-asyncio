@@ -146,10 +146,6 @@ async def main(loop):
     print(out)
 
 
-if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main(loop))
-
 
 async def raid(bot, message, station_query):
     logger.debug("raid")
@@ -210,7 +206,7 @@ async def raid(bot, message, station_query):
 
             # shazam it
 
-            shazamapi = shazam.ShazamApi(asyncio.get_running_loop(), api_key=shazam_api_key)
+            shazamapi = ShazamApi(asyncio.get_running_loop(), api_key=shazam_api_key)
             tz = pytz.timezone("Europe/London")
             london_now = datetime.now(tz)
             hours_minutes = london_now.strftime("%H:%M")
@@ -296,6 +292,9 @@ async def shazam_station(message, station):
     print("shazam_station")
     bot = BotSingleton.get_instance()
     logger.debug("shazam_station")
+
+    audio_source = None
+
     if station == "nts1":
         audio_source = "https://stream-relay-geo.ntslive.net/stream"
     elif station == "nts2":
@@ -321,13 +320,14 @@ async def shazam_station(message, station):
     bandcamp_result = None
     shazam_result = None
 
-    shazamapi = shazam.ShazamApi(asyncio.get_running_loop(), api_key=shazam_api_key)
+    shazamapi = ShazamApi(asyncio.get_running_loop(), api_key=shazam_api_key)
     # session = ClientSession(trust_env=True)
     tz = pytz.timezone("Europe/London")
     london_now = datetime.now(tz)
     hours_minutes = london_now.strftime("%H:%M")
     ""
     ""
+
     shazam_result = await shazamapi._get(audio_source)
     # print(shazam_result)
 
