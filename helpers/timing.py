@@ -53,7 +53,6 @@ def convert_to_time(milliseconds):
 
 
 def convert_utc_to_london(utctime):
-    pytz.timezone("UTC")
     naive_time = datetime.strptime(utctime, "%Y-%m-%d %H:%M:%S")
     utc_time = naive_time.replace(tzinfo=pytz.UTC)
     london_tz = pytz.timezone("Europe/London")
