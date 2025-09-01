@@ -53,13 +53,13 @@ except LookupError:
     nltk.download("averaged_perceptron_tagger")
 
 try:
-    nltk.data.find('tokenizers/punkt_tab')
+    nltk.data.find("tokenizers/punkt_tab")
 except LookupError:
-    nltk.download('punkt_tab')
-try: 
-    nltk.data.find('taggers/averaged_perceptron_tagger_eng')
+    nltk.download("punkt_tab")
+try:
+    nltk.data.find("taggers/averaged_perceptron_tagger_eng")
 except LookupError:
-    nltk.download('averaged_perceptron_tagger_eng')
+    nltk.download("averaged_perceptron_tagger_eng")
 
 
 from helpers.aiosqliteclass import Sqlite3Class
@@ -296,7 +296,6 @@ async def now_playing(return_type):
                 print(live_json)
         print("live_json", live_json)
 
-        
     except Exception as e:
         print("Error fetching live status")
         print(e)
@@ -396,7 +395,6 @@ async def now_playing(return_type):
         return chu1_np_raw, chu2_np_raw
 
 
-
 async def create_connection_pool():
     return await aiosqlite.connect("chatbot_database.db")
 
@@ -450,7 +448,7 @@ class MyBot(chatango.Client):
         banned_ips_file = "data/banned_ips.txt"
         with open(banned_ips_file, "r") as file:
             self.banned_ips = [line.strip() for line in file]
-        
+
         print("seriously")
 
     async def on_start(self):  # room join queue
@@ -585,17 +583,16 @@ class MyBot(chatango.Client):
             else:
                 orig_cmd, args = data[0], ""
             cmd = orig_cmd.lower().strip().lstrip().rstrip()
-            #print(cmd)
+            # print(cmd)
 
             # Route through the command registry
-            logger.info('** Routing command:', cmd)
+            logger.info("** Routing command:", cmd)
             if await commands.route_command(self, message, cmd, args):
                 return
 
-
-            #print(cmd)
-            #print(cmd.startswith("raid"))
-            #print(cmd.startswith("id") or cmd.startswith("raid"))
+            # print(cmd)
+            # print(cmd.startswith("raid"))
+            # print(cmd.startswith("id") or cmd.startswith("raid"))
 
             # log command
             connection_pool = await create_connection_pool()
