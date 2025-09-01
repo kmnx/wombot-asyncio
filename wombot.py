@@ -27,7 +27,7 @@ import re
 import zoneinfo
 
 # Import command system
-import commands
+import commands as cmds # rename to avoid conflict with helpers.commands
 
 
 handle = "wombo"
