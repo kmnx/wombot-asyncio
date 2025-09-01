@@ -101,16 +101,10 @@ except:
 
 
 from helpers import commands, chuntfm, aiosqliteclass_id
-
-
-# Import command modules to register them
-
-
 from mopidy_asyncio_client import MopidyClient
 
 # logging.basicConfig()
 # logging.getLogger("mopidy_asyncio_client").setLevel(logging.DEBUG)
-
 # logging.basicConfig(filename="example.log", encoding="utf-8", level=logging.DEBUG)
 # logging.debug("This message should go to the log file")
 # logging.info("So should this")
