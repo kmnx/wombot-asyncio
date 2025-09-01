@@ -20,7 +20,9 @@ class CommandSpec:
     aliases: Iterable[str]
     matcher: str  # "exact" | "startswith" | "regex"
     pattern: Optional[Pattern[str]]
-    handler: Callable[[Any, Any, str, str], Awaitable[None]]  # (self, message, cmd, args)
+    handler: Callable[
+        [Any, Any, str, str], Awaitable[None]
+    ]  # (self, message, cmd, args)
 
 
 REGISTRY: List[CommandSpec] = []
@@ -61,20 +63,24 @@ def wrapped(handler):
     Wrap a handler to automatically delete the command message unless it's a PM
     and provide comprehensive error handling to prevent bot crashes.
     """
+
     async def _inner(self, message, cmd, args):
         try:
             # Delete command message unless it's a PM
             await delete_unless_pm(message)
-            
+
             # Execute the handler
             await handler(self, message, cmd, args)
-            
+
         except Exception as e:
             # Log the error for debugging
             import logging
+
             logger = logging.getLogger("wombot.commands")
-            logger.error(f"Error in command '{cmd}' from user {message.user.showname}: {type(e).__name__}: {e}")
-                
+            logger.error(
+                f"Error in command '{cmd}' from user {message.user.showname}: {type(e).__name__}: {e}"
+            )
+
     return _inner
 
 
@@ -92,7 +98,7 @@ def _match(spec: CommandSpec, cmd: str) -> bool:
 async def route_command(self, message, cmd: str, args: str) -> bool:
     """
     Route a command through the registry with error handling.
-    
+
     Returns True if a command was handled, False if it should fall back
     to the original logic.
     """
@@ -110,16 +116,19 @@ async def route_command(self, message, cmd: str, args: str) -> bool:
         print(f"No matching command found for '{cmd}'")
 
         return False
-        
+
     except Exception as e:
         # Log routing errors
         import logging
+
         logger = logging.getLogger("wombot.commands")
         logger.error(f"Error in command routing for '{cmd}': {type(e).__name__}: {e}")
-        
+
         # Try to send a generic error message
         try:
-            await message.channel.send("❌ Command system error. Please try again later.")
+            await message.channel.send(
+                "❌ Command system error. Please try again later."
+            )
         except Exception:
             logger.error(f"Failed to send routing error message for command '{cmd}'")
 

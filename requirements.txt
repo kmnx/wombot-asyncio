@@ -20,3 +20,4 @@ PyWavelets
 validators
 #audioop-lts
 librosa
+black

@@ -146,7 +146,6 @@ async def main(loop):
     print(out)
 
 
-
 async def raid(bot, message, station_query):
     logger.debug("raid")
 

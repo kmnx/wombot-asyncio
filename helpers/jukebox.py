@@ -99,6 +99,7 @@ async def now_playing_jukebox(return_type):
 async def playback_started_handler(data):
     logger.debug("playback_started_handler")
     from wombot import BotSingleton
+
     bot = BotSingleton.get_instance()
     """Callback function, called when the playback started."""
     print(data)

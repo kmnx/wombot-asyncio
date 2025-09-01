@@ -2,7 +2,10 @@
 example.log
 # macOS 
 .DS_Store
+# Gif Of The Hour
 goth.txt
+# Blocked Image URLs
+blocked.txt
 # IDE
 .idea/*
 
