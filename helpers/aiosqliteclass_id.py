@@ -17,7 +17,7 @@ class Sqlite3Class:
     # self.cursor.row_factory = lambda cursor, row: row[0]
 
     async def _init(self):
-        self.conn = await aiosqlite.connect("db_idhistory.db")
+        self.conn = await aiosqlite.connect("./data/database_idhistory.db")
         # self.conn.row_factory = lambda cursor, row: row[0]
         # self.conn.row_factory = aiosqlite.Row
         self.cursor = await self.conn.cursor()

@@ -177,7 +177,8 @@ eightball = [
 
 base_path = Path().absolute()
 
-allgif_file = os.path.join(base_path, "allgif.txt")
+base_dir = os.path.dirname(os.path.abspath(__file__))
+allgif_file = os.path.join(base_dir, "data", "data_allgif.txt")
 if not os.path.exists(allgif_file):
     with open(allgif_file, "a") as file:
         pass
@@ -390,7 +391,7 @@ async def now_playing(return_type):
 
 
 async def create_connection_pool():
-    return await aiosqlite.connect("chatbot_database.db")
+    return await aiosqlite.connect("./data/database_commands.db")
 
 
 class Config:
@@ -481,7 +482,6 @@ class MyBot(chatango.Client):
             await room.enable_bg()
 
     async def on_message(self, message):
-        bot = BotSingleton.get_instance()
         print(
             time.strftime("%b/%d-%H:%M:%S", time.localtime(message.time)),
             message.room.name,
@@ -637,8 +637,8 @@ base_path = os.path.dirname(os.path.abspath(__file__))
 
 if __name__ == "__main__":
     logger.debug("__main__")
-    allgif_file = os.path.join(base_path, "allgif.txt")
-    blocked_file = os.path.join(base_path, "blocked.txt")
+    allgif_file = os.path.join(base_path, "./data/data_allgif.txt")
+    blocked_file = os.path.join(base_path, "./data/banned_img.txt")
     if not os.path.exists(blocked_file):
         with open(blocked_file, "a") as file:
             pass
@@ -658,15 +658,16 @@ if __name__ == "__main__":
                 for line in file
                 if (line.startswith("http") and line.strip() not in blocked_set)
             )
-    goth_file = os.path.join(base_path, "goth.txt")
+    goth_file = os.path.join(base_path, "./data/data_goth.txt")
     if not os.path.exists(goth_file):
         with open(goth_file, "a") as file:
             pass
-
+    asyncio.run(main())
     # Create the event loop manually
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    try:
+    '''loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)'''
+
+    '''try:
         # Run the main coroutine until it completes
         loop.run_until_complete(main())
         # Keep the loop running indefinitely
@@ -676,4 +677,4 @@ if __name__ == "__main__":
     finally:
         # Clean up the event loop
         loop.stop()
-        loop.close()
+        loop.close()'''

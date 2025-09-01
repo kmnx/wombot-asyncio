@@ -2,7 +2,7 @@ import asyncio
 import aiosqlite
 import logging
 import random
-
+import os 
 logger = logging.getLogger(__name__)
 
 
@@ -15,7 +15,10 @@ async def create_conn():
 class Sqlite3Class:
     # self.cursor.row_factory = lambda cursor, row: row[0]
 
-    def __init__(self, db_name="pythonsqlite.db"):
+    def __init__(self, db_name=None):
+        if db_name is None:
+            base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            db_name = os.path.join(base_dir, "data", "database_gifs.db")
         self.db_name = db_name
         self.conn = None
         self.cursor = None
