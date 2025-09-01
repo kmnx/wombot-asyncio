@@ -1,8 +1,9 @@
 from datetime import datetime, timedelta
+import logging
 
 import aiosqlite
 
-from wombot import logger
+logger = logging.getLogger(__name__)
 
 
 async def create_commands_table(connection):

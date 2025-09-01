@@ -1,8 +1,10 @@
 import asyncio
+import logging
 from os import environ
 
-from wombot import logger, BotSingleton
 from helpers.timing import convert_to_time
+
+logger = logging.getLogger(__name__)
 
 
 def display_progress(track_position, track_length):
@@ -96,6 +98,7 @@ async def now_playing_jukebox(return_type):
 
 async def playback_started_handler(data):
     logger.debug("playback_started_handler")
+    from wombot import BotSingleton
     bot = BotSingleton.get_instance()
     """Callback function, called when the playback started."""
     print(data)
