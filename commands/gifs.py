@@ -14,10 +14,10 @@ async def random_handler(self, message, cmd, args):
     # Get random gif from database
     connection_pool = await wombot.create_connection_pool()
     try:
-        gif_res = await self.db.get_objects_by_tag_name("random")
+        gif_res = await self.db_gif.get_objects_by_tag_name("random")
         if not gif_res:
             # Fallback to any random gif
-            gif_res = await self.db.get_random_objects(5)
+            gif_res = await self.db_gif.get_random_objects(5)
 
         if gif_res:
             await message.channel.send(random.choice(gif_res))
@@ -38,11 +38,11 @@ async def gif_handler(self, message, cmd, args):
     # Get random gif from database
     connection_pool = await wombot.create_connection_pool()
     try:
-        gif_res = await self.db.get_objects_by_tag_name("dance")
+        gif_res = await self.db_gif.get_objects_by_tag_name("dance")
         if not gif_res:
-            gif_res = await self.db.get_objects_by_tag_name("gif")
+            gif_res = await self.db_gif.get_objects_by_tag_name("gif")
         if not gif_res:
-            gif_res = await self.db.get_random_objects(10)
+            gif_res = await self.db_gif.get_random_objects(10)
 
         if gif_res:
             await message.channel.send(random.choice(gif_res))

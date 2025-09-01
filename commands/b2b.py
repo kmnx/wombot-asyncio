@@ -14,7 +14,7 @@ async def b2b_handler(self, message, cmd, args):
     # Get random b2b gifs from database
     connection_pool = await wombot.create_connection_pool()
     try:
-        gif_res = await self.db.get_objects_by_tag_name("b2b")
+        gif_res = await self.db_gif.get_objects_by_tag_name("bbb")
         if gif_res:
             # Send multiple gifs for b2b effect
             selected_gifs = random.choices(gif_res, k=min(3, len(gif_res)))
@@ -37,7 +37,7 @@ async def b2b2b_handler(self, message, cmd, args):
     # Even more b2b action
     connection_pool = await wombot.create_connection_pool()
     try:
-        gif_res = await self.db.get_objects_by_tag_name("b2b")
+        gif_res = await self.db_gif.get_objects_by_tag_name("b2b")
         if gif_res:
             # Send even more gifs for b2b2b effect
             selected_gifs = random.choices(gif_res, k=min(5, len(gif_res)))
@@ -60,7 +60,7 @@ async def bbb_handler(self, message, cmd, args):
     # Get bbb gifs from database
     connection_pool = await wombot.create_connection_pool()
     try:
-        gif_res = await self.db.get_objects_by_tag_name("bbb")
+        gif_res = await self.db_gif.get_objects_by_tag_name("bbb")
         if gif_res:
             await message.channel.send(random.choice(gif_res))
         else:

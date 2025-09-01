@@ -64,7 +64,7 @@ async def get_db_idhistory_cur():
     # ugh
     logger.debug("get_db_cur")
 
-    conn = await aiosqlite.connect("/db/trackids.db")
+    conn = await aiosqlite.connect("../data/database_idhistory.db")
     # conn.row_factory = lambda cursor, row: row[0]
     # self.conn.row_factory = aiosqlite.Row
     cursor = await conn.cursor()

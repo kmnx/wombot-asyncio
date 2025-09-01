@@ -15,12 +15,12 @@ async def sandwich_handler(self, message, cmd, args):
     connection_pool = await wombot.create_connection_pool()
     try:
         # First get sandwich gif
-        sandwich_res = await self.db.get_objects_by_tag_name("sandwich")
+        sandwich_res = await self.db_gif.get_objects_by_tag_name("sandwich")
         if sandwich_res:
             await message.channel.send(random.choice(sandwich_res))
 
             # Then get random bbb gifs
-            bbb_res = await self.db.get_objects_by_tag_name("bbb")
+            bbb_res = await self.db_gif.get_objects_by_tag_name("bbb")
             if bbb_res:
                 # Send a few random bbb gifs
                 selected_bbb = random.choices(bbb_res, k=min(3, len(bbb_res)))

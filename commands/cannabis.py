@@ -14,9 +14,9 @@ async def cannabis_handler(self, message, cmd, args):
     # Get 420/cannabis gifs from database
     connection_pool = await wombot.create_connection_pool()
     try:
-        gif_res = await self.db.get_objects_by_tag_name("420")
+        gif_res = await self.db_gif.get_objects_by_tag_name("420")
         if not gif_res:
-            gif_res = await self.db.get_objects_by_tag_name("blaze")
+            gif_res = await self.db_gif.get_objects_by_tag_name("blaze")
 
         if gif_res:
             await message.channel.send(random.choice(gif_res))

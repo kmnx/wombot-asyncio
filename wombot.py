@@ -419,8 +419,8 @@ class MyBot(chatango.Client):
     async def on_init(self):
         print("Bot initialized")
         # self.db = await aiosqliteclass.create_conn()
-        self.db = Sqlite3Class()
-        await self.db._init()
+        self.db_gif = Sqlite3Class()
+        await self.db_gif._init()
         print("trying to start id_db")
         self.db_id = await aiosqliteclass_id.create_conn()
         # self.top_tags = await aiosqliteclass_top_tags.create_conn()
@@ -433,7 +433,7 @@ class MyBot(chatango.Client):
             self.goth = file.readline().strip()
         if not self.goth:
             try:
-                self.goth = random.choice(await self.db.get_objects_by_tag_name("bbb"))
+                self.goth = random.choice(await self.db_gif.get_objects_by_tag_name("bbb"))
             except Exception as e:
                 print("Error getting goth from db:", e)
                 self.goth = "No goth :("
@@ -595,7 +595,7 @@ class MyBot(chatango.Client):
             )
             await connection_pool.close()
             try:
-                gif_res = await self.db.get_objects_by_tag_name(cmd)
+                gif_res = await self.db_gif.get_objects_by_tag_name(cmd)
             except Exception as e:
                 gif_res = None
                 print(e)
@@ -662,12 +662,13 @@ if __name__ == "__main__":
     if not os.path.exists(goth_file):
         with open(goth_file, "a") as file:
             pass
-    asyncio.run(main())
+    print("past goth")
+    #asyncio.run(main())
     # Create the event loop manually
-    '''loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)'''
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
 
-    '''try:
+    try:
         # Run the main coroutine until it completes
         loop.run_until_complete(main())
         # Keep the loop running indefinitely
@@ -677,4 +678,4 @@ if __name__ == "__main__":
     finally:
         # Clean up the event loop
         loop.stop()
-        loop.close()'''
+        loop.close()

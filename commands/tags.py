@@ -37,7 +37,7 @@ async def tags_handler(self, message, cmd, args):
 
     connection_pool = await wombot.create_connection_pool()
     try:
-        tag_list = await self.db.get_all_tag_names()
+        tag_list = await self.db_gif.get_all_tag_names()
         if tag_list:
             the_longest_string = "to tag a gif: !tag link-to-the-gif tagname \r\r tags that post gifs/links: \r"
             for key in tag_list:
@@ -59,7 +59,7 @@ async def last_handler(self, message, cmd, args):
 
     connection_pool = await wombot.create_connection_pool()
     try:
-        last_item = await self.db.get_last_object()
+        last_item = await self.db_gif.get_last_object()
         if last_item:
             await message.channel.send(last_item)
         else:
@@ -82,7 +82,7 @@ async def tagged_handler(self, message, cmd, args):
             await message.channel.send("Enter a query after !tagged")
         else:
             args = str(args).rstrip()
-            tagged_items = await self.db.get_objects_by_tag_name(args)
+            tagged_items = await self.db_gif.get_objects_by_tag_name(args)
             if tagged_items:
                 await message.channel.send(
                     f"Found {len(tagged_items)} items tagged with '{args}'"
@@ -107,10 +107,10 @@ async def rndtag_handler(self, message, cmd, args):
 
     connection_pool = await wombot.create_connection_pool()
     try:
-        tag_list = await self.db.get_all_tag_names()
+        tag_list = await self.db_gif.get_all_tag_names()
         if tag_list:
             random_tag = random.choice(tag_list)[0]
-            tagged_items = await self.db.get_objects_by_tag_name(random_tag)
+            tagged_items = await self.db_gif.get_objects_by_tag_name(random_tag)
             if tagged_items:
                 await message.channel.send(f"Random tag: !{random_tag}")
                 await message.channel.send(random.choice(tagged_items))
@@ -147,7 +147,7 @@ async def tag_handler(self, message, cmd, args):
 
                 if validators.url(url):
                     for tag in tags:
-                        await self.db.insert_object(url, tag, message.user.showname)
+                        await self.db_gif.insert_object(url, tag, message.user.showname)
                     await message.channel.send(f"Tagged {url} with: {', '.join(tags)}")
                 else:
                     await message.channel.send("Please provide a valid URL")
@@ -218,7 +218,7 @@ async def info_handler(self, message, cmd, args):
             )
         else:
             # This would show info about tags and URLs
-            info_data = await self.db.get_info_for_tag(args)
+            info_data = await self.db_gif.get_info_for_tag(args)
             if info_data:
                 await message.channel.send(f"Info for '{args}': {info_data}")
             else:
@@ -238,7 +238,7 @@ async def top_handler(self, message, cmd, args):
     connection_pool = await wombot.create_connection_pool()
     try:
         # Get most popular tags
-        top_tags = await self.db.get_top_tags(10)
+        top_tags = await self.db_gif.get_top_tags(10)
         if top_tags:
             msg = "Top tags: "
             for tag, count in top_tags:
