@@ -14,8 +14,12 @@ pythonsqlite.db
 trackids.db
 db_idhistory.db
 chatbot_database.db
+*.db
 
-allgif.txt
+data_allgif.txt
+data_goth.txt
+banned_img.txt
+banned_ips.txt
 mysecrets.py
 
 # Byte-compiled / optimized / DLL files
