@@ -58,3 +58,5 @@ from . import heart
 from . import say
 
 # from . import test_error  # Uncomment for testing error handling
+
+from . import eightball
