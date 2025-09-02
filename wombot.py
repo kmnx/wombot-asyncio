@@ -18,10 +18,10 @@ import time
 import logging
 import nltk
 
-from helpers.db import create_commands_table, insert_command
 from helpers.jukebox import jukebox_status, mpd_context_manager, MpdSingleton
 from helpers.db_gif import DB_GIF
 from helpers.db_shazamids import DB_ShazamIDs
+from helpers.db_commands import DB_Commands
 
 import re
 
@@ -153,8 +153,8 @@ async def post_gif_of_the_hour(param):
     logger.debug("post_gif_of_the_hour")
     bot = BotSingleton.get_instance()
     bots = []
-    main_room = environ["wombotmainroom"]
-    test_room = environ["wombottestroom"]
+    main_room = mysecrets.wombotmainroom
+    test_room = mysecrets.wombottestroom
     bots.append(bot.get_room(main_room))
     bots.append(bot.get_room(test_room))
     # print(datetime.now().time(), param)
@@ -331,7 +331,6 @@ async def now_playing(return_type):
         except Exception as e:
             print("exception in np")
             print(e)
-            print("this was the np exception")
 
     # anything on chu2?
 
@@ -340,12 +339,11 @@ async def now_playing(return_type):
         chu1_np_formatted = "i think chunt.org might be broken"
 
     if chu2_np_formatted:
-
         chu1_np_formatted = chu1_np_formatted + " | " + chu2_np_formatted
 
     if return_type == "formatted":
-
         return chu1_np_formatted
+
     elif return_type == "raw":
         return chu1_np_raw, chu2_np_raw
 
@@ -355,7 +353,7 @@ async def create_connection_pool():
 
 
 class Config:
-    rooms = [environ["wombotmainroom"], environ["wombottestroom"]]
+    rooms = [mysecrets.wombotmainroom, mysecrets.wombottestroom]
     # rooms = ["bothome2", "bothome"]
     bot_user = [mysecrets.chatango_user, mysecrets.chatango_pass]  # password
 
@@ -381,15 +379,13 @@ class MyBot(chatango.Client):
         # self.db = await aiosqliteclass.create_conn()
         self.db_gif = DB_GIF("./data/database_gifs.db")
         await self.db_gif.open()
-        print("trying to start id_db")
         self.db_shazamids = DB_ShazamIDs("./data/database_idhistory.db")
         await self.db_shazamids.open()
+        self.db_commands = DB_Commands("./data/database_commands.db")
+        await self.db_commands.open()
         # self.top_tags = await aiosqliteclass_top_tags.create_conn()
-        connection_pool = await create_connection_pool()
 
         # Create the commands table if not exists
-        await create_commands_table(connection_pool)
-        await connection_pool.close()
         with open(goth_file, "r") as file:
             self.goth = file.readline().strip()
         if not self.goth:

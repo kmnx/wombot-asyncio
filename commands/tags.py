@@ -4,18 +4,14 @@ Tag and database command implementations.
 
 import random
 from helpers.commands import register_exact, wrapped
-from helpers.db import get_most_used_commands
 
 
 @wrapped
 async def stats_handler(self, message, cmd, args):
     """Handle !stats command."""
-    import wombot
-
-    connection_pool = await wombot.create_connection_pool()
 
     try:
-        most_used = await get_most_used_commands(connection_pool)
+        most_used = await self.db_commands.get_most_used_commands()
         if most_used:
             stats_msg = "Most used commands: "
             for cmd_name, count in most_used[:5]:  # Top 5
@@ -26,16 +22,12 @@ async def stats_handler(self, message, cmd, args):
     except Exception as e:
         print(f"Error getting stats: {e}")
         await message.channel.send("Error getting command stats")
-    finally:
-        await connection_pool.close()
 
 
 @wrapped
 async def tags_handler(self, message, cmd, args):
     """Handle !tags command."""
-    import wombot
 
-    connection_pool = await wombot.create_connection_pool()
     try:
         tag_list = await self.db_gif.get_all_tag_names()
         if tag_list:
@@ -48,16 +40,12 @@ async def tags_handler(self, message, cmd, args):
     except Exception as e:
         print(f"Error getting tags: {e}")
         await message.channel.send("Error getting tags")
-    finally:
-        await connection_pool.close()
 
 
 @wrapped
 async def last_handler(self, message, cmd, args):
     """Handle !last command."""
-    import wombot
 
-    connection_pool = await wombot.create_connection_pool()
     try:
         last_item = await self.db_gif.get_last_object()
         if last_item:
@@ -67,16 +55,12 @@ async def last_handler(self, message, cmd, args):
     except Exception as e:
         print(f"Error getting last item: {e}")
         await message.channel.send("Error getting last item")
-    finally:
-        await connection_pool.close()
 
 
 @wrapped
 async def tagged_handler(self, message, cmd, args):
     """Handle !tagged command."""
-    import wombot
 
-    connection_pool = await wombot.create_connection_pool()
     try:
         if not args:
             await message.channel.send("Enter a query after !tagged")
@@ -96,16 +80,12 @@ async def tagged_handler(self, message, cmd, args):
     except Exception as e:
         print(f"Error getting tagged items: {e}")
         await message.channel.send("Error getting tagged items")
-    finally:
-        await connection_pool.close()
 
 
 @wrapped
 async def rndtag_handler(self, message, cmd, args):
     """Handle !rndtag command."""
-    import wombot
 
-    connection_pool = await wombot.create_connection_pool()
     try:
         tag_list = await self.db_gif.get_all_tag_names()
         if tag_list:
@@ -121,17 +101,14 @@ async def rndtag_handler(self, message, cmd, args):
     except Exception as e:
         print(f"Error getting random tag: {e}")
         await message.channel.send("Error getting random tag")
-    finally:
-        await connection_pool.close()
 
 
 @wrapped
 async def tag_handler(self, message, cmd, args):
     """Handle !tag command."""
-    import wombot
+
     import validators
 
-    connection_pool = await wombot.create_connection_pool()
     try:
         if not args:
             await message.channel.send("to tag a gif: !tag url-to-gif tag1 tag2 tag3")
@@ -154,16 +131,12 @@ async def tag_handler(self, message, cmd, args):
     except Exception as e:
         print(f"Error tagging: {e}")
         await message.channel.send("Error tagging content")
-    finally:
-        await connection_pool.close()
 
 
 @wrapped
 async def untag_handler(self, message, cmd, args):
     """Handle !untag command."""
-    import wombot
 
-    connection_pool = await wombot.create_connection_pool()
     try:
         if not args:
             await message.channel.send(
@@ -182,16 +155,12 @@ async def untag_handler(self, message, cmd, args):
     except Exception as e:
         print(f"Error untagging: {e}")
         await message.channel.send("Error removing tag")
-    finally:
-        await connection_pool.close()
 
 
 @wrapped
 async def block_handler(self, message, cmd, args):
     """Handle !block command."""
-    import wombot
 
-    connection_pool = await wombot.create_connection_pool()
     try:
         if not args:
             await message.channel.send("Specify URL to block")
@@ -201,16 +170,12 @@ async def block_handler(self, message, cmd, args):
     except Exception as e:
         print(f"Error blocking: {e}")
         await message.channel.send("Error blocking content")
-    finally:
-        await connection_pool.close()
 
 
 @wrapped
 async def info_handler(self, message, cmd, args):
     """Handle !info command."""
-    import wombot
 
-    connection_pool = await wombot.create_connection_pool()
     try:
         if not args:
             await message.channel.send(
@@ -226,16 +191,12 @@ async def info_handler(self, message, cmd, args):
     except Exception as e:
         print(f"Error getting info: {e}")
         await message.channel.send("Error getting info")
-    finally:
-        await connection_pool.close()
 
 
 @wrapped
 async def top_handler(self, message, cmd, args):
     """Handle !top and !toptags commands."""
-    import wombot
 
-    connection_pool = await wombot.create_connection_pool()
     try:
         # Get most popular tags
         top_tags = await self.db_gif.get_top_tags(10)
@@ -249,8 +210,6 @@ async def top_handler(self, message, cmd, args):
     except Exception as e:
         print(f"Error getting top tags: {e}")
         await message.channel.send("Error getting top tags")
-    finally:
-        await connection_pool.close()
 
 
 # Register all tag/database commands

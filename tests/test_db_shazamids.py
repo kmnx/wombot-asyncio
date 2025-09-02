@@ -4,7 +4,6 @@ import asyncio
 from helpers.db_shazamids import DB_ShazamIDs
 
 
-
 @pytest.mark.asyncio
 async def test_shazamids_full(tmp_path):
     db_path = tmp_path / "test_idhistory.db"

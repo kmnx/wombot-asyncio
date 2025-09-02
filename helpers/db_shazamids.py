@@ -51,7 +51,7 @@ class DB_ShazamIDs(AsyncDB):
         # return result_tag_id
 
     async def query_history_all(self):
-        #  returns all history
+        #  returns all history ever
         async with self.conn.execute("SELECT * FROM chuntfm") as cursor:
             result = await cursor.fetchall()
             if result:
@@ -60,7 +60,7 @@ class DB_ShazamIDs(AsyncDB):
                 return None
 
     async def query_usernames(self):
-        #  returns all history
+        #  returns all usernames who ever tried to ID with shazam
         async with self.conn.execute(
             "SELECT username FROM chuntfm ORDER BY username DESC"
         ) as cursor:
@@ -72,7 +72,7 @@ class DB_ShazamIDs(AsyncDB):
                 return None
 
     async def query_history_user(self, username):
-        #  returns all history
+        #  returns all history per user
         async with self.conn.execute(
             "SELECT * FROM chuntfm WHERE username=? ", [username]
         ) as cursor:
@@ -82,5 +82,3 @@ class DB_ShazamIDs(AsyncDB):
 
             else:
                 return None
-
-
