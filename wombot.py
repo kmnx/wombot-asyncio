@@ -20,7 +20,7 @@ import nltk
 
 from helpers.db import create_commands_table, insert_command
 from helpers.jukebox import jukebox_status, mpd_context_manager, MpdSingleton
-
+from helpers.db_gif import DB_GIF
 
 import re
 
@@ -134,23 +134,7 @@ print("start")
 
 gif_hosts = ["https://c.tenor.com/", "https://media.giphy.com/"]
 
-schedule_test_blob = [
-    {
-        "uid": "2022-06-2300:00",
-        "startTimestamp": "2022-09-28T14:00:00+00:00",
-        "endTimestamp": "2022-09-28T17:00:00+00:00",
-        "dateUK": "2022-06-23",
-        "startTimeUK": "00:00",
-        "endTimeUK": "01:00",
-        "title": "print debugging w/ knmx",
-        "description": "None",
-        "location": "",
-        "lastModified": "2022-08-09T11:14:34+00:00",
-        "status": "CONFIRMED",
-        "invitationStatus": None,
-        "url": None,
-    }
-]
+
 
 eightball = [
     "It is certain.",
@@ -198,7 +182,7 @@ async def post_gif_of_the_hour(param):
     bots.append(bot.get_room(main_room))
     bots.append(bot.get_room(test_room))
     # print(datetime.now().time(), param)
-    bot.goth = random.choice(await bot.db.get_objects_by_tag_name("bbb"))
+    bot.goth = random.choice(await bot.db_gif.get_objects_by_tag_name("bbb"))
     with open(goth_file, "w") as file:
         file.write(bot.goth)
 
@@ -419,8 +403,8 @@ class MyBot(chatango.Client):
     async def on_init(self):
         print("Bot initialized")
         # self.db = await aiosqliteclass.create_conn()
-        self.db_gif = Sqlite3Class()
-        await self.db_gif._init()
+        self.db_gif = DB_GIF("./data/database_gifs.db")
+        await self.db_gif.open()
         print("trying to start id_db")
         self.db_id = await aiosqliteclass_id.create_conn()
         # self.top_tags = await aiosqliteclass_top_tags.create_conn()

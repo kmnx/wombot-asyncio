@@ -21,3 +21,4 @@ validators
 #audioop-lts
 librosa
 black
+tzdata
