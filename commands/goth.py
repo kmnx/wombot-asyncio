@@ -12,7 +12,7 @@ async def goth_handler(self, message, cmd, args):
     import wombot
 
     # Get random goth gif from database
-    #connection_pool = await wombot.create_connection_pool()
+    # connection_pool = await wombot.create_connection_pool()
     try:
         gif_res = await self.db_gif.get_objects_by_tag_name("bbb")
         if gif_res:
@@ -22,7 +22,7 @@ async def goth_handler(self, message, cmd, args):
     except Exception as e:
         print(f"Error getting goth content: {e}")
         await message.channel.send("Error loading goth content")
-    #finally:
+    # finally:
     #    await connection_pool.close()
 
 

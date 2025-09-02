@@ -3,7 +3,8 @@ Command modules for the wombot.
 
 Each command is organized into its own module within this package.
 """
-'''
+
+"""
 # automatically import every file as a module
 import os
 import importlib
@@ -13,7 +14,7 @@ cmd_dir = os.path.join(os.path.dirname(__file__), "cmd")
 for filename in os.listdir(cmd_dir):
     if filename.endswith(".py") and not filename.startswith("__"):
         modulename = f"cmd.{filename[:-3]}"
-        importlib.import_module(modulename)'''
+        importlib.import_module(modulename)"""
 
 
 # Import all command modules to register them
@@ -57,6 +58,6 @@ from . import events
 from . import heart
 from . import say
 
-# from . import test_error  # Uncomment for testing error handling
+# from . import intentional_error  # Uncomment for testing error handling
 
 from . import eightball

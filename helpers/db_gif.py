@@ -4,6 +4,7 @@ import logging
 import random
 import os
 from helpers.db_sqlite import AsyncDB
+
 logger = logging.getLogger(__name__)
 
 
@@ -11,7 +12,7 @@ class DB_GIF(AsyncDB):
     async def _init(self):
         self.conn = await aiosqlite.connect(self.db_name)
         # Create tables if they don't exist
-        
+
         await self.conn.execute(
             """
             CREATE TABLE IF NOT EXISTS object_table (
@@ -162,8 +163,6 @@ class DB_GIF(AsyncDB):
         ) as cursor:
             result = await cursor.fetchall()
         return result
-
-
 
     async def untag(self, inurl, intag):
         print("untagging....")

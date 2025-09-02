@@ -21,13 +21,14 @@ import nltk
 from helpers.db import create_commands_table, insert_command
 from helpers.jukebox import jukebox_status, mpd_context_manager, MpdSingleton
 from helpers.db_gif import DB_GIF
+from helpers.db_shazamids import DB_ShazamIDs
 
 import re
 
 import zoneinfo
 
 # Import command system
-import commands as cmds # rename to avoid conflict with helpers.commands
+import commands as cmds  # rename to avoid conflict with helpers.commands
 
 
 handle = "wombo"
@@ -381,7 +382,8 @@ class MyBot(chatango.Client):
         self.db_gif = DB_GIF("./data/database_gifs.db")
         await self.db_gif.open()
         print("trying to start id_db")
-        self.db_id = await aiosqliteclass_id.create_conn()
+        self.db_shazamids = DB_ShazamIDs("./data/database_idhistory.db")
+        await self.db_shazamids.open()
         # self.top_tags = await aiosqliteclass_top_tags.create_conn()
         connection_pool = await create_connection_pool()
 
@@ -392,7 +394,9 @@ class MyBot(chatango.Client):
             self.goth = file.readline().strip()
         if not self.goth:
             try:
-                self.goth = random.choice(await self.db_gif.get_objects_by_tag_name("bbb"))
+                self.goth = random.choice(
+                    await self.db_gif.get_objects_by_tag_name("bbb")
+                )
             except Exception as e:
                 print("Error getting goth from db:", e)
                 self.goth = "No goth :("
@@ -622,7 +626,7 @@ if __name__ == "__main__":
         with open(goth_file, "a") as file:
             pass
     print("past goth")
-    #asyncio.run(main())
+    # asyncio.run(main())
     # Create the event loop manually
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)

@@ -28,6 +28,7 @@ eightball = [
     "Very doubtful.",
 ]
 
+
 @wrapped
 async def eightball_handler(self, message, cmd, args):
     """Handle !8ball command."""
