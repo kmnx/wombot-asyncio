@@ -101,7 +101,7 @@ except:
     edamam_app_id = ""
 
 
-from helpers import commands, chuntfm, aiosqliteclass_id
+from helpers import commands, chuntfm
 from mopidy_asyncio_client import MopidyClient
 
 # logging.basicConfig()
