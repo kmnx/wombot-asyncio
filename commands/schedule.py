@@ -30,7 +30,6 @@ async def upnext_handler(self, message, cmd, args):
                     datetime.fromisoformat(show["endTimestamp"])
 
                     if start_time > time_now:
-                        print(show)
                         timediff = start_time - time_now
                         time_rem = str(timediff)
                         when = time_rem.split(".")[0] + " hours"

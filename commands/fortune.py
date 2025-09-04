@@ -13,7 +13,6 @@ async def fortune_handler(self, message, cmd, args):
     """Handle !fortune command."""
 
     coinflip = random.choice([0, 1])
-    print(coinflip)
 
     if (coinflip == 0) or (message.user.showname == "yungdale"):
         await message.channel.send(

@@ -275,21 +275,17 @@ class DB_GIF(AsyncDB):
         else:
             if object_data_from_db[1].strip().strip("'") == object_data:
                 print(object_data)
-                # print(object_id)
-                # print(tag_ids)
                 await self.remove_object_by_object_id(object_id)
                 if object_id and tag_ids:
                     for tag_id in tag_ids:
                         tag_name = await self.get_tag_name_by_tag_id(tag_id[1])
 
                         print(tag_name[1])
-                        # print(tag_id[1])
                         await self.remove_mapping_by_ids(object_id, tag_id[1])
                         await self.conn.commit()
                         test_tag_has_objects = await self.get_object_ids_by_tag_id(
                             tag_id[1]
                         )
-                        # print(test_tag_has_objects)
 
                         if test_tag_has_objects:
                             pass

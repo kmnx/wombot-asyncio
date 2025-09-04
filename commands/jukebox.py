@@ -2,7 +2,7 @@
 Jukebox command implementations.
 """
 
-#import helpers.jukebox
+# import helpers.jukebox
 import json
 from urllib.parse import urlparse
 from aiohttp import ClientSession
@@ -14,22 +14,15 @@ from helpers.commands import register_exact, wrapped
 async def play_add_handler(self, message, cmd, args):
     """Handle !play and !add commands."""
 
-    # Import MpdSingleton from main module
-
     playback_state = await self.mpd.mpd.playback.get_state()
     schemes = await self.mpd.mpd.core.get_uri_schemes()
-    print(schemes)
+    # print(schemes)
     if args:
-        # print(args)
         splitargs = args.split(" ")
-        # print(splitargs)
         url = splitargs[0]
 
-        # print(mypath)
-        # print(url)
         stripped_url = url.strip().lstrip().rstrip()
         url = stripped_url
-        # print(url)
         results = ""
         added = ""
 
@@ -50,7 +43,6 @@ async def play_add_handler(self, message, cmd, args):
                 res = soup.find_all("script", type="application/json")
                 jo = json.loads(res[0].string)
                 url = jo["props"]["pageProps"]["entry"]["fileUrl"]
-                print("rinse_url:", url)
 
         parsed = urlparse(url)
         mypath = parsed.path
@@ -59,7 +51,6 @@ async def play_add_handler(self, message, cmd, args):
             uri = "mixcloud:track:" + mypath
             search_uri = []
             search_uri.append(uri)
-            print("search_uri", search_uri)
             added = await self.mpd.mpd.tracklist.add(uris=search_uri)
 
         elif url.startswith("https://m.mixcloud.com"):
@@ -98,15 +89,10 @@ async def play_add_handler(self, message, cmd, args):
             search_uri = []
             search_uri.append(uri)
             added = await self.mpd.mpd.tracklist.add(uris=search_uri)
-        print("added:", added)
         if added:
             if "__model__" in added[0]:
-                print("added okay")
-                await message.channel.send(
-                    "jukebox successfully added " + url
-                )
+                await message.channel.send("jukebox successfully added " + url)
             elif "ValidationError" in added:
-                print("ValidationError")
                 await message.channel.send(
                     "could not add "
                     + url
@@ -120,14 +106,10 @@ async def play_add_handler(self, message, cmd, args):
             )
 
         if playback_state != "playing":
-            print("it's not playing")
             top_slice = await self.mpd.mpd.tracklist.slice(0, 1)
-            print("the top slice is: ", top_slice)
 
             if top_slice is not None:
-                print(top_slice)
                 tlid = top_slice[0]["tlid"]
-                print("the tlid is: ", tlid)
                 playback_state = await self.mpd.mpd.playback.get_state()
                 print("Playback state before play():", playback_state)
                 await self.mpd.mpd.playback.play()
@@ -146,13 +128,10 @@ async def play_add_handler(self, message, cmd, args):
 async def queue_handler(self, message, cmd, args):
     """Handle !queue and !tl commands."""
 
-
     try:
         tracklist = await self.mpd.mpd.tracklist.get_tl_tracks()
         i = 0
         small_list = []
-        print("jukebox queue_handler")
-        print("tracklist: ", tracklist)
 
         for item in tracklist:
             i += 1
@@ -179,7 +158,6 @@ async def queue_handler(self, message, cmd, args):
 async def skip_handler(self, message, cmd, args):
     """Handle !skip command."""
 
-
     try:
         await self.mpd.playback.next()
         await message.channel.send("Skipped to next track")
@@ -191,7 +169,6 @@ async def skip_handler(self, message, cmd, args):
 @wrapped
 async def seek_handler(self, message, cmd, args):
     """Handle !seek command."""
-
 
     if args:
         try:
@@ -211,7 +188,6 @@ async def seek_handler(self, message, cmd, args):
 async def ff_handler(self, message, cmd, args):
     """Handle !ff and !fastforward commands."""
 
-
     try:
         # Fast forward by 30 seconds by default
         current_time = await self.mpd.playback.get_time_position()
@@ -227,7 +203,6 @@ async def ff_handler(self, message, cmd, args):
 async def rewind_handler(self, message, cmd, args):
     """Handle !rewind and !rw commands."""
 
-
     try:
         # Rewind by 30 seconds by default
         current_time = await self.mpd.playback.get_time_position()
@@ -242,7 +217,6 @@ async def rewind_handler(self, message, cmd, args):
 @wrapped
 async def clear_handler(self, message, cmd, args):
     """Handle !clear command."""
-
 
     try:
         await self.mpd.tracklist.clear()
@@ -260,11 +234,8 @@ async def juke_handler(self, message, cmd, args):
 
     try:
         # Check jukebox status
-        print("before trying jukebox")
         data = await self.mpd.jukebox_status()
-        print("after trying jukebox")
         if data is not None:
-            print(data)
             jukebox_status_msg = " !juke is playing"
         else:
             print("no mpd data")

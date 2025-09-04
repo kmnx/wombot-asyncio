@@ -7,13 +7,13 @@ from mopidy_asyncio_client import MopidyClient
 
 logger = logging.getLogger(__name__)
 
-# new Implementation 
+# new Implementation
+
 
 class Jukebox:
     def __init__(self, host):
         self.host = host
         self.mpd = MopidyClient(host=self.host)
-
 
     def display_progress(self, track_position, track_length):
         position_str = convert_to_time(track_position)
@@ -29,45 +29,31 @@ class Jukebox:
         )
         return f"at [{position_str}] of [{length_str}] [{progress_bar}{remaining_space}] {percentage}%"
 
-
     async def jukebox_status(self):
-        #mpd = MpdSingleton.get_instance()
         data = None
-        print("trying to get mpd data")
         try:
             data = await self.mpd.playback.get_current_track()
         except Exception as e:
-            print("exception in np")
-            print(e)
             jukebox_status_msg = "!juke is down"
 
         if data is not None:
-            print(data)
             jukebox_status_msg = " !juke is playing"
 
         else:
-            print("no mpd data")
-            url = ""
-            jukebox_status_msg = ""
+            jukebox_status_msg = "!juke is not playing"
         return jukebox_status_msg
 
-
-    async def now_playing_jukebox(self,return_type=None):
-        #mpd = MpdSingleton.get_instance()
+    async def now_playing_jukebox(self, return_type=None):
         chu2_np_formatted = ""
         chu2_np_raw = None
 
         # anything on chu2?
         data = None
-        print("trying to get mpd data")
         try:
             data = await self.mpd.playback.get_current_track()
             track_position = await self.mpd.playback.get_time_position()
         except Exception as e:
-            print("exception in np")
             print(e)
-
-        # print(data)
 
         if data is not None:
             print(data)
@@ -94,7 +80,6 @@ class Jukebox:
                 )
 
         else:
-            print("no mpd data")
             url = ""
             chu2_np_formatted = "jukebox is empty. !add a link from sc,mc,bc or nts!"
 
@@ -103,18 +88,14 @@ class Jukebox:
         elif return_type == "raw":
             return chu2_np_raw
 
-
     async def playback_started_handler(self, data):
         logger.debug("playback_started_handler")
-        #from wombot import BotSingleton
 
-        #bot = BotSingleton.get_instance()
         """Callback function, called when the playback started."""
         print(data)
         print(self.rooms)  # ok
         main_room = environ["wombotmainroom"]
         my_room = self.get_room(main_room)
-        # print(my_room) # ok
         if data["tl_track"]["track"]["uri"].startswith("soundcloud"):
             url = data["tl_track"]["track"]["comment"]
         elif data["tl_track"]["track"]["uri"].startswith("mixcloud"):
@@ -125,7 +106,6 @@ class Jukebox:
         msg = "https://fm.chunt.org/stream2 jukebox now playing: " + url
         await my_room.send_message(msg)
 
-
     async def all_events_handler(self, event, data):
         logger.debug("all_events_handler")
 
@@ -133,7 +113,6 @@ class Jukebox:
         print(event, data)
         if event == "tracklist_changed":
             print(data)
-
 
     async def mpd_context_manager(self):
         logger.debug("mpd_context_manager")
@@ -157,6 +136,3 @@ class Jukebox:
         # Launch the context manager as a background task
         self._mpd_task = asyncio.create_task(self.mpd_context_manager())
         return self._mpd_task
-
-
-

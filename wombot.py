@@ -1,8 +1,6 @@
 # /usr/bin/env python
 # -*- coding: utf-8 -*-
 import asyncio
-import aiosqlite
-
 import aiocron
 import chatango
 
@@ -18,14 +16,13 @@ import time
 import logging
 import nltk
 from helpers.juke import Jukebox
-
-#from helpers.jukebox import jukebox_status, mpd_context_manager, MpdSingleton
 from helpers.db_gif import DB_GIF
 from helpers.db_shazamids import DB_ShazamIDs
 from helpers.db_commands import DB_Commands
+from helpers import commands, chuntfm
+
 
 import re
-
 import zoneinfo
 
 # Import command system
@@ -64,8 +61,6 @@ except LookupError:
     nltk.download("averaged_perceptron_tagger_eng")
 
 
-from helpers.aiosqliteclass import Sqlite3Class
-
 # banned usernames like 4422jkf or dkl3322
 pattern = r"(\d{3}[a-zA-Z]{4}|[a-zA-Z]{4}\d{3})"
 
@@ -102,9 +97,6 @@ except:
     edamam_app_id = ""
 
 
-from helpers import commands, chuntfm
-from mopidy_asyncio_client import MopidyClient
-
 # logging.basicConfig()
 # logging.getLogger("mopidy_asyncio_client").setLevel(logging.DEBUG)
 # logging.basicConfig(filename="example.log", encoding="utf-8", level=logging.DEBUG)
@@ -113,26 +105,6 @@ from mopidy_asyncio_client import MopidyClient
 # logging.warning("And this, too")
 # logging.error("And non-ASCII stuff, too, like Øresund and Malmö")
 
-
-class BotSingleton:
-    _instance = None
-
-    @staticmethod
-    def get_instance():
-        """Get the current bot instance, or raise an error if not initialized."""
-        if BotSingleton._instance is None:
-            raise Exception("Bot instance has not been initialized.")
-        return BotSingleton._instance
-
-    @staticmethod
-    def initialize(bot_instance):
-        """Initialize the bot instance."""
-        if BotSingleton._instance is not None:
-            raise Exception("Bot instance is already initialized.")
-        BotSingleton._instance = bot_instance
-
-
-print("start")
 
 gif_hosts = ["https://c.tenor.com/", "https://media.giphy.com/"]
 
@@ -147,18 +119,14 @@ else:
     with open(allgif_file) as file:
         allgif_set = set(line.strip() for line in file if line.startswith("http://"))
 
-print("init variables done")
-
 
 async def post_gif_of_the_hour(self, param):
     logger.debug("post_gif_of_the_hour")
-    #bot = BotSingleton.get_instance()
     bots = []
     main_room = mysecrets.wombotmainroom
     test_room = mysecrets.wombottestroom
     bots.append(self.get_room(main_room))
     bots.append(self.get_room(test_room))
-    # print(datetime.now().time(), param)
     self.goth = random.choice(await self.db_gif.get_objects_by_tag_name("bbb"))
     with open(goth_file, "w") as file:
         file.write(self.goth)
@@ -179,14 +147,9 @@ async def schedule_gif_of_the_hour():
         start=True,
     )
 
-    # while True:
-    #    logger.warning("sleeping for goth")
-    #    await asyncio.sleep(5)
-
 
 async def post_chuntfm_status(self):
     logger.debug("post_chuntfm_status")
-    #bot = BotSingleton.get_instance()
     bots = []
     main_room = environ["wombotmainroom"]
     test_room = environ["wombottestroom"]
@@ -232,7 +195,6 @@ async def schedule_chuntfm_livecheck():
         await asyncio.sleep(5)
 
 
-
 class Config:
     rooms = [mysecrets.wombotmainroom, mysecrets.wombottestroom]
     # rooms = ["bothome2", "bothome"]
@@ -256,7 +218,6 @@ class Timer:
 
 class MyBot(chatango.Client):
     async def on_init(self):
-        print("Bot initialized")
         # self.db = await aiosqliteclass.create_conn()
         self.db_gif = DB_GIF("./data/database_gifs.db")
         await self.db_gif.open()
@@ -278,13 +239,10 @@ class MyBot(chatango.Client):
                 print("Error getting goth from db:", e)
                 self.goth = "No goth :("
 
-        print(self.goth)
         self._room = None
         banned_ips_file = "data/banned_ips.txt"
         with open(banned_ips_file, "r") as file:
             self.banned_ips = [line.strip() for line in file]
-
-        print("seriously")
 
     async def on_start(self):  # room join queue
         logger.debug("on_start")
@@ -417,16 +375,11 @@ class MyBot(chatango.Client):
             else:
                 orig_cmd, args = data[0], ""
             cmd = orig_cmd.lower().strip().lstrip().rstrip()
-            # print(cmd)
 
             # Route through the command registry
             logger.info("** Routing command:", cmd)
             if await commands.route_command(self, message, cmd, args):
                 return
-
-            # print(cmd)
-            # print(cmd.startswith("raid"))
-            # print(cmd.startswith("id") or cmd.startswith("raid"))
 
             # log command
             await self.db_commands.insert_command(
@@ -450,15 +403,9 @@ class MyBot(chatango.Client):
 
 async def main():
     bot = MyBot()
-    #BotSingleton.initialize(bot)
-    bot.default_user(Config.bot_user[0], Config.bot_user[1])  # easy_start
-
+    bot.default_user(Config.bot_user[0], Config.bot_user[1])
     bot_task = asyncio.create_task(bot.start())  # Single bot instance
     gif_task = asyncio.create_task(schedule_gif_of_the_hour())  # Continuous task
-    #mpd_client = MopidyClient(host="139.177.181.183")
-    #MpdSingleton.initialize(mpd_client)
-    #mpd_task = asyncio.create_task(mpd_context_manager(mpd_client))
-
     bot.mpd = Jukebox(host="139.177.181.183")
     mpd_task = bot.mpd.start()
     tasks = asyncio.gather(bot_task, gif_task, mpd_task)
@@ -471,7 +418,7 @@ async def main():
         # Cancel tasks on shutdown
         bot_task.cancel()
         gif_task.cancel()
-        #mpd_task.cancel()
+        mpd_task.cancel()
 
 
 base_path = os.path.dirname(os.path.abspath(__file__))
@@ -503,20 +450,14 @@ if __name__ == "__main__":
     if not os.path.exists(goth_file):
         with open(goth_file, "a") as file:
             pass
-    print("past goth")
-    # asyncio.run(main())
-    # Create the event loop manually
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
 
     try:
-        # Run the main coroutine until it completes
         loop.run_until_complete(main())
-        # Keep the loop running indefinitely
         loop.run_forever()
     except KeyboardInterrupt:
         logger.debug("Keyboard interrupt received, shutting down.")
     finally:
-        # Clean up the event loop
         loop.stop()
         loop.close()

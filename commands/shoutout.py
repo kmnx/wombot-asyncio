@@ -17,8 +17,6 @@ async def shoutout_handler(self, message, cmd, args):
     shout_end = ["😘", "❤️", "💙", "*h*", "<3"]
 
     if args:
-        # print(args)
-        # print('.......')
         splitargs = args.split(" ")
         if args.startswith("@"):
             for arg in splitargs:

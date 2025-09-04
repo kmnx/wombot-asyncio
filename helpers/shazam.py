@@ -74,7 +74,6 @@ class ShazamApi:
                     while asyncio.get_event_loop().time() < (start_time + 4):
                         chunk = await response.content.read(1024)
                         chunk_count += 1
-                        # print("written chunk ", chunk_count)
                         if not chunk:
                             break
 
@@ -92,7 +91,6 @@ class ShazamApi:
                         sound = AudioSegment.from_file(recording)
                     # with open("rinse_test.raw", "wb") as f:
                     #    f.write(recording.getvalue())
-                    # print("Saved raw recording as rinse_test.raw, size:", recording.getbuffer().nbytes)
                     sound = sound.set_channels(1)
                     sound = sound.set_sample_width(2)
                     sound = sound.set_frame_rate(44100)
@@ -147,7 +145,7 @@ async def main(loop):
 
 
 async def raid(self, message, station_query):
-    #logger.debug("raid")
+    # logger.debug("raid")
 
     ra_stations = await radioactivity.get_station_list()
     print("wtf")
@@ -282,15 +280,12 @@ async def raid(self, message, station_query):
                         print(e)
             except Exception as e:
                 print(str(e))
-        # print(artist + " - " + track)
         # return artist,track
 
 
-async def shazam_station(message, station):
+async def shazam_station(bot, message, station):
 
     print("shazam_station")
-    #bot = BotSingleton.get_instance()
-    #logger.debug("shazam_station")
 
     audio_source = None
 
@@ -328,7 +323,6 @@ async def shazam_station(message, station):
     ""
 
     shazam_result = await shazamapi._get(audio_source)
-    # print(shazam_result)
 
     if "track" in shazam_result:
         artist = shazam_result["track"]["subtitle"]
@@ -359,12 +353,12 @@ async def shazam_station(message, station):
     # insert anything we found into db anyway
     if station == "chunt1":
         try:
-            show_name, who_cares = await self.mpd.now_playing("raw")
+            show_name, who_cares = await bot.mpd.now_playing("raw")
         except Exception as e:
             print(e)
     elif station == "chunt2":
         try:
-            who_cares, show_name = await self.mpd.now_playing("raw")
+            who_cares, show_name = await bot.mpd.now_playing("raw")
         except Exception as e:
             print(e)
     elif station == "nts1":
@@ -394,7 +388,7 @@ async def shazam_station(message, station):
     print("should get a data pack:")
     print(data_package)
     try:
-        await self.db_id.insert_id_request(
+        await bot.db_id.insert_id_request(
             str(london_now),
             message.user.showname,
             message.room.name,
