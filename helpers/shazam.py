@@ -359,12 +359,12 @@ async def shazam_station(message, station):
     # insert anything we found into db anyway
     if station == "chunt1":
         try:
-            show_name, who_cares = await now_playing("raw")
+            show_name, who_cares = await self.mpd.now_playing("raw")
         except Exception as e:
             print(e)
     elif station == "chunt2":
         try:
-            who_cares, show_name = await now_playing("raw")
+            who_cares, show_name = await self.mpd.now_playing("raw")
         except Exception as e:
             print(e)
     elif station == "nts1":

@@ -17,8 +17,9 @@ from pathlib import Path
 import time
 import logging
 import nltk
+from helpers.juke import Jukebox
 
-from helpers.jukebox import jukebox_status, mpd_context_manager, MpdSingleton
+#from helpers.jukebox import jukebox_status, mpd_context_manager, MpdSingleton
 from helpers.db_gif import DB_GIF
 from helpers.db_shazamids import DB_ShazamIDs
 from helpers.db_commands import DB_Commands
@@ -454,10 +455,12 @@ async def main():
 
     bot_task = asyncio.create_task(bot.start())  # Single bot instance
     gif_task = asyncio.create_task(schedule_gif_of_the_hour())  # Continuous task
-    mpd_client = MopidyClient(host="139.177.181.183")
+    #mpd_client = MopidyClient(host="139.177.181.183")
     #MpdSingleton.initialize(mpd_client)
-    mpd_task = asyncio.create_task(mpd_context_manager(mpd_client))
-    bot.mpd = mpd_task
+    #mpd_task = asyncio.create_task(mpd_context_manager(mpd_client))
+
+    bot.mpd = Jukebox(host="139.177.181.183")
+    mpd_task = bot.mpd.start()
     tasks = asyncio.gather(bot_task, gif_task, mpd_task)
 
     try:
@@ -468,7 +471,7 @@ async def main():
         # Cancel tasks on shutdown
         bot_task.cancel()
         gif_task.cancel()
-        mpd_task.cancel()
+        #mpd_task.cancel()
 
 
 base_path = os.path.dirname(os.path.abspath(__file__))
