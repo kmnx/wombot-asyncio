@@ -61,3 +61,4 @@ from . import say
 # from . import intentional_error  # Uncomment for testing error handling
 
 from . import eightball
+from . import np

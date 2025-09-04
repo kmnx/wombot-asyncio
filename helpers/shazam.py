@@ -12,8 +12,8 @@ import logging
 import ssl
 
 from helpers import radioactivity, schedule
-from wombot import logger, shazam_api_key, BotSingleton, now_playing
 from helpers.bandcamp import bandcamp_search
+
 
 shazam_api_key = mysecrets.shazam_api_key
 print("shazam_api_key: ", shazam_api_key)
@@ -146,8 +146,8 @@ async def main(loop):
     print(out)
 
 
-async def raid(bot, message, station_query):
-    logger.debug("raid")
+async def raid(self, message, station_query):
+    #logger.debug("raid")
 
     ra_stations = await radioactivity.get_station_list()
     print("wtf")
@@ -237,7 +237,7 @@ async def raid(bot, message, station_query):
                     )
                     # bandcamp search found something, insert into db
                     try:
-                        await bot.db_id.insert_id_request(
+                        await self.db_shazamids.insert_id_request(
                             str(london_now),
                             message.user.showname,
                             message.room.name,
@@ -265,7 +265,7 @@ async def raid(bot, message, station_query):
                     )
                     # shazam found nothing, insert into db anyway
                     try:
-                        await bot.db_id.insert_id_request(
+                        await self.db_shazamids.insert_id_request(
                             str(london_now),
                             message.user.showname,
                             message.room.name,
@@ -289,8 +289,8 @@ async def raid(bot, message, station_query):
 async def shazam_station(message, station):
 
     print("shazam_station")
-    bot = BotSingleton.get_instance()
-    logger.debug("shazam_station")
+    #bot = BotSingleton.get_instance()
+    #logger.debug("shazam_station")
 
     audio_source = None
 
@@ -394,7 +394,7 @@ async def shazam_station(message, station):
     print("should get a data pack:")
     print(data_package)
     try:
-        await bot.db_id.insert_id_request(
+        await self.db_id.insert_id_request(
             str(london_now),
             message.user.showname,
             message.room.name,

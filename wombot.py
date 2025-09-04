@@ -149,21 +149,21 @@ else:
 print("init variables done")
 
 
-async def post_gif_of_the_hour(param):
+async def post_gif_of_the_hour(self, param):
     logger.debug("post_gif_of_the_hour")
-    bot = BotSingleton.get_instance()
+    #bot = BotSingleton.get_instance()
     bots = []
     main_room = mysecrets.wombotmainroom
     test_room = mysecrets.wombottestroom
-    bots.append(bot.get_room(main_room))
-    bots.append(bot.get_room(test_room))
+    bots.append(self.get_room(main_room))
+    bots.append(self.get_room(test_room))
     # print(datetime.now().time(), param)
-    bot.goth = random.choice(await bot.db_gif.get_objects_by_tag_name("bbb"))
+    self.goth = random.choice(await self.db_gif.get_objects_by_tag_name("bbb"))
     with open(goth_file, "w") as file:
-        file.write(bot.goth)
+        file.write(self.goth)
 
     for roombot in bots:
-        await roombot.send_message("the gif of the hour is: " + bot.goth)
+        await roombot.send_message("the gif of the hour is: " + self.goth)
 
 
 async def schedule_gif_of_the_hour():
@@ -183,45 +183,45 @@ async def schedule_gif_of_the_hour():
     #    await asyncio.sleep(5)
 
 
-async def post_chuntfm_status():
+async def post_chuntfm_status(self):
     logger.debug("post_chuntfm_status")
-    bot = BotSingleton.get_instance()
+    #bot = BotSingleton.get_instance()
     bots = []
     main_room = environ["wombotmainroom"]
     test_room = environ["wombottestroom"]
-    bots.append(bot.get_room(main_room))
-    bots.append(bot.get_room(test_room))
+    bots.append(self.get_room(main_room))
+    bots.append(self.get_room(test_room))
 
-    if not hasattr(bot, "chuntfm"):
-        bot.chuntfm = dict()
+    if not hasattr(self, "chuntfm"):
+        self.chuntfm = dict()
 
     cfm_status = await chuntfm.get_chuntfm_status()
 
     if cfm_status is not None:
-        bot.chuntfm.update(cfm_status)
+        self.chuntfm.update(cfm_status)
     else:
         return None
 
     # if there's a new status
-    print("last_posted_status", (bot.chuntfm.get("last_posted_status")))
-    print("bot.chuntfm.get(status) ==", bot.chuntfm.get("status"))
-    if (bot.chuntfm.get("last_posted_status") is None) or (
-        bot.chuntfm.get("status") != bot.chuntfm.get("last_posted_status")
+    print("last_posted_status", (self.chuntfm.get("last_posted_status")))
+    print("self.chuntfm.get(status) ==", self.chuntfm.get("status"))
+    if (self.chuntfm.get("last_posted_status") is None) or (
+        self.chuntfm.get("status") != self.chuntfm.get("last_posted_status")
     ):
-        msg = "ChuntFM status: " + bot.chuntfm.get("status") + "!"
+        msg = "ChuntFM status: " + self.chuntfm.get("status") + "!"
         print("the msg is:", msg)
-    elif bot.chuntfm.get("status") == "online":
+    elif self.chuntfm.get("status") == "online":
         # if the last online status post was less than 15 minutes ago, don't post again
-        print(bot.chuntfm.get("last_posted_time"))
-        print(time.time() - bot.chuntfm.get("last_posted_time"))
-        print(time.time() - bot.chuntfm.get("last_posted_time") < 15 * 60)
-        if time.time() - bot.chuntfm.get("last_posted_time") < 15 * 60:
+        print(self.chuntfm.get("last_posted_time"))
+        print(time.time() - self.chuntfm.get("last_posted_time"))
+        print(time.time() - self.chuntfm.get("last_posted_time") < 15 * 60)
+        if time.time() - self.chuntfm.get("last_posted_time") < 15 * 60:
             return None
-    elif bot.chuntfm.get("status") == "offline":
+    elif self.chuntfm.get("status") == "offline":
         return None
 
-    bot.chuntfm["last_posted_status"] = bot.chuntfm.get("status")
-    bot.chuntfm["last_posted_time"] = time.time()
+    self.chuntfm["last_posted_status"] = self.chuntfm.get("status")
+    self.chuntfm["last_posted_time"] = time.time()
 
 
 async def schedule_chuntfm_livecheck():
@@ -230,126 +230,6 @@ async def schedule_chuntfm_livecheck():
     while True:
         await asyncio.sleep(5)
 
-
-# now_playing live only
-async def now_playing(return_type):
-    # check if someone is connected to stream
-    liquidsoap_harbor_status = ""
-    chu1_np_formatted = ""
-    chu2_np_formatted = ""
-    chu1_np_raw, chu2_np_raw = None, None
-    print("trying to get liquidsoap_harbor_status")
-
-    try:
-        async with ClientSession() as s:
-            r = await s.get("https://chunt.org/live.json", timeout=5)
-            live_json = await r.json()
-        if live_json:
-            if live_json["live"] == True:
-                liquidsoap_harbor_status = "source"
-            else:
-                print(live_json)
-        print("live_json", live_json)
-
-    except Exception as e:
-        print("Error fetching live status")
-        print(e)
-    # is someone scheduled to be live?
-    print("made it past telnet connection attempt")
-    chu1_scheduled = None
-    print("harbor_status", liquidsoap_harbor_status)
-    try:
-        print("trying to get schedule.json")
-        async with ClientSession() as s:
-            r = await s.get("https://chunt.org/schedule.json", timeout=5)
-            schedule_json = await r.json()
-            # print(chu_json)
-            if schedule_json:
-                print("got schedule_json")
-                time_now = datetime.now(timezone.utc)
-                print("time_now: ", time_now)
-                for show in schedule_json:
-                    start_time = datetime.fromisoformat(show["startTimestamp"])
-                    end_time = datetime.fromisoformat(show["endTimestamp"])
-                    # print("start_time: ", start_time)
-                    if start_time < time_now:
-                        if end_time > time_now:
-                            print(show)
-                            chu1_scheduled = show["title"]
-    except Exception as e:
-        print(e)
-
-    # is someone connected?
-    if liquidsoap_harbor_status.startswith("source"):
-        if chu1_scheduled:
-            chu1_np_formatted = "LIVE NOW: " + chu1_scheduled
-            chu1_np_raw = chu1_scheduled
-        else:
-            chu1_np_formatted = "LIVE NOW: unscheduled livestream w/ anon1111"
-            chu1_np_raw = "unscheduled livestream w/ anon1111"
-
-    # no one is connected
-    else:
-        # get current restream info
-        print("trying to get restream info")
-        try:
-            async with ClientSession() as s:
-                r = await s.get("https://chunt.org/restream.json", timeout=5)
-                chu_restream_json = await r.json()
-                if chu_restream_json:
-                    print(chu_restream_json)
-                    # is someone supposed to be live?
-                    print("received restream.json")
-                    print(chu1_scheduled)
-                    if chu1_scheduled is not None:
-                        print("chu1_scheduled is not none")
-                        print("chu1_scheduled", chu1_scheduled)
-                        print("chu_json", chu_restream_json)
-                        if chu_restream_json["current"]["show_date"] is None:
-                            chu_restream_json["current"]["show_date"] = ""
-                        chu1_np_formatted = (
-                            "scheduled but offline: "
-                            + chu1_scheduled
-                            + " | "
-                            + "RESTREAM: "
-                            + chu_restream_json["current"]["show_title"]
-                            + " @ "
-                            + chu_restream_json["current"]["show_date"]
-                        )
-                    else:
-                        print("chu_restream is none")
-                        print(chu1_np_formatted)
-                        if chu_restream_json["current"]["show_date"] is None:
-                            chu_restream_json["current"]["show_date"] = ""
-                        chu1_np_formatted = (
-                            "RESTREAM: "
-                            + chu_restream_json["current"]["show_title"]
-                            + " @ "
-                            + chu_restream_json["current"]["show_date"]
-                        )
-                    chu1_np_raw = chu_restream_json["current"]["show_title"]
-        except Exception as e:
-            print("exception in np")
-            print(e)
-
-    # anything on chu2?
-
-    chu2_np_formatted = await jukebox_status()
-    if chu1_np_formatted == "":
-        chu1_np_formatted = "i think chunt.org might be broken"
-
-    if chu2_np_formatted:
-        chu1_np_formatted = chu1_np_formatted + " | " + chu2_np_formatted
-
-    if return_type == "formatted":
-        return chu1_np_formatted
-
-    elif return_type == "raw":
-        return chu1_np_raw, chu2_np_raw
-
-
-async def create_connection_pool():
-    return await aiosqlite.connect("./data/database_commands.db")
 
 
 class Config:
@@ -548,11 +428,9 @@ class MyBot(chatango.Client):
             # print(cmd.startswith("id") or cmd.startswith("raid"))
 
             # log command
-            connection_pool = await create_connection_pool()
-            await insert_command(
-                connection_pool, cmd, message.user.showname, message.room.name
+            await self.db_commands.insert_command(
+                cmd, message.user.showname, message.room.name
             )
-            await connection_pool.close()
             try:
                 gif_res = await self.db_gif.get_objects_by_tag_name(cmd)
             except Exception as e:
@@ -571,14 +449,15 @@ class MyBot(chatango.Client):
 
 async def main():
     bot = MyBot()
-    BotSingleton.initialize(bot)
+    #BotSingleton.initialize(bot)
     bot.default_user(Config.bot_user[0], Config.bot_user[1])  # easy_start
 
     bot_task = asyncio.create_task(bot.start())  # Single bot instance
     gif_task = asyncio.create_task(schedule_gif_of_the_hour())  # Continuous task
     mpd_client = MopidyClient(host="139.177.181.183")
-    MpdSingleton.initialize(mpd_client)
+    #MpdSingleton.initialize(mpd_client)
     mpd_task = asyncio.create_task(mpd_context_manager(mpd_client))
+    bot.mpd = mpd_task
     tasks = asyncio.gather(bot_task, gif_task, mpd_task)
 
     try:

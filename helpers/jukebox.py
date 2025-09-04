@@ -22,8 +22,8 @@ def display_progress(track_position, track_length):
     return f"at [{position_str}] of [{length_str}] [{progress_bar}{remaining_space}] {percentage}%"
 
 
-async def jukebox_status():
-    mpd = MpdSingleton.get_instance()
+async def jukebox_status(mpd):
+    #mpd = MpdSingleton.get_instance()
     data = None
     print("trying to get mpd data")
     try:
@@ -44,8 +44,8 @@ async def jukebox_status():
     return jukebox_status_msg
 
 
-async def now_playing_jukebox(return_type):
-    mpd = MpdSingleton.get_instance()
+async def now_playing_jukebox(mpd,return_type=None):
+    #mpd = MpdSingleton.get_instance()
     chu2_np_formatted = ""
     chu2_np_raw = None
 
@@ -96,16 +96,16 @@ async def now_playing_jukebox(return_type):
         return chu2_np_raw
 
 
-async def playback_started_handler(data):
+async def playback_started_handler(self, data):
     logger.debug("playback_started_handler")
-    from wombot import BotSingleton
+    #from wombot import BotSingleton
 
-    bot = BotSingleton.get_instance()
+    #bot = BotSingleton.get_instance()
     """Callback function, called when the playback started."""
     print(data)
-    print(bot.rooms)  # ok
+    print(self.rooms)  # ok
     main_room = environ["wombotmainroom"]
-    my_room = bot.get_room(main_room)
+    my_room = self.get_room(main_room)
     # print(my_room) # ok
     if data["tl_track"]["track"]["uri"].startswith("soundcloud"):
         url = data["tl_track"]["track"]["comment"]
