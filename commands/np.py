@@ -1,19 +1,18 @@
 """
-Listeners command implementation.
+np (now playing) command implementation.
 """
 
 from aiohttp import ClientSession
 from pytz import timezone
 from helpers.commands import register_exact, wrapped
 import datetime
-from helpers.jukebox import jukebox_status
 from helpers.now_playing import now_playing
 
 
 @wrapped
-async def np_handler(self, message, cmd, args):
+async def np_handler(bot, message, cmd, args):
     """Handle the !np command."""
-    np_result = await now_playing(self)
+    np_result = await now_playing(bot)
     print("now what")
 
 

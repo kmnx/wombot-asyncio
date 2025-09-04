@@ -36,11 +36,11 @@ logger = logging.getLogger(handle)
 if zoneinfo.available_timezones() is None:
     import tzdata
 
-logger.debug("this will get printed")
-logger.info("this will get printed")
-logger.warning("this will get printed")
-logger.error("this will get printed")
-logger.critical("this will get printed")
+#logger.debug("this will get printed")
+#logger.info("this will get printed")
+#logger.warning("this will get printed")
+#logger.error("this will get printed")
+#logger.critical("this will get printed")
 
 try:
     nltk.data.find("tokenizers/punkt")
@@ -406,8 +406,18 @@ async def main():
     bot.default_user(Config.bot_user[0], Config.bot_user[1])
     bot_task = asyncio.create_task(bot.start())  # Single bot instance
     gif_task = asyncio.create_task(schedule_gif_of_the_hour())  # Continuous task
+
+    # Debug info: The Jukebox client mopidy_asyncio_client is horribly outdated and unmaintained
+    # after installing the dependencyit requires patching two lines in client.py of mopidy_asyncio_client
+    # change: return self.websocket and self.websocket.open
+    # to: return self.websocket
+    # change: self.websocket = await websockets.connect(self.ws_uri, loop=self._loop)
+    # to: self.websocket = await websockets.connect(self.ws_uri)
+
     bot.mpd = Jukebox(host="139.177.181.183")
-    mpd_task = bot.mpd.start()
+    #mpd_task = bot.start()
+    mpd_task = asyncio.create_task(bot.mpd.mpd_context_manager())
+
     tasks = asyncio.gather(bot_task, gif_task, mpd_task)
 
     try:

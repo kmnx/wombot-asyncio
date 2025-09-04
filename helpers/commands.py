@@ -95,7 +95,7 @@ def _match(spec: CommandSpec, cmd: str) -> bool:
     return False
 
 
-async def route_command(self, message, cmd: str, args: str) -> bool:
+async def route_command(bot, message, cmd: str, args: str) -> bool:
     """
     Route a command through the registry with error handling.
 
@@ -110,7 +110,7 @@ async def route_command(self, message, cmd: str, args: str) -> bool:
         for spec in REGISTRY:
             if _match(spec, cmd):
                 print(f"Matched command '{cmd}' with spec '{spec.name}'")
-                await spec.handler(self, message, cmd, args)
+                await spec.handler(bot, message, cmd, args)
                 return True
 
         print(f"No matching command found for '{cmd}'")

@@ -68,7 +68,7 @@ async def now_playing(bot):
                 )
 
     # anything on chu2?
-    chu2_np = await bot.jukebox_status()
+    chu2_np = await bot.mpd.jukebox_status()
     if chu1_np == "":
         chu1_np = "i think chunt.org might be broken"
 
