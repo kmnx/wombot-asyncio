@@ -1,8 +1,12 @@
+.env
 #log
 example.log
 # macOS 
 .DS_Store
+# Gif Of The Hour
 goth.txt
+# Blocked Image URLs
+blocked.txt
 # IDE
 .idea/*
 
@@ -11,8 +15,12 @@ pythonsqlite.db
 trackids.db
 db_idhistory.db
 chatbot_database.db
+*.db
 
-allgif.txt
+data_allgif.txt
+data_goth.txt
+banned_img.txt
+banned_ips.txt
 mysecrets.py
 
 # Byte-compiled / optimized / DLL files
@@ -145,3 +153,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+/.claude/
+CLAUDE.md

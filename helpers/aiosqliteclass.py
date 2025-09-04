@@ -2,6 +2,7 @@ import asyncio
 import aiosqlite
 import logging
 import random
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +16,10 @@ async def create_conn():
 class Sqlite3Class:
     # self.cursor.row_factory = lambda cursor, row: row[0]
 
-    def __init__(self, db_name="pythonsqlite.db"):
+    def __init__(self, db_name=None):
+        if db_name is None:
+            base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            db_name = os.path.join(base_dir, "data", "database_gifs.db")
         self.db_name = db_name
         self.conn = None
         self.cursor = None
@@ -286,22 +290,17 @@ class Sqlite3Class:
             print(object_data)
         else:
             if object_data_from_db[1].strip().strip("'") == object_data:
-                print(object_data)
-                # print(object_id)
-                # print(tag_ids)
                 await self.remove_object_by_object_id(object_id)
                 if object_id and tag_ids:
                     for tag_id in tag_ids:
                         tag_name = await self.get_tag_name_by_tag_id(tag_id[1])
 
                         print(tag_name[1])
-                        # print(tag_id[1])
                         await self.remove_mapping_by_ids(object_id, tag_id[1])
                         await self.conn.commit()
                         test_tag_has_objects = await self.get_object_ids_by_tag_id(
                             tag_id[1]
                         )
-                        # print(test_tag_has_objects)
 
                         if test_tag_has_objects:
                             pass

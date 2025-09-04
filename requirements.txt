@@ -18,5 +18,8 @@ matplotlib
 scipy
 PyWavelets
 validators
-audioop-lts
+#audioop-lts
 librosa
+black
+tzdata
+pytest-asyncio

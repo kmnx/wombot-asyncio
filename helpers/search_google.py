@@ -27,7 +27,6 @@ async def search(query):
         items = data["items"]
     else:
         items = None
-    # print(items)
     return items
 
 

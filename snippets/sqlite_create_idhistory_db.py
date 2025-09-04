@@ -17,7 +17,7 @@ def create_connection(db_file):
 
 
 def run():
-    conn_obj = create_connection("db_idhistory.db")
+    conn_obj = create_connection("./data/database_idhistory.db")
     cursor_obj = conn_obj.cursor()
     cursor_obj.execute("DROP TABLE IF EXISTS chuntfm")
     cursor_obj.execute(

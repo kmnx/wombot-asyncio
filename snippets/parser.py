@@ -59,7 +59,6 @@ def track_and_album_processor(soup):
 
     # get tags embedded in javascript script "data-tralbum-collect-info"
     js_tralbum = soup.find("script", {"data-tralbum-collect-info": True})
-    # print(js_tralbum)
 
     # get dictionaries from data-tralbum-collect-info
     js_data_band = js_tralbum["data-band"]

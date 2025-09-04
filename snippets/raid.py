@@ -1,14 +1,12 @@
-import sys
 import re
 import json
 import asyncio
 import aiohttp
 import mysecrets
-import shazam
+from helpers import shazam
 from aiohttp import ClientSession
 
 shazam_api_key = mysecrets.shazam_api_key
-import logging as LOGGER
 
 
 async def raid(loop, station_query):

@@ -54,7 +54,6 @@ async def get_bpm(station):
         match = True
     else:
         ra_stations = await radioactivity.get_station_list()
-        print("wtf")
         ra_station_names = list(ra_stations.keys())
 
         if station in ra_station_names:

@@ -1,0 +1,106 @@
+now_playing
+jukebox_status
+raid
+shazam_station
+bandcamp_search
+
+a
+count
+help
+idnts1
+idnts2
+idsoho
+iddy iddoyou
+id1 idchunt1 idchu1
+id2 idchunt2 idchu2 idjuke idjukebox
+idalhara idalha idalhar
+isha share shar shared sharedfreq sharedfrequencies
+raid
+id
+randomstation
+upnext nextup
+whenis wenis
+today
+tomorrow
+yesterday
+np
+juke
+jukebox
+clear
+play add
+queue tl
+skip
+seek
+ff fastforward
+rewind rw
+sched schedule
+funfact fact
+chuntfact cact
+fortune
+cfortune
+normalfortune
+boshtune
+scran recipe hungry
+[
+                "legalize",
+                "legalizeit",
+                "legalise",
+                "legalize it",
+                "legalise it",
+                "blaze",
+                "420",
+                "blazeit",
+                "blaze it",
+                "blazin",
+            ]
+
+sandwich
+whatdoesthatmean benufo bufo
+wombat 
+capybara
+otter
+quokka
+time times
+            elif anniversary := re.match(r"^chunt#(\d{3,4})$", cmd):
+
+stats
+tags
+last
+tagged
+rndtag
+tag
+untag
+info
+random rnd rand
+vs
+gif dance
+bbb
+b2b
+b2b2b bbb b3b
+goth
+chuntfm
+fortune
+coinflip
+rollcall 
+whom
+battle
+say
+bg
+kiss
+chunt
+8ball
+heart
+hearts
+shoutout shout out
+ronfret
+chavalon
+day date
+wombot
+top toptags
+bcg
+else: gif resolution attempt
+gif catcher
+bot spam detection
+
+
+
