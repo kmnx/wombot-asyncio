@@ -3158,12 +3158,18 @@ class MyBot(chatango.Client):
                 pass
             elif (
                 message.user.isanon
-                or re.search(
+                or (re.search(
                     r"^(?:([a-z]{2})\1|([a-z]{1})\2([a-z]{1})\3)\d{3}$",
                     message.user.showname,
                     flags=re.I,
                 )
-                is not None
+                is not None)
+                or (re.search(
+                    r"^[a-z]{3}\d{2}$", 
+                    message.user.showname,
+                    flags=re.I,
+                )
+                is not None)
             ) and len(message.room.get_last_messages(user=message.user)) < 2:
                 # if any link thats not an image or youtube link is posted, ban user
                 if any(
