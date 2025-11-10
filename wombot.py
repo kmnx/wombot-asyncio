@@ -1733,6 +1733,49 @@ class MyBot(chatango.Client):
 
                         await message.channel.send(cleaner)
 
+            elif cmd in ["whenwas"]:
+                if message.room.name != "<PM>":
+                    await message.room.delete_message(message)
+                if not args:
+                    await message.channel.send("Enter a query for show: !whenwas [query]")
+                else:
+                    try:
+                        params = {"q": args}
+                        async with ClientSession() as s:
+                            async with s.get("http://127.0.0.1:8000/search", params=params, timeout=5) as r:
+                                if r.status != 200:
+                                    await message.channel.send(f"Search failed ({r.status})")
+                                else:
+                                    data = await r.json()
+                                    # expected shape: {"query":"cumbia","match":{...},"message": "..."}
+                                    match = data.get("match") or {}
+                                    if not match:
+                                        # fallback to server message or generic no-result
+                                        server_msg = data.get("message") or f"No results for {args}"
+                                        await message.channel.send(server_msg)
+                                    else:
+                                        title = match.get("title", "<unknown title>")
+                                        desc = match.get("description", "")
+                                        ts = match.get("startTimestamp", "")
+                                        try:
+                                            show_date = ts.split("T", 1)[0] if ts else ""
+                                            days_ago = (date.today() - date.fromisoformat(show_date)).days if show_date else None
+                                        except Exception:
+                                            show_date = ts
+                                            days_ago = None
+                                        days_str = f", {days_ago} days ago" if days_ago is not None else ""
+                                        # build response
+                                        resp = (
+                                            f"last show containing '{args}' was '{title}'"
+                                            + (f" with '{desc}'" if desc else "")
+                                            + (f" on {show_date}" if show_date else "")
+                                            + days_str
+                                        )
+                                        await message.channel.send(resp)
+                    except Exception as e:
+                        print("whenwas search error:", e)
+                        await message.channel.send("Error searching for show")
+
             elif cmd in ["today"]:
                 chuntfm_schedule = ""
 
