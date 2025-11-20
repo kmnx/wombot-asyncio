@@ -1747,45 +1747,40 @@ class MyBot(chatango.Client):
                                     await message.channel.send(f"Search failed ({r.status})")
                                 else:
                                     data = await r.json()
-                                    # expected shape: {"query":"cumbia","match":{...},"message": "..."}
                                     match = data.get("match") or {}
-                                    if not match:
-                                        # fallback to server message or generic no-result
-                                        server_msg = data.get("message") or f"No results for {args}"
-                                        await message.channel.send(server_msg)
+                                    # Only proceed if match exists and is in the past
+                                    ts = match.get("startTimestamp", "")
+                                    try:
+                                        show_dt = datetime.fromisoformat(ts) if ts else None
+                                    except Exception:
+                                        show_dt = None
+
+                                    now = datetime.now(timezone.utc)
+                                    if not match or not show_dt or show_dt > now:
+                                        await message.channel.send(f"No results for {args}")
                                     else:
                                         title = match.get("title", "<unknown title>")
                                         desc = match.get("description", "")
-                                        ts = match.get("startTimestamp", "")
-                                        try:
-                                            show_dt = datetime.fromisoformat(ts) if ts else None
-                                        except Exception:
-                                            show_dt = None
-
-                                        now = datetime.now(timezone.utc)
-                                        if not show_dt or show_dt > now:
-                                            await message.channel.send(f"No results for {args}")
+                                        delta = now - show_dt
+                                        if delta.days > 0:
+                                            time_str = f"{delta.days} days ago"
+                                        elif delta.seconds >= 3600:
+                                            hours = delta.seconds // 3600
+                                            time_str = f"{hours} hours ago"
+                                        elif delta.seconds >= 60:
+                                            minutes = delta.seconds // 60
+                                            time_str = f"{minutes} minutes ago"
                                         else:
-                                            delta = now - show_dt
-                                            if delta.days > 0:
-                                                time_str = f"{delta.days} days ago"
-                                            elif delta.seconds >= 3600:
-                                                hours = delta.seconds // 3600
-                                                time_str = f"{hours} hours ago"
-                                            elif delta.seconds >= 60:
-                                                minutes = delta.seconds // 60
-                                                time_str = f"{minutes} minutes ago"
-                                            else:
-                                                time_str = "just now"
+                                            time_str = "just now"
 
-                                            show_date = show_dt.strftime("%Y-%m-%d") if show_dt else ts
-                                            resp = (
-                                                f"last show containing '{args}' was '{title}'"
-                                                + (f" with '{desc}'" if desc else "")
-                                                + (f" on {show_date}" if show_date else "")
-                                                + f", {time_str}"
-                                            )
-                                            await message.channel.send(resp)
+                                        show_date = show_dt.strftime("%Y-%m-%d") if show_dt else ts
+                                        resp = (
+                                            f"last show containing '{args}' was '{title}'"
+                                            + (f" with '{desc}'" if desc else "")
+                                            + (f" on {show_date}" if show_date else "")
+                                            + f", {time_str}"
+                                        )
+                                        await message.channel.send(resp)
                     except Exception as e:
                         print("whenwas search error:", e)
                         await message.channel.send("Error searching for show")
