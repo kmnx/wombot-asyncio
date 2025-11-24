@@ -3135,7 +3135,7 @@ class MyBot(chatango.Client):
                     await message.room.delete_message(message)
                 #ronfret_date = date(2024, 4, 13)
                 ronfret_date = date(2025, 4, 17)
-                days_left = str((date.today()).days - ronfret_date.days)
+                days_left = str((ronfret_date - date.today()).days)
                 await message.channel.send(
                     "17 April 2025 weekend for Ronfret 2025 in Lisboa. Only "
                     + days_left
