@@ -3134,7 +3134,7 @@ class MyBot(chatango.Client):
                 if message.room.name != "<PM>":
                     await message.room.delete_message(message)
                 #ronfret_date = date(2024, 4, 13)
-                ronfret_date = date(2025, 4, 17)
+                ronfret_date = date(2026, 4, 17)
                 days_left = str((date.today() - ronfret_date).days)
                 await message.channel.send(
                     "17 April 2025 weekend for Ronfret 2025 in Lisboa. Only "
