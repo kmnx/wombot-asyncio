@@ -1448,8 +1448,17 @@ class MyBot(chatango.Client):
                         r = await s.get("https://fm.chunt.org/status-json.xsl", timeout=5)
                         if r.status == 200:
                             try:
-                                json_data = await r.json()
-                                # Extract listener count from JSON
+                                raw = await r.text()
+                                # Regex: find "title": <not-quoted-value> ,
+                                def fix_title(match):
+                                    value = match.group(1).strip()
+                                    # If value starts and ends with a quote, it's fine
+                                    if value.startswith('"') and value.endswith('"'):
+                                        return match.group(0)
+                                    # Otherwise, replace with quoted dash
+                                    return '"title":"-",'
+                                fixed = re.sub(r'"title":\s*([^,]+),', fix_title, raw)
+                                json_data = json.loads(fixed)
                                 listener_count = json_data.get("icestats", {}).get("source", {}).get("listeners", 'NA')
                                 await message.channel.send(f"Current listeners on /stream: {listener_count}")
                             except Exception as e:
