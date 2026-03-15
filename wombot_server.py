@@ -354,7 +354,7 @@ async def now_playing(return_type):
     
     try:
         async with ClientSession() as s:
-            r = await s.get("https://chunt.org/live.json")
+            r = await s.get("https://api.chunt.org/fm/channels/1/live")
             live_json = await r.json()
         if live_json:
             if live_json["live"] == True:
@@ -372,7 +372,7 @@ async def now_playing(return_type):
     try:
         print("trying to get schedule.json")
         async with ClientSession() as s:
-            r = await s.get("https://chunt.org/schedule.json")
+            r = await s.get("https://assets.chunt.org/schedule.json")
             schedule_json = await r.json()
             # print(chu_json)
             time_now = datetime.now(timezone.utc)
@@ -403,7 +403,7 @@ async def now_playing(return_type):
         print("trying to get restream info")
         try:
             async with ClientSession() as s:
-                r = await s.get("https://chunt.org/restream.json")
+                r = await s.get("https://assets.chunt.org/restream.json")
                 chu_json = await r.json()
                 print(chu_json)
                 # is someone supposed to be live?
@@ -508,7 +508,7 @@ async def now_playing(return_type):
     '''
     try:
         async with ClientSession() as s:
-            r = await s.get("https://chunt.org/live.json", timeout=5)
+            r = await s.get("https://api.chunt.org/fm/channels/1/live", timeout=5)
             live_json = await r.json()
         if live_json:
             if live_json["live"] == True:
@@ -523,7 +523,7 @@ async def now_playing(return_type):
         if r.status != 200:
             try:
                 async with ClientSession() as s:
-                    r = await s.get("https://chunt.org/live.json", timeout=5)
+                    r = await s.get("https://api.chunt.org/fm/channels/1/live", timeout=5)
                     live_json = await r.json()
                 if live_json:
                     if live_json["live"] == True:
@@ -550,7 +550,7 @@ async def now_playing(return_type):
     try:
         print("trying to get schedule.json")
         async with ClientSession() as s:
-            r = await s.get("https://chunt.org/schedule.json",timeout=5)
+            r = await s.get("https://assets.chunt.org/schedule.json",timeout=5)
             schedule_json = await r.json()
             # print(chu_json)
             if schedule_json:
@@ -583,7 +583,7 @@ async def now_playing(return_type):
         print("trying to get restream info")
         try:
             async with ClientSession() as s:
-                r = await s.get("https://chunt.org/restream.json", timeout=5)
+                r = await s.get("https://assets.chunt.org/restream.json", timeout=5)
                 chu_restream_json = await r.json()
                 if chu_restream_json:
                     print(chu_restream_json)
@@ -1340,7 +1340,7 @@ class MyBot(chatango.Client):
                     await message.room.delete_message(message)
                 try:
                     async with ClientSession() as s:
-                        r = await s.get("https://chunt.org/schedule.json", timeout=5)
+                        r = await s.get("https://assets.chunt.org/schedule.json", timeout=5)
                         if r:
                             schedule_json = await r.json()
                             # print(chu_json)
@@ -1419,7 +1419,7 @@ class MyBot(chatango.Client):
                 else:
                     try:
                         async with ClientSession() as s:
-                            r = await s.get("https://chunt.org/schedule.json", timeout=5)
+                            r = await s.get("https://assets.chunt.org/schedule.json", timeout=5)
                             if r:
                                 schedule_json = await r.json()
                                 # print(chu_json)
@@ -2370,7 +2370,7 @@ class MyBot(chatango.Client):
                 chuntfm_np = ""
                 try:
                     async with ClientSession() as s:
-                        with s.get("https://chunt.org/restream.json", timeout=5) as r:
+                        with s.get("https://assets.chunt.org/restream.json", timeout=5) as r:
                             chu_json = await r.json()
                         if chu_json:
                             #print(chu_json)

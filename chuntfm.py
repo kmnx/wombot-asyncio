@@ -5,7 +5,7 @@ import socket
 import mysecrets
 
 
-async def get_chuntfm_status(status_url="https://chunt.org/chuntfm.json"):
+async def get_chuntfm_status(status_url="https://assets.chunt.org/chuntfm.json"):
 
     # read in json from url
     try:
