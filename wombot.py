@@ -296,21 +296,22 @@ async def post_gif_of_the_hour(param):
     with open(goth_file, "w") as file:
         file.write(bot.goth)
 
-    for roombot in bots:
-        await roombot.send_message("the gif of the hour is: " + bot.goth)
+    # temporarily disabled
+    #for roombot in bots:
+    #    await roombot.send_message("the gif of the hour is: " + bot.goth)
 
 
 async def schedule_gif_of_the_hour():
     logger.debug("schedule_gif_of_the_hour")
 
-    # cron_min = aiocron.crontab('*/1 * * * *', func=post_gif_of_the_hour, args=("At every minute",), start=True)
+    '''# cron_min = aiocron.crontab('*/1 * * * *', func=post_gif_of_the_hour, args=("At every minute",), start=True)
     cron_jub = aiocron.crontab(
         "0 */1 * * *",
         # "*/1 * * * *",
         func=post_gif_of_the_hour,
         args=("At minute 0 past every hour.",),
         start=True,
-    )
+    )'''
 
     # while True:
     #    logger.warning("sleeping for goth")
