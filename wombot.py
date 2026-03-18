@@ -751,6 +751,8 @@ async def now_playing_jukebox(return_type):
             else:
                 url = ""
             chu2_np_raw = url
+            if "utm_medium" in url:
+                url = url.split("?utm_medium")[0]
             chu2_np_formatted = (
                 " https://fm.chunt.org/stream2 jukebox now playing: "
                 + url
@@ -847,6 +849,8 @@ async def playback_started_handler(data):
         url = uri.replace("mixcloud:track:", "https://www.mixcloud.com")
     else:
         url = data["tl_track"]["track"]["name"]
+    if "utm_medium" in url:
+        url = url.split("?utm_medium")[0]
     msg = "https://fm.chunt.org/stream2 jukebox now playing: " + url
     await my_room.send_message(msg)
 

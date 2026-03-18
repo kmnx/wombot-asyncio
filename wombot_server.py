@@ -694,6 +694,8 @@ async def now_playing_jukebox(return_type):
                 url = comment.replace("URL: ", "")
             else:
                 url = ""
+            if "utm_medium" in url:
+                url = url.split("?utm_medium")[0]
             chu2_np_raw = url
             chu2_np_formatted = (
                 " https://fm.chunt.org/stream2 jukebox now playing: " + url + " " + progress_bar
