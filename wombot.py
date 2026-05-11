@@ -1557,11 +1557,46 @@ class MyBot(chatango.Client):
                             monday = time_now - timedelta(days=time_now.weekday())
                             sunday = monday + timedelta(days=6)
                             # print("time_now: ", time_now)
-                            this_week_shows = 'This week: '
+                            this_week_shows = 'This week on ChuntFM: (UK time)\n\n\n'
+                            mon = ''
+                            tue = ''
+                            wed = ''
+                            thu = ''
+                            fri = ''
+                            sat = ''
+                            sun = ''
                             for show in schedule_json:
                                 if monday.date() <= datetime.fromisoformat(show["startTimestamp"]).date() <= sunday.date():
-                                    this_show = show["title"] + " on " + datetime.strptime(show["dateUK"], "%Y-%m-%d").strftime("%a") + " " + show["startTimeUK"] + " " + get_uk_timezone_label() + " | "
-                                    this_week_shows += this_show
+                                    print(show)
+                                    match datetime.strptime(show["dateUK"], "%Y-%m-%d").strftime("%a"):
+                                        case 'Mon':
+                                            mon += show["title"] + " " + show["startTimeUK"] + " | "
+                                        case 'Tue':
+                                            tue += show["title"] + " " + show["startTimeUK"] + " | "
+                                        case 'Wed':
+                                            wed += show["title"] + " " + show["startTimeUK"] + " | "
+                                        case 'Thu':
+                                            thu += show["title"] + " " + show["startTimeUK"] + " | "
+                                        case 'Fri':
+                                            fri += show["title"] + " " + show["startTimeUK"] + " | "
+                                        case 'Sat':
+                                            sat += show["title"] + " " + show["startTimeUK"] + " | "
+                                        case 'Sun':
+                                            sun += show["title"] + " " + show["startTimeUK"] + " | "
+                            if mon:
+                                this_week_shows += "Mon: " + mon + "\n"
+                            if tue:
+                                this_week_shows += "Tue: " + tue + "\n"
+                            if wed:
+                                this_week_shows += "Wed: " + wed + "\n"
+                            if thu:
+                                this_week_shows += "Thu: " + thu + "\n"
+                            if fri:
+                                this_week_shows += "Fri: " + fri + "\n"
+                            if sat:
+                                this_week_shows += "Sat: " + sat + "\n"
+                            if sun:
+                                this_week_shows += "Sun: " + sun + "\n"
                         else:
                             this_week_shows = "i think chunt.org might be broken"
                 except Exception as e:
@@ -1590,7 +1625,7 @@ class MyBot(chatango.Client):
                             monday = time_now - timedelta(days=time_now.weekday()) + timedelta(days=7)
                             sunday = monday + timedelta(days=6)
                             # print("time_now: ", time_now)
-                            next_week_shows = 'Next week on ChuntFM: (all times UK time)\n'
+                            next_week_shows = 'Next week on ChuntFM: (UK time)\n\n\n'
                             mon = ''
                             tue = ''
                             wed = ''
@@ -1603,19 +1638,19 @@ class MyBot(chatango.Client):
                                     print(show)
                                     match datetime.strptime(show["dateUK"], "%Y-%m-%d").strftime("%a"):
                                         case 'Mon':
-                                            mon += show["title"] + " at " + show["startTimeUK"] + " | "
+                                            mon += show["title"] + " " + show["startTimeUK"] + " | "
                                         case 'Tue':
-                                            tue += show["title"] + " at " + show["startTimeUK"] + " | "
+                                            tue += show["title"] + " " + show["startTimeUK"] + " | "
                                         case 'Wed':
-                                            wed += show["title"] + " at " + show["startTimeUK"] + " | "
+                                            wed += show["title"] + " " + show["startTimeUK"] + " | "
                                         case 'Thu':
-                                            thu += show["title"] + " at " + show["startTimeUK"] + " | "
+                                            thu += show["title"] + " " + show["startTimeUK"] + " | "
                                         case 'Fri':
-                                            fri += show["title"] + " at " + show["startTimeUK"] + " | "
+                                            fri += show["title"] + " " + show["startTimeUK"] + " | "
                                         case 'Sat':
-                                            sat += show["title"] + " at " + show["startTimeUK"] + " | "
+                                            sat += show["title"] + " " + show["startTimeUK"] + " | "
                                         case 'Sun':
-                                            sun += show["title"] + " at " + show["startTimeUK"] + " | "
+                                            sun += show["title"] + " " + show["startTimeUK"] + " | "
                             if mon:
                                 next_week_shows += "Mon: " + mon + "\n"
                             if tue:
