@@ -1583,6 +1583,8 @@ class MyBot(chatango.Client):
                                             sat += show["title"] + " | "
                                         case 'Sun':
                                             sun += show["title"] + " | "
+                            if not sat:
+                                sat = "Saturday"
                             if mon:
                                 this_week_shows += "MON: " + mon + "\n"
                             if tue:
@@ -1625,7 +1627,7 @@ class MyBot(chatango.Client):
                             monday = time_now - timedelta(days=time_now.weekday()) + timedelta(days=7)
                             sunday = monday + timedelta(days=6)
                             # print("time_now: ", time_now)
-                            next_week_shows = 'Next week on ChuntFM: '
+                            next_week_shows = 'Next week on ChuntFM: ' + "\n" + " " + "\n" + " " + "\n" + " "
                             mon = ''
                             tue = ''
                             wed = ''
@@ -1638,19 +1640,21 @@ class MyBot(chatango.Client):
                                     print(show)
                                     match datetime.strptime(show["dateUK"], "%Y-%m-%d").strftime("%a"):
                                         case 'Mon':
-                                            mon += show["title"] + " | "
+                                            mon += show["title"] + " | " + "\n"
                                         case 'Tue':
-                                            tue += show["title"] + " | "
+                                            tue += show["title"] + " | " + "\n"
                                         case 'Wed':
-                                            wed += show["title"] + " | "
+                                            wed += show["title"] + " | " + "\n"
                                         case 'Thu':
-                                            thu += show["title"] + " | "
+                                            thu += show["title"] + " | " + "\n"
                                         case 'Fri':
-                                            fri += show["title"] + " | "
+                                            fri += show["title"] + " | " + "\n"
                                         case 'Sat':
-                                            sat += show["title"] + " | "
+                                            sat += show["title"] + " | " + "\n"
                                         case 'Sun':
-                                            sun += show["title"] + " | "
+                                            sun += show["title"] + " | " + "\n"
+                            if not sat:
+                                sat = "Saturday"
                             if mon:
                                 next_week_shows += "MON: " + mon
                             if tue:
