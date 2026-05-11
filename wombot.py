@@ -1640,35 +1640,35 @@ class MyBot(chatango.Client):
                                     print(show)
                                     match datetime.strptime(show["dateUK"], "%Y-%m-%d").strftime("%a"):
                                         case 'Mon':
-                                            mon += show["title"] + " | " + "\n"
+                                            mon += show["title"] + " | "
                                         case 'Tue':
-                                            tue += show["title"] + " | " + "\n"
+                                            tue += show["title"] + " | "
                                         case 'Wed':
-                                            wed += show["title"] + " | " + "\n"
+                                            wed += show["title"] + " | "
                                         case 'Thu':
-                                            thu += show["title"] + " | " + "\n"
+                                            thu += show["title"] + " | "
                                         case 'Fri':
-                                            fri += show["title"] + " | " + "\n"
+                                            fri += show["title"] + " | "
                                         case 'Sat':
-                                            sat += show["title"] + " | " + "\n"
+                                            sat += show["title"] + " | "
                                         case 'Sun':
-                                            sun += show["title"] + " | " + "\n"
+                                            sun += show["title"] + " | "
                             if not sat:
                                 sat = "Saturday"
                             if mon:
-                                next_week_shows += "MON: " + mon
+                                next_week_shows += "MON: " + mon + " | "
                             if tue:
-                                next_week_shows += "TUE: " + tue
+                                next_week_shows += "TUE: " + tue + " | "
                             if wed:
-                                next_week_shows += "WED: " + wed
+                                next_week_shows += "WED: " + wed + " | "
                             if thu:
-                                next_week_shows += "THU: " + thu
+                                next_week_shows += "THU: " + thu + " | "
                             if fri:
-                                next_week_shows += "FRI: " + fri
+                                next_week_shows += "FRI: " + fri + " | "
                             if sat:
-                                next_week_shows += "SAT: " + sat
+                                next_week_shows += "SAT: " + sat + " | "
                             if sun:
-                                next_week_shows += "SUN: " + sun
+                                next_week_shows += "SUN: " + sun + " | "
                                     
                                     
                         else:
