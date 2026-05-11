@@ -1542,7 +1542,7 @@ class MyBot(chatango.Client):
                     cleaner = htmlmod.escape(cleaner)
 
                     await message.channel.send(cleaner)
-            elif cmd in ["thisweek"]:
+            elif cmd in ["thisweek", "tw"]:
                 this_week_shows = ""
 
                 if message.room.name != "<PM>":
@@ -1612,7 +1612,7 @@ class MyBot(chatango.Client):
                     cleaner.encode()
                     cleaner = htmlmod.escape(cleaner)
                     await message.channel.send(cleaner)
-            elif cmd in ["nextweek"]:
+            elif cmd in ["nextweek","nw"]:
                 next_week_shows = ""
 
                 if message.room.name != "<PM>":
@@ -1656,19 +1656,19 @@ class MyBot(chatango.Client):
                             if not sat:
                                 sat = "Saturday"
                             if mon:
-                                next_week_shows += "MON: " + mon + " | "
+                                next_week_shows += "MON: " + mon + "\n"
                             if tue:
-                                next_week_shows += "TUE: " + tue + " | "
+                                next_week_shows += "TUE: " + tue + "\n"
                             if wed:
-                                next_week_shows += "WED: " + wed + " | "
+                                next_week_shows += "WED: " + wed + "\n"
                             if thu:
-                                next_week_shows += "THU: " + thu + " | "
+                                next_week_shows += "THU: " + thu + "\n"
                             if fri:
-                                next_week_shows += "FRI: " + fri + " | "
+                                next_week_shows += "FRI: " + fri + "\n"
                             if sat:
-                                next_week_shows += "SAT: " + sat + " | "
+                                next_week_shows += "SAT: " + sat + "\n"
                             if sun:
-                                next_week_shows += "SUN: " + sun + " | "
+                                next_week_shows += "SUN: " + sun + "\n"
                                     
                                     
                         else:
