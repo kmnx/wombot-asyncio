@@ -1534,25 +1534,97 @@ class MyBot(chatango.Client):
                     print(e)
                     chuntfm_upnext = "i think chunt.org might be broken"
                 if chuntfm_upnext:
-                    # chuntfm_upnext = chuntfm_upnext.encode("ascii", "ignore")
-                    # chuntfm_upnext = chuntfm_upnext.decode("utf-8")
-                    # await message.channel.send("UP NEXT: Brazillian Correspondence w/ Pedro | Pedro from Brazil, Author of Vivas Caf, graces the ChuntFM airwaves once a month | 2023-12-28 16:00 GMT (in 2 days, 2:19:57 hours)")
-                    # pe = "UP NEXT: Brazillian Correspondence w/ Pedro | Pedro from Brazil, Author of Vivas Caf, graces the ChuntFM airwaves once a month | 2023-12-28 16:00 GMT (in 2 days, 2:19:57 hours)"
-                    # chuntfm_cleaned = chuntfm_upnext
-                    # if pe == chuntfm_cleaned:
-                    #    print('strings are equal')
-                    # else:
-                    #    print(pe)
-                    #    print(chuntfm_upnext)
                     clean = re.compile("<.*?>")
                     chuntfm_upnext = re.sub(clean, "", chuntfm_upnext)
-                    # await message.channel.send(chuntfm_upnext)
-
                     cleaner = htmlmod.escape(chuntfm_upnext)
                     print("upnext cleaned is: ", chuntfm_upnext)
                     cleaner.encode()
                     cleaner = htmlmod.escape(cleaner)
 
+                    await message.channel.send(cleaner)
+            elif cmd in ["thisweek"]:
+                this_week_shows = ""
+
+                if message.room.name != "<PM>":
+                    await message.room.delete_message(message)
+                try:
+                    async with ClientSession() as s:
+                        r = await s.get("https://assets.chunt.org/schedule.json", timeout=5)
+                        if r:
+                            schedule_json = await r.json()
+                            # print(chu_json)
+                            time_now = datetime.now(timezone.utc)
+                            monday = time_now - timedelta(days=time_now.weekday())
+                            sunday = monday + timedelta(days=6)
+                            # print("time_now: ", time_now)
+                            this_week_shows = 'This week: '
+                            for show in schedule_json:
+                                if monday.date() <= datetime.fromisoformat(show["startTimestamp"]).date() <= sunday.date():
+                                    this_week_shows += (
+                                        + (show["title"])
+                                        + " | "
+                                        + show["dateUK"]
+                                        + " "
+                                        + show["startTimeUK"]
+                                        + " "
+                                        + get_uk_timezone_label()
+                                        + " | "
+                                    )
+                                    
+                        else:
+                            this_week_shows = "i think chunt.org might be broken"
+                except Exception as e:
+                    print(e)
+                    this_week_shows = "i think chunt.org might be broken"
+                if this_week_shows:
+                    clean = re.compile("<.*?>")
+                    this_week_shows = re.sub(clean, "", this_week_shows)
+                    cleaner = htmlmod.escape(this_week_shows)
+                    print("upnext cleaned is: ", this_week_shows)
+                    cleaner.encode()
+                    cleaner = htmlmod.escape(cleaner)
+                    await message.channel.send(cleaner)
+            elif cmd in ["nextweek"]:
+                next_week_shows = ""
+
+                if message.room.name != "<PM>":
+                    await message.room.delete_message(message)
+                try:
+                    async with ClientSession() as s:
+                        r = await s.get("https://assets.chunt.org/schedule.json", timeout=5)
+                        if r:
+                            schedule_json = await r.json()
+                            # print(chu_json)
+                            time_now = datetime.now(timezone.utc)
+                            monday = time_now - timedelta(days=time_now.weekday()) + timedelta(days=7)
+                            sunday = monday + timedelta(days=6)
+                            # print("time_now: ", time_now)
+                            next_week_shows = 'Next week: '
+                            for show in schedule_json:
+                                if monday.date() <= datetime.fromisoformat(show["startTimestamp"]).date() <= sunday.date():
+                                    next_week_shows += (
+                                        + (show["title"])
+                                        + " | "
+                                        + show["dateUK"]
+                                        + " "
+                                        + show["startTimeUK"]
+                                        + " "
+                                        + get_uk_timezone_label()
+                                        + " | "
+                                    )
+                                    
+                        else:
+                            next_week_shows = "i think chunt.org might be broken"
+                except Exception as e:
+                    print(e)
+                    next_week_shows = "i think chunt.org might be broken"
+                if next_week_shows:
+                    clean = re.compile("<.*?>")
+                    next_week_shows = re.sub(clean, "", next_week_shows)
+                    cleaner = htmlmod.escape(next_week_shows)
+                    print("upnext cleaned is: ", next_week_shows)
+                    cleaner.encode()
+                    cleaner = htmlmod.escape(cleaner)
                     await message.channel.send(cleaner)
 
             elif cmd in ["whenis"]:
