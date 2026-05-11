@@ -1557,7 +1557,7 @@ class MyBot(chatango.Client):
                             monday = time_now - timedelta(days=time_now.weekday())
                             sunday = monday + timedelta(days=6)
                             # print("time_now: ", time_now)
-                            this_week_shows = 'This week on ChuntFM: (UK time)\n\n\n'
+                            this_week_shows = 'This week on ChuntFM: (UK time)\n\n\n\n'
                             mon = ''
                             tue = ''
                             wed = ''
@@ -1625,7 +1625,7 @@ class MyBot(chatango.Client):
                             monday = time_now - timedelta(days=time_now.weekday()) + timedelta(days=7)
                             sunday = monday + timedelta(days=6)
                             # print("time_now: ", time_now)
-                            next_week_shows = 'Next week on ChuntFM: (UK time)\n\n\n'
+                            next_week_shows = 'Next week on ChuntFM: (UK time)\n\n\n\n'
                             mon = ''
                             tue = ''
                             wed = ''
