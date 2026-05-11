@@ -1602,6 +1602,7 @@ class MyBot(chatango.Client):
                             next_week_shows = 'Next week: '
                             for show in schedule_json:
                                 if monday.date() <= datetime.fromisoformat(show["startTimestamp"]).date() <= sunday.date():
+                                    print(show)
                                     next_week_shows += (
                                         + (show["title"])
                                         + " | "
