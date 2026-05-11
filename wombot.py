@@ -1557,7 +1557,7 @@ class MyBot(chatango.Client):
                             monday = time_now - timedelta(days=time_now.weekday())
                             sunday = monday + timedelta(days=6)
                             # print("time_now: ", time_now)
-                            this_week_shows = 'This week on ChuntFM: (UK time)\n\n\n\n'
+                            this_week_shows = 'This week on ChuntFM (UK time): '
                             mon = ''
                             tue = ''
                             wed = ''
@@ -1584,19 +1584,19 @@ class MyBot(chatango.Client):
                                         case 'Sun':
                                             sun += show["title"] + " " + show["startTimeUK"] + " | "
                             if mon:
-                                this_week_shows += "Mon: " + mon + "\n"
+                                this_week_shows += "MONDAY: " + mon + "\n"
                             if tue:
-                                this_week_shows += "Tue: " + tue + "\n"
+                                this_week_shows += "TUESDAY: " + tue + "\n"
                             if wed:
-                                this_week_shows += "Wed: " + wed + "\n"
+                                this_week_shows += "WEDNESDAY: " + wed + "\n"
                             if thu:
-                                this_week_shows += "Thu: " + thu + "\n"
+                                this_week_shows += "THURSDAY: " + thu + "\n"
                             if fri:
-                                this_week_shows += "Fri: " + fri + "\n"
+                                this_week_shows += "FRIDAY: " + fri + "\n"
                             if sat:
-                                this_week_shows += "Sat: " + sat + "\n"
+                                this_week_shows += "SATURDAY: " + sat + "\n"
                             if sun:
-                                this_week_shows += "Sun: " + sun + "\n"
+                                this_week_shows += "SUNDAY: " + sun + "\n"
                         else:
                             this_week_shows = "i think chunt.org might be broken"
                 except Exception as e:
@@ -1625,7 +1625,7 @@ class MyBot(chatango.Client):
                             monday = time_now - timedelta(days=time_now.weekday()) + timedelta(days=7)
                             sunday = monday + timedelta(days=6)
                             # print("time_now: ", time_now)
-                            next_week_shows = 'Next week on ChuntFM: (UK time)\n\n\n\n'
+                            next_week_shows = 'Next week on ChuntFM (UK time): '
                             mon = ''
                             tue = ''
                             wed = ''
@@ -1652,19 +1652,19 @@ class MyBot(chatango.Client):
                                         case 'Sun':
                                             sun += show["title"] + " " + show["startTimeUK"] + " | "
                             if mon:
-                                next_week_shows += "Mon: " + mon + "\n"
+                                next_week_shows += "MONDAY: " + mon + "\n"
                             if tue:
-                                next_week_shows += "Tue: " + tue + "\n"
+                                next_week_shows += "TUESDAY: " + tue + "\n"
                             if wed:
-                                next_week_shows += "Wed: " + wed + "\n"
+                                next_week_shows += "WEDNESDAY: " + wed + "\n"
                             if thu:
-                                next_week_shows += "Thu: " + thu + "\n"
+                                next_week_shows += "THURSDAY: " + thu + "\n"
                             if fri:
-                                next_week_shows += "Fri: " + fri + "\n"
+                                next_week_shows += "FRIDAY: " + fri + "\n"
                             if sat:
-                                next_week_shows += "Sat: " + sat + "\n"
+                                next_week_shows += "SATURDAY: " + sat + "\n"
                             if sun:
-                                next_week_shows += "Sun: " + sun + "\n"
+                                next_week_shows += "SUNDAY: " + sun + "\n"
                                     
                                     
                         else:
