@@ -1603,17 +1603,10 @@ class MyBot(chatango.Client):
                             for show in schedule_json:
                                 if monday.date() <= datetime.fromisoformat(show["startTimestamp"]).date() <= sunday.date():
                                     print(show)
-                                    next_week_shows += (
-                                        + (show["title"])
-                                        + " | "
-                                        + show["dateUK"]
-                                        + " "
-                                        + show["startTimeUK"]
-                                        + " "
-                                        + get_uk_timezone_label()
-                                        + " | "
-                                    )
                                     
+                                    next_week_show_string = show["title"] + " | " + show["dateUK"] + " " + show["startTimeUK"] + " " + get_uk_timezone_label() + " | "
+
+                                    next_week_shows += next_week_show_string
                         else:
                             next_week_shows = "i think chunt.org might be broken"
                 except Exception as e:
