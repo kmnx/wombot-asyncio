@@ -1560,7 +1560,7 @@ class MyBot(chatango.Client):
                             this_week_shows = 'This week: '
                             for show in schedule_json:
                                 if monday.date() <= datetime.fromisoformat(show["startTimestamp"]).date() <= sunday.date():
-                                    this_show = show["title"] + " | " + datetime.strptime(show["dateUK"], "%Y-%m-%d").strftime("%a") + " " + show["startTimeUK"] + " " + get_uk_timezone_label() + " | "
+                                    this_show = show["title"] + " on " + datetime.strptime(show["dateUK"], "%Y-%m-%d").strftime("%a") + " " + show["startTimeUK"] + " " + get_uk_timezone_label() + " | "
                                     this_week_shows += this_show
                         else:
                             this_week_shows = "i think chunt.org might be broken"
@@ -1594,7 +1594,7 @@ class MyBot(chatango.Client):
                             for show in schedule_json:
                                 if monday.date() <= datetime.fromisoformat(show["startTimestamp"]).date() <= sunday.date():
                                     print(show)
-                                    next_week_show_string = show["title"] + " | " + datetime.strptime(show["dateUK"], "%Y-%m-%d").strftime("%a") + " " + show["startTimeUK"] + " " + get_uk_timezone_label() + " | "
+                                    next_week_show_string = show["title"] + " on " + datetime.strptime(show["dateUK"], "%Y-%m-%d").strftime("%a") + " " + show["startTimeUK"] + " " + get_uk_timezone_label() + " | "
                                     next_week_shows += next_week_show_string
                         else:
                             next_week_shows = "i think chunt.org might be broken"
