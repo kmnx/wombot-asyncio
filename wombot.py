@@ -297,8 +297,8 @@ async def post_gif_of_the_hour(param):
         file.write(bot.goth)
 
     # temporarily disabled
-    #for roombot in bots:
-    #    await roombot.send_message("the gif of the hour is: " + bot.goth)
+    for roombot in bots:
+        await roombot.send_message("the gif of the hour is: " + bot.goth)
 
 
 async def schedule_gif_of_the_hour():
